@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.3.0",
+  version: "1.4.0",
 
   map: {
     center: [31.45, 34.95],

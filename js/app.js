@@ -594,6 +594,7 @@
       ${m.aip && m.aip.edition ? `<p class="muted">${esc(m.aip.edition)}</p>` : ""}
       <p class="fsum">${esc(T("gaps"))}</p>
       ${crosscheckHtml()}
+      ${state.versions ? `<h3>${state.lang === "he" ? "גרסאות (קישור קבוע לכל גרסה)" : "Versions"}</h3><ul class="near">${state.versions.map(v => `<li><a href="${esc(v.url)}" target="_blank" rel="noopener"><b>${esc(v.v)}</b></a>${v.live ? (state.lang === "he" ? " (נוכחית, מתעדכנת)" : " (live)") : ""} – ${esc(v.he)}</li>`).join("")}</ul>` : ""}
       <h3>${esc(T("changelog"))}</h3><ul class="near">${log}</ul>
       <p class="muted">${esc(T("version"))} ${esc(CFG.version)}</p>
     `, "about");
@@ -691,6 +692,7 @@
       state.unlocated = notams.unlocated || [];
       try { state.overlays = await getJSON("data/overlays.json"); } catch (e) { state.overlays = []; }
       try { state.crosscheck = await getJSON("data/crosscheck.json"); } catch (e) { state.crosscheck = null; }
+      try { state.versions = await getJSON("data/versions.json"); } catch (e) { state.versions = null; }
       state.overlays.forEach(o => { if ((state.ovlState[o.id] || {}).on) setOverlay(o.id, true); });
       $("#demoRibbon").hidden = !meta.demo;
       drawBasemap(); renderBanner(); drawZones(); applyLang();

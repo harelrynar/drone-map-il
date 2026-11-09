@@ -1,0 +1,39 @@
+[
+ {
+  "id": "uas-map",
+  "file": "data/overlays/uas-map.png",
+  "bounds": [
+   [
+    30.744472176297496,
+    34.06912350578503
+   ],
+   [
+    33.10694734396786,
+    35.89608779549917
+   ]
+  ],
+  "he": "נספח א' לב'-09 – מפת אזורי טיסה לכטב\"ם",
+  "en": "AIP B-09 annex A – UAS areas map",
+  "edition": "עדכון 3/23, 02 נוב' 2023",
+  "url": "https://www.gov.il/BlobFolder/guide/aip/he/aip_Bet%2009%20-%20Nispah%20A.pdf",
+  "err_m": 30
+ },
+ {
+  "id": "prd-map",
+  "file": "data/overlays/prd-map.png",
+  "bounds": [
+   [
+    29.411073472415794,
+    33.507309024995855
+   ],
+   [
+    33.43412529619017,
+    36.58515418458816
+   ]
+  ],
+  "he": "נספח א' לא'-17 – מפת אזורים אסורים, מוגבלים ומסוכנים",
+  "en": "AIP A-17 annex A – P/R/D map",
+  "url": "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-17%20-%20%D7%A0%D7%A1%D7%A4%D7%97%20%D7%90'.pdf",
+  "err_m": 80
+ }
+]
