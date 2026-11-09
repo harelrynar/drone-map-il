@@ -1,18 +1,23 @@
-# UAS airspace map – update runbook
+# UAS airspace map – update runbook (GitHub edition)
 
-Artifact slug: `444ddce3-fdd5-4268-9eaa-dca6666d25f4` (https://claude.ai/artifact/9SCco6f5kuN1kmbpBb5eTV)
-Pipeline files are stored in the artifact under `pipeline/` (each `*.py.txt` → save as `/home/claude/build/<name>.py`).
+**Primary site:** https://harelrynar.github.io/drone-map-il/ – repo `harelrynar/drone-map-il`, branch `main` (GitHub Pages serves the repo root).
+The claude.ai artifact (444ddce3-…) is a legacy preview and is no longer updated.
 
 ## 0. Setup (every run – the session starts empty)
-1. `mkdir -p /home/claude/build /home/claude/site/data /home/claude/raw/notam /home/claude/raw/aip/pdf`
-2. Artifact `read_file` with `paths` = all `pipeline/*` files + `data/meta.json`, `data/notams.json`, `data/notam_ai.json`, `data/basemap.json`
-   (+ `data/zones.json` and `data/aip_state.json` for the AIP run). Copy each saved resource to:
-   - `pipeline/X.py.txt` → `/home/claude/build/X.py`, `pipeline/X.json` → `/home/claude/build/X.json`
-   - `pipeline/enr51.txt` → `/home/claude/raw/aip/pdf/enr51.txt` (eAIP ENR 5.1 text, used by build_prd.py)
-   - `data/*` → `/home/claude/site/data/*`  (and copy `data/notam_ai.json` also to `/home/claude/build/notam_ai.json`)
-3. `pip install --break-system-packages -q pdfplumber shapely pyproj requests playwright`;
+1. Attach and clone the repo: call the add_repo tool (owner `harelrynar`, repo `drone-map-il`, access `push`), then
+   `git clone --depth 1 https://github.com/harelrynar/drone-map-il /home/claude/drone-map-il` (generous timeout).
+2. `mkdir -p /home/claude/build /home/claude/raw/notam /home/claude/raw/aip/pdf && cp /home/claude/drone-map-il/pipeline/*.py /home/claude/drone-map-il/pipeline/*.json /home/claude/build/ && cp /home/claude/drone-map-il/pipeline/enr51.txt /home/claude/raw/aip/pdf/ && cp /home/claude/drone-map-il/data/notam_ai.json /home/claude/build/`
+3. Use `/home/claude/drone-map-il/data` wherever the steps below say `/home/claude/site/data`
+   (e.g. `ln -sfn /home/claude/drone-map-il/data /home/claude/site/data` after `mkdir -p /home/claude/site`).
+4. `pip install --break-system-packages -q pdfplumber shapely pyproj requests playwright geopandas pyogrio`;
    if `/usr/bin/google-chrome` is missing: `python3 -m playwright install chromium`.
-4. Network: needs brin.iaa.gov.il, *.gov.il, openapi-gc.digital.gov.il (gov.il pages need headless Chrome – Cloudflare).
+5. Publishing = `cd /home/claude/drone-map-il && git add data pipeline && git commit -m "<what changed>" && git push origin main`
+   (if the push is rejected: `git pull --rebase origin main` once, then push). Never push tags (blocked); never touch `versions/`.
+   After a NOTAM run also copy `/home/claude/build/notam_ai.json` to `data/notam_ai.json` before committing.
+
+## Versions
+Frozen copies live in `versions/<v>/` (index.html, css, js, data) and are listed in `data/versions.json`; each also has a branch `release-<v>`.
+Only create a new version when the user asks.
 
 ## A. NOTAM run (every 6 hours)
 1. `cd /home/claude/build && python3 -I notam_fetch.py /home/claude/raw/notam/all.json` (≈3 min, 0.8 s between requests – do not speed up; the site has a WAF).
@@ -25,7 +30,7 @@ Pipeline files are stored in the artifact under `pipeline/` (each `*.py.txt` →
    - Never invent a precise shape: if location/size is uncertain mark `confidence: "approx"`, explain in `approxReason`; the raw NOTAM is always shown as a quote.
    - Remove entries for NOTAM ids that no longer exist. Re-run step 2.
 4. `python3 assemble.py /home/claude/site/data --notam`
-5. Publish (artifact `get_artifact` → version; `publish_files` mode patch): `data/notams.json`, `data/meta.json`, `data/notam_ai.json` (from build dir).
+5. Publish (see 0.5): commit `data/notams.json`, `data/meta.json`, `data/notam_ai.json`.
 6. If there are new NOTAMs relevant to drones (UAS activity, closures/obstacles up to ~1,500 ft AGL, new general notices), finish with a short
    Hebrew summary (what/where/when) – it is sent to the owner as a push notification. Otherwise end with "אין שינויים מהותיים".
 
