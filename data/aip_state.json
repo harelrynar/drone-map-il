@@ -195,6 +195,41 @@
    "links": [
     "https://www.gov.il/BlobFolder/generalpage/others-landing-ground/he/aip_%D7%9E%D7%A0%D7%97%D7%AA%D7%99%D7%9D%20%D7%A0%D7%95%D7%A1%D7%A4%D7%99%D7%9D.pdf"
    ]
+  },
+  "11": {
+   "updated": "29.10.2026",
+   "links": [
+    "https://www.gov.il/BlobFolder/guide/aip/he/%D7%9E%D7%A4%D7%AA%20%D7%90%D7%96%D7%95%D7%A8%D7%99%20%D7%A7%D7%A8%D7%91%20%D7%94%D7%95%D7%96%D7%90%20%D7%90%D7%95%D7%92%2026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/%D7%9E%D7%A4%D7%AA%20%D7%9E%D7%A1%D7%95%D7%A7%D7%99%D7%9D%20%D7%97%D7%99%D7%9C%20%D7%94%D7%90%D7%95%D7%95%D7%99%D7%A8%20%D7%9E%D7%90%D7%99%2026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/%D7%9E%D7%A4%D7%AA%20%D7%9E%D7%A8%D7%97%D7%91%D7%99%20%D7%A7%D7%A8%D7%91%20%D7%94%D7%95%D7%96%D7%90%20%D7%90%D7%95%D7%92%2026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/%D7%9E%D7%AA%D7%97%D7%9D%20%D7%93%D7%A8%D7%95%D7%9D.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/%D7%9E%D7%AA%D7%97%D7%9D%20%D7%9E%D7%A8%D7%9B%D7%96.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/%D7%9E%D7%AA%D7%97%D7%9D%20%D7%A6%D7%A4%D7%95%D7%9F.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/ISRAELI AIR FORCE - Charts Amendment Table.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/ISRAELI AIR FORCE -Transport Charts Checklist 07092026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/ISRAELI%20AIR%20FORCE%20-%20Charts%20Amendment%20Table.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/ISRAELI%20AIR%20FORCE%20-Transport%20Charts%20Checklist%2007092026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLEK.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLHB.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLHS.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLKD.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLNV.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLOV TRANSPORT.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLOV%20TRANSPORT.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLPL.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLRD.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/LLRM.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/Navigation-North 2026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/Navigation-North%202026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/Navigation-south 2026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/Navigation-south%202026.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/מפת אזורי קרב הוזא אוג 26.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/מפת מסוקים חיל האוויר מאי 26.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/מפת מרחבי קרב הוזא אוג 26.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/מתחם דרום.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/מתחם מרכז.pdf",
+    "https://www.gov.il/BlobFolder/guide/aip/he/מתחם צפון.pdf"
+   ]
   }
  },
  "docs": {
@@ -202,6 +237,8 @@
   "א-17_-_נספח_א.pdf": "bfd657d217725034ac957957c15cc84b35266f5b743a4c06a81a3c1a9623eacb",
   "א-17.pdf": "a9d48b6a4393a5044d8a0afe65a3c648caee65d4dcd6442484cad1561ec142d1",
   "ב-09.pdf": "ce3a2f66043a9d530a77dba0cf7be3344e95c85fafe119dca299d970e0e64353",
-  "aip_Bet_09_-_Nispah_A.pdf": "c65f54cfcb7c9c43122c48a9f099e05b253ce4f88ce95a5d5a82d7ab7bf13a34"
+  "aip_Bet_09_-_Nispah_A.pdf": "c65f54cfcb7c9c43122c48a9f099e05b253ce4f88ce95a5d5a82d7ab7bf13a34",
+  "אסורים_לטיסה_וCTRים.zip": "5ca685f9da5482eda1f91a2cebf9d175bdbd6a02126d6199d5ec870acd9ed21a",
+  "RATAG_kmz.zip": "539840f396a3a74e1807778c6a6d0b787528beaec0ddfdb5b720b9ffbd981804"
  }
 }

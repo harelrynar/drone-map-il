@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.1.0",
+  version: "1.3.0",
 
   map: {
     center: [31.45, 34.95],
@@ -40,13 +40,14 @@ window.APP_CONFIG = {
     uas:        { color: "#2e86ab", fill: 0.20, dash: null,    severity: 2, on: true,  he: "אזור טיסה לכטב\"ם", en: "UAS flight area" },
     notam:      { color: "#9b5de5", fill: 0.22, dash: null,    severity: 3, on: true,  he: "סגירה זמנית (נוטאם)",     en: "Temporary closure (NOTAM)" },
     notamApprox:{ color: "#ff00a8", fill: 0.12, dash: "2 6",   severity: 3, on: true,  he: "נוטאם – מיקום משוער",     en: "NOTAM – approximate area" },
+    nature:     { color: "#2d6a4f", fill: 0.16, dash: "4 3",   severity: 3, on: true,  he: "שמורות, גנים וקינון (רט\"ג)", en: "Nature closures (INPA)" },
     ctr:        { color: "#3a86ff", fill: 0.06, dash: "10 5",  severity: 2, on: true,  he: "מרחב פיקוח CTR / ATZ", en: "Control zone (CTR/ATZ)" },
     airfield:   { color: "#111111", fill: 0.9,  dash: null,    severity: 2, on: true,  he: "שדה תעופה / מנחת",       en: "Airport / airstrip" },
     heliport:   { color: "#2b9348", fill: 0.9,  dash: null,    severity: 2, on: true,  he: "מנחת מסוקים",            en: "Heliport" }
   },
 
   // סדר ציור (התחתון ראשון)
-  drawOrder: ["ctr", "uas", "danger", "restricted", "prohibited", "uasProhibited", "notam", "notamApprox", "airfield", "heliport"],
+  drawOrder: ["ctr", "nature", "uas", "danger", "restricted", "prohibited", "uasProhibited", "notam", "notamApprox", "airfield", "heliport"],
 
   sources: {
     aip: [

@@ -173,6 +173,10 @@ for id_, code, he, ll, phones in HELI:
 point("hp-llhd2", "heliport", "מנחת מסוקים הדסה עין כרם (גג)", "LLHD rooftop heliport", "LLHD", P("31°45'08\"N,035°08'57\"E"),
       [ph("02-6776666", "מוקד")], "משטח נחיתה מוגבה על גג בניין.", src("פמ\"ת ו' – הדסה עין כרם", CH9))
 
+# replaced by the official CAAI CTR layer (build_gis.py), which has the exact shapes
+REPLACED_BY_GIS = {"ctr-llhz", "ctr-llib", "atz-llmg-n", "atz-llmg-s", "atz-llbs"}
+F[:] = [f for f in F if f["properties"]["id"] not in REPLACED_BY_GIS]
+
 if __name__ == "__main__":
     json.dump({"type": "FeatureCollection", "features": F}, open("/home/claude/build/ad.json", "w"), ensure_ascii=False)
     from collections import Counter

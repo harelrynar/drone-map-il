@@ -128,7 +128,10 @@ def parse_annex_b():
 def build_ring(z, enr):
     """Return (ring_latlon or None, circle or None)."""
     code = z["code"]
-    if code in enr:  # eAIP geometry is unambiguous for arcs
+    has_arc = any(isinstance(p, dict) for p in z["pts"])
+    plain = [p for p in z["pts"] if not isinstance(p, dict)]
+    # Hebrew A-17 table is the binding source; eAIP only where the Hebrew row refers to ENR 5.1 or contains arcs
+    if code in enr and (z.get("enr") or has_arc or (len(plain) < 3 and not z.get("center"))):
         e = enr[code]
         if "circle" in e: return None, e["circle"]
         return e["ring"], None
@@ -223,8 +226,8 @@ def main():
             c = z["center"]; pts = [c] + [dest(*c, b, 3000) for b in range(-90, 91, 6)] + [c]
             geom = {"type": "Polygon", "coordinates": [to_geojson_ring(pts)]}; props.pop("radius_m", None)
         feats.append({"type": "Feature", "geometry": geom, "properties": props})
-    # eAIP-only entries (e.g. LLR01/02 are upper airspace, keep only if lower < 5000)
     feats += llu(None) + balloons()
+    feats = apply_official(feats)
     for l in log: print(l, file=sys.stderr)
     return feats
 
@@ -244,9 +247,71 @@ MANUAL = {
                       _p('31° 38\' 49.52" N 34° 44\' 24.08" E'), _p('31° 38\' 13.77" N 34° 44\' 16.36" E')], "max": "1100", "min": "GND", "name": "פלוגות"},
     "LLP42": {"pts": [], "center": _p('30° 33\' 06.00" N 35° 11\' 55.00" E'), "circle_r": 1000, "max": "2000", "min": "GND", "name": "בלון צופר"},
     "LLD28": {"pts": [], "circle_r": 3000, "half_north": True},
+    # table text '100 מטר' is garbled in the PDF (parsed as 1 km); CAAI GIS layer confirms 100 m
+    "LLP44": {"circle_r": 100},
 }
 def fix_41_42():
     pass  # handled in post-processing (see fix_rows)
+
+OFFICIAL_GEOM = {"LLD28": "בפמ\"ת: חצי מעגל צפוני קטום לאורך כביש 4 ומסילת הרכבת – הגבול המדויק נלקח משכבת ה-GIS של רת\"א.",
+                 "LLR27": "בפמ\"ת: 'צפונה לאורך הגבול' – הקטע לאורך הגבול נלקח משכבת ה-GIS של רת\"א."}
+NEW_IN_GIS = {"LLP29", "LLP33", "LLR31"}           # newer than the A-17 text (GIS modified 08/2026)
+OLD_IN_GIS = {"LLP31", "LLP32", "LLR107", "LLR120", "LLR601", "LLL1", "LLL2"}   # in GIS layer, not in current A-17
+def apply_official(feats):
+    import os
+    p = "/home/claude/build/gis_official_prd.json"
+    if not os.path.exists(p): return feats
+    off = json.load(open(p))
+    by = {f["properties"]["designator"]: f for f in feats}
+    for code, why in OFFICIAL_GEOM.items():
+        if code in by and code in off:
+            f = by[code]; f["geometry"] = off[code]["geometry"]; f["properties"].pop("radius_m", None)
+            f["properties"]["confidence"] = "exact"; f["properties"].pop("approxReason", None)
+            f["properties"]["sourceNote"] = {"he": why, "en": "Boundary from the CAAI GIS layer."}
+    from shapely.geometry import shape as _sh
+    for code, f in by.items():
+        if f["geometry"]["type"] == "Polygon" and code in off and not _sh(f["geometry"]).is_valid:
+            f["geometry"] = off[code]["geometry"]
+            f["properties"]["sourceNote"] = {"he": "סדר הנקודות בטבלת הפמ\"ת יוצר צורה לא תקינה; הגבול נלקח משכבת ה-GIS של רת\"א.", "en": "Invalid ring in the AIP table; CAAI GIS boundary used."}
+            print("INVALID -> official", code)
+    # conservative: where the AIP table and the CAAI GIS layer disagree noticeably, show the union of both
+    from shapely.geometry import mapping as _mp
+    from shapely import force_2d as _f2
+    from pyproj import Transformer as _T
+    from shapely.ops import transform as _tr
+    _to = _T.from_crs(4326, 2039, always_xy=True).transform
+    _bk = _T.from_crs(2039, 4326, always_xy=True).transform
+    for code, f in by.items():
+        if code not in off or f["properties"].get("sourceNote"): continue
+        gp = f["geometry"]; sh = _sh(gp)
+        gm = _tr(_to, sh).buffer(f["properties"].get("radius_m", 0), 64) if sh.geom_type == "Point" else _tr(_to, sh).buffer(0)
+        go = _tr(_to, _f2(_sh(off[code]["geometry"]))).buffer(0)
+        iou = go.intersection(gm).area / go.union(gm).area
+        if iou < 0.9:
+            u = _tr(_bk, go.union(gm).buffer(0))
+            if u.geom_type == "MultiPolygon": u = max(u.geoms, key=lambda x: x.area)
+            f["geometry"] = {"type": "Polygon", "coordinates": [[[round(x, 6), round(y, 6)] for x, y in u.exterior.coords]]}
+            f["properties"].pop("radius_m", None)
+            f["properties"]["sourceNote"] = {"he": f"טבלת הפמ\"ת ושכבת ה-GIS של רת\"א אינן זהות (חפיפה {round(iou*100)}%). מטעמי זהירות מוצג האיחוד של שתיהן.",
+                                             "en": f"AIP table and CAAI GIS layer differ (overlap {round(iou*100)}%); union shown."}
+            print("UNION", code, round(iou, 3))
+    for code in sorted(NEW_IN_GIS | OLD_IN_GIS):
+        if code not in off or code in by: continue
+        o = off[code]
+        layer = {"P": "prohibited", "R": "restricted", "D": "danger", "L": "prohibited"}.get((o["type"] or "P")[0], "prohibited")
+        lo = {"ref": "SFC"} if not o["min"] or str(o["min"]) == "0" else {"v": int(float(o["min"])), "u": "ft", "ref": "AMSL"}
+        mx = str(o["max"] or "").split("/")[0].strip()
+        up = {"ref": "UNL"} if mx in ("99000", "") else {"v": int(float(mx)), "u": "ft", "ref": "AMSL"}
+        note = (f"מופיע בשכבת ה-GIS הרשמית של רת\"א (עודכנה {o['modified']}) ועדיין לא בטבלאות פרק א'-17. יש לבדוק NOTAM/פמ\"ת."
+                if code in NEW_IN_GIS else
+                f"מופיע בשכבת ה-GIS של רת\"א (עודכן {o['modified']}) אך לא בפרק א'-17 העדכני – ייתכן שאינו בתוקף. מוצג מטעמי זהירות.")
+        feats.append({"type": "Feature", "geometry": o["geometry"], "properties": {
+            "id": code.lower(), "layer": layer, "designator": code, "name": {"he": f"{code} – {o['name'] or ''}", "en": code},
+            "status": "active", "lower": lo, "upper": up, "valid": {}, "confidence": "exact",
+            "source": {"name": {"he": "רת\"א – שכבות מידע גאוגרפיות (אזורים אסורים, מוגבלים ומסוכנים)", "en": "CAAI GIS layer"},
+                       "url": "https://www.gov.il/he/pages/aip?chapterIndex=11"},
+            "sourceNote": {"he": note, "en": "From the CAAI GIS layer; not in the current A-17 tables."}}})
+    return feats
 
 def half_disc(code):
     from shapely.geometry import Point, Polygon, LineString

@@ -126,7 +126,7 @@ BR = {
     "242": ["31°45'51.4\",35°07'56.1\"", "31°45'51.1\",35°11'15.7\"", "31°43'51.5\",35°11'14.5\"", "31°43'53.2\",35°10'48.8\"", "31°44'48.6\",35°09'38.5\"", "31°44'22.1\",35°08'48.9\""],
 }
 for k, pts in BR.items():
-    Z.append((f"uas-bereshit-{k}", f"אזור בראשית {k}", f"Bereshit area {k}", ring_poly(poly(*pts)), {"ref": "SFC"}, ftAMSL(4000),
+    Z.append((f"lld{k}", f"LLD{k} – אזור בראשית {k}", f"LLD{k} Bereshit area", ring_poly(poly(*pts)), {"ref": "SFC"}, ftAMSL(4000),
               "בתחום האזור מתקיימת פעילות צה\"ל (נספח ב'-3 – אזורי בראשית במפת נתיבי התובלה ובמפת הגובה הנמוך).", [], "exact", None))
 
 def to_features():
@@ -137,11 +137,13 @@ def to_features():
         if g.geom_type == "MultiPolygon":
             g = max(g.geoms, key=lambda x: x.area)
         coords = [[round(x, 6), round(y, 6)] for x, y in g.exterior.coords]
-        p = {"id": id_, "layer": "uas", "name": {"he": he, "en": en}, "status": "active", "lower": lo, "upper": up,
+        bere = id_.startswith("lld")
+        p = {"id": id_, "layer": "danger" if bere else "uas", "name": {"he": he, "en": en}, "status": "active", "lower": lo, "upper": up,
              "valid": {}, "source": SRC, "confidence": conf,
-             "remarks": {"he": (rem + " " + GEN).strip() if not id_.startswith("uas-bereshit") else rem,
+             "remarks": {"he": (rem + " " + GEN).strip() if not bere else rem,
                          "en": "Activity requires ATC approval. See AIP B-09 for conditions."}}
         if cts: p["contact"] = cts
+        if bere: p["designator"] = "LLD" + id_[3:]
         if why: p["approxReason"] = {"he": why, "en": "Shape simplified from an ambiguous AIP definition."}
         out.append({"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [coords]}, "properties": p})
     for w in warn: print("WARN", w)

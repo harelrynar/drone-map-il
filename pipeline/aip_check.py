@@ -5,7 +5,7 @@ Prints a JSON report: {"changed_chapters": [...], "changed_docs": [...], "new_do
 import json, sys, os, re, html, hashlib, subprocess
 B = "/home/claude/build/"; RAW = "/home/claude/raw/aip/"
 os.makedirs(RAW + "pdf", exist_ok=True)
-CHAPTERS = ["4", "5", "7", "8", "9"]
+CHAPTERS = ["4", "5", "7", "8", "9", "11"]
 # documents whose geometry/text the map is built from (re-parse / re-review if they change)
 KEY_DOCS = {
     "א'-17.pdf": "P/R/D + LLU (build_prd.py – automatic)",
@@ -37,7 +37,10 @@ for ch in CHAPTERS:
 # key docs
 key_urls = [u for u in urls if any(u.endswith(k.replace(" ", "%20")) or u.endswith(k) for k in KEY_DOCS)]
 key_urls += ["https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-17.pdf", "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-17%20-%20%D7%A0%D7%A1%D7%A4%D7%97%20%D7%90'.pdf",
-             "https://www.gov.il/BlobFolder/guide/aip/he/%D7%91'-09.pdf", "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-07.pdf"]
+             "https://www.gov.il/BlobFolder/guide/aip/he/%D7%91'-09.pdf", "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-07.pdf",
+             # CAAI GIS layers (chapter 11) – same data family as the DronesIL app
+             "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90%D7%A1%D7%95%D7%A8%D7%99%D7%9D%20%D7%9C%D7%98%D7%99%D7%A1%D7%94%20%D7%95CTR%D7%99%D7%9D.zip",
+             "https://www.gov.il/BlobFolder/guide/aip/he/RATAG_kmz.zip"]
 run([B + "govil.py", "pdf", RAW + "pdf"] + sorted(set(key_urls)))
 import urllib.parse
 key_names = {urllib.parse.unquote(u.split("/")[-1]).replace("'", "").replace(" ", "_") for u in key_urls}

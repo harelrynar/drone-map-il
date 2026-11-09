@@ -112,8 +112,21 @@
   });
   panes.labels.style.zIndex = 640; panes.labels.style.pointerEvents = "none";
   panes.annex.style.zIndex = 302; panes.annex.style.pointerEvents = "none";
+  const natureRenderer = L.canvas({ pane: "p_nature", padding: 0.3 });
 
-  let baseLayer = null, cityLayer = null;
+  let baseLayer = null, cityLayer = null, roadLayer = null;
+  function drawRoads() {
+    if (!state.basemap || !state.basemap.roads) return;
+    if (roadLayer) roadLayer.remove();
+    const z = map.getZoom();
+    const maxCls = z <= 7 ? 1 : z <= 8 ? 2 : 3;
+    roadLayer = L.geoJSON(state.basemap.roads, {
+      pane: "p_basemap", interactive: false,
+      filter: f => f.properties.c <= maxCls,
+      style: f => ({ color: f.properties.c === 1 ? "#e8a23a" : f.properties.c === 2 ? "#f1c27a" : "#c9c3b5",
+                     weight: (f.properties.c === 1 ? 2.6 : f.properties.c === 2 ? 1.8 : 1.1) * (z >= 11 ? 1.4 : 1), opacity: 0.95 })
+    }).addTo(map);
+  }
   function drawBasemap() {
     if (!state.basemap) return;
     if (baseLayer) baseLayer.remove();
@@ -126,6 +139,7 @@
           fillColor: id === "ISR" ? "#fbfaf5" : id === "PSE" ? "#f6f3ea" : "#ebe7dc", fillOpacity: 1 };
       }
     }).addTo(map);
+    drawRoads();
     drawCities();
   }
   function drawCities() {
@@ -148,7 +162,7 @@
     });
     cityLayer.addTo(map);
   }
-  map.on("zoomend", () => { if (state.basemap) drawCities(); });
+  map.on("zoomend", () => { if (state.basemap) { drawRoads(); drawCities(); } });
 
   /* ---------- zones ---------- */
   const zoneLayers = {}; // id -> leaflet layer
@@ -193,7 +207,7 @@
           layer = L.circle(ll, Object.assign({}, style, { radius: p.radius_m || 500 }));
         }
       } else {
-        layer = L.geoJSON(f, { pane: "p_" + key, style: () => style });
+        layer = L.geoJSON(f, Object.assign({ pane: "p_" + key, style: () => style }, key === "nature" ? { renderer: natureRenderer } : {}));
       }
       layer.on("click", e => { L.DomEvent.stop(e); openPoint(e.latlng.lat, e.latlng.lng, p.id); });
       if (layer.bindTooltip && !L.Browser.mobile) layer.bindTooltip(esc(L_(p.name)), { sticky: true, direction: "top", className: "ztip" });
@@ -310,6 +324,7 @@
 
     let approx = "";
     if (p.confidence === "approx") approx = `<div class="approx"><b>⚠ ${esc(T("approxTitle"))}</b><p>${esc(T("approxText"))}</p>${p.approxReason ? `<p class="muted">${esc(L_(p.approxReason))}</p>` : ""}</div>`;
+    if (p.sourceNote) approx += `<div class="srcnote">ℹ ${esc(L_(p.sourceNote))}</div>`;
     let raw = "";
     if (p.interpreted) rows.push([T("source"), `<span class="badge">🤖 ${esc(T("interpreted"))}</span>`]);
     if (p.notam && p.notam.raw) raw = `<details class="raw" ${p.confidence === "approx" ? "open" : ""}><summary>${esc(T("notamQuote"))} ${esc(p.notam.id || "")}</summary><pre dir="ltr">${esc(p.notam.raw)}</pre></details>`;
@@ -555,6 +570,17 @@
     openSheet(html, "news");
   }
 
+  function crosscheckHtml() {
+    const x = state.crosscheck; if (!x) return "";
+    const s = x.summary, he = state.lang === "he";
+    const bad = x.rows.filter(r => r.status !== "match");
+    const lbl = { minor: he ? "הבדל קל" : "minor", union: he ? "איחוד" : "union", differs: he ? "שונה" : "differs", missing: he ? "לא במפה" : "not shown" };
+    return `<h3>${he ? "אימות מול שכבות ה-GIS של רת\"א" : "Cross-check with CAAI GIS layers"}</h3>
+      <p style="font-size:13px">${he ? `נבדק ${fmtTime(x.checkedAt)}: <b>${s.match}</b> מתוך ${s.official} אזורים אסורים/מוגבלים/מסוכנים זהים (חפיפה ≥95%), ${s.union} מוצגים כאיחוד של שני המקורות, ${s.minor} הבדל קל, ${s.missing} לא מוצגים (אזורי אימון בגובה רב).`
+        : `Checked ${fmtTime(x.checkedAt)}: ${s.match}/${s.official} identical, ${s.union} union, ${s.minor} minor, ${s.missing} not shown.`}</p>
+      <p class="muted" style="font-size:12px">${esc(L_(x.policy))}</p>
+      <details class="rules"><summary>${he ? "פירוט ההבדלים" : "Differences"} (${bad.length})</summary><ul>${bad.map(r => `<li><b class="mono">${esc(r.id)}</b> ${esc(r.name || "")} – ${lbl[r.status] || r.status}${r.iou != null ? ` (${Math.round(r.iou * 100)}%)` : ""}</li>`).join("")}</ul></details>`;
+  }
   function openAbout() {
     const m = state.meta || {};
     const legend = CFG.drawOrder.slice().reverse().map(k => { const lc = CFG.layers[k]; return `<li><i class="sw ${k === "airfield" || k === "heliport" ? "dot" : ""}" style="--zc:${lc.color};--dash:${lc.dash ? "dashed" : "solid"}"></i>${esc(lc[state.lang] || lc.he)}</li>`; }).join("");
@@ -567,6 +593,7 @@
       <ul class="near">${CFG.sources.aip.concat([CFG.sources.notam]).map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.he)}</a></li>`).join("")}</ul>
       ${m.aip && m.aip.edition ? `<p class="muted">${esc(m.aip.edition)}</p>` : ""}
       <p class="fsum">${esc(T("gaps"))}</p>
+      ${crosscheckHtml()}
       <h3>${esc(T("changelog"))}</h3><ul class="near">${log}</ul>
       <p class="muted">${esc(T("version"))} ${esc(CFG.version)}</p>
     `, "about");
@@ -663,6 +690,7 @@
       state.features = (zones.features || []).concat((notams.located && notams.located.features) || []);
       state.unlocated = notams.unlocated || [];
       try { state.overlays = await getJSON("data/overlays.json"); } catch (e) { state.overlays = []; }
+      try { state.crosscheck = await getJSON("data/crosscheck.json"); } catch (e) { state.crosscheck = null; }
       state.overlays.forEach(o => { if ((state.ovlState[o.id] || {}).on) setOverlay(o.id, true); });
       $("#demoRibbon").hidden = !meta.demo;
       drawBasemap(); renderBanner(); drawZones(); applyLang();

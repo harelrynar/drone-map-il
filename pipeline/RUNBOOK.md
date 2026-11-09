@@ -50,3 +50,14 @@ Localities (basemap.json `cities`) come from CBS via data.gov.il datastore resou
 
 ## Adding features
 - New layer → `js/config.js` (`layers`, `drawOrder`), texts in `js/i18n.js`. Bump `version` and add an `appChangelog` entry in `data/meta.json`.
+
+## C. CAAI GIS layers (chapter 11 "שכבות מידע גאוגרפיות") – run when aip_check reports a change in the zips or chapter 11
+These are the official layers of the same data family the DronesIL app shows. They are used to cross-check and fill gaps; the A-17 tables stay the binding source.
+1. Files are downloaded by aip_check.py into /home/claude/raw/aip/pdf/: `אסורים_לטיסה_וCTRים.zip`, `RATAG_kmz.zip`.
+2. `mkdir -p /home/claude/raw/gis && cd /home/claude/raw/gis && unzip -o ../aip/pdf/אסורים_לטיסה_וCTRים.zip -d prd && unzip -o ../aip/pdf/RATAG_kmz.zip -d ratag && unzip -o ratag/*/*.kmz -d ratag/k && cp ratag/k/doc.kml ratag.kml`
+3. `pip install --break-system-packages -q geopandas pyogrio` then
+   `python3 -c "import pyogrio,glob;g=glob.glob('/home/claude/raw/gis/prd/*.gdb')[0];[pyogrio.read_dataframe(g,layer=l).to_crs(4326).to_file(f'/home/claude/raw/gis/{o}.geojson',driver='GeoJSON') for l,o in (('CTR','ctr'),('F_Limited','flimited'))]"`
+4. annexE.json (A-17 annex E altitudes) is in pipeline/; regenerate only if A-17 changed (see build_gis.py docstring / pdfrows on pages 31-50).
+5. `python3 build_gis.py && python3 build_prd.py && python3 build_uas.py && python3 build_ad.py`
+6. `python3 assemble.py /home/claude/site/data --aip` and `python3 crosscheck.py /home/claude/site/data/zones.json /home/claude/site/data/crosscheck.json`
+7. Publish zones.json, meta.json, crosscheck.json. In the final message mention new/removed areas and any cross-check status that is "differs".

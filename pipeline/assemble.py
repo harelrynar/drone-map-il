@@ -16,7 +16,7 @@ def fid(f): return f["properties"]["id"]
 
 if "--aip" in sys.argv:
     feats = []
-    for n in ("prd.json", "uas.json", "ad.json"):
+    for n in ("prd.json", "uas.json", "ad.json", "gis.json"):
         feats += json.load(open(B + n))["features"]
     zp = os.path.join(out, "zones.json")
     old = json.load(open(zp))["features"] if os.path.exists(zp) else []

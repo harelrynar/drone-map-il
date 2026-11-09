@@ -1,6 +1,18 @@
 {
  "appChangelog": [
   {
+   "version": "1.3.0",
+   "date": "2026-11-09",
+   "he": "אימות מול שכבות ה-GIS הרשמיות של רת\"א (אותו מקור כמו יישומון DronesIL): מרחבי פיקוח של בסיסי חיל האוויר, 542 מגבלות רט\"ג (שמורות/גנים/קינון), אזורים חדשים (LLP29, LLP33, LLR31), תיקון LLP44; דוח התאמה בחלון 'אודות'",
+   "en": "Cross-check with official CAAI GIS layers; military CTRs; INPA closures; alignment report"
+  },
+  {
+   "version": "1.2.0",
+   "date": "2026-11-09",
+   "he": "שכבת כבישים ראשיים (Natural Earth) לפי רמת זום – בלי מספרי כבישים",
+   "en": "Main roads layer (Natural Earth), by zoom"
+  },
+  {
    "version": "1.1.0",
    "date": "2026-11-09",
    "he": "גרסה יציבה 1.1 – נקודת שמירה: פמ\"ת + נוטאם, מפות נספח, יישובים, בקרת שכבות. עותק גיבוי נשמר כארטיפקט נפרד.",
@@ -25,17 +37,477 @@
    "en": "First release"
   }
  ],
- "changes": [],
+ "changes": [
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "nature",
+   "text": {
+    "he": "נוספה שכבת מגבלות רט\"ג: 328 שמורות טבע, גנים לאומיים ואתרי קינון – אסור לטוס מתחת לגובה המצוין",
+    "en": "328 INPA nature closures added"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "gis-ctr",
+   "text": {
+    "he": "נוספו 28 מרחבי פיקוח (CTR/CTA/ATZ) משכבת רת\"א, כולל בסיסי חיל האוויר",
+    "en": "28 CTR/ATZ added incl. military"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp03",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP03 – מכון דוד",
+    "en": "AIP changed: LLP03"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp04",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP04 – בתי הזיקוק",
+    "en": "AIP changed: LLP04"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp05",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP05 – עתלית",
+    "en": "AIP changed: LLP05"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp07",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP07 – תחנת כוח חדרה",
+    "en": "AIP changed: LLP07"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp08",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP08 – רמת השרון",
+    "en": "AIP changed: LLP08"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp12",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP12 – שטח אש 209",
+    "en": "AIP changed: LLP12"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp16",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP16 – עין עבדת",
+    "en": "AIP changed: LLP16"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp18",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP18 – יריחו",
+    "en": "AIP changed: LLP18"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp19",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP19 – רצועת עזה",
+    "en": "AIP changed: LLP19"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llr27",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLR27 – אילת",
+    "en": "AIP changed: LLR27"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp28",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP28 – אסדת \"לוויתן",
+    "en": "AIP changed: LLP28"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "lld28",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLD28 – גליל הצנחה חוף התמרים",
+    "en": "AIP changed: LLD28"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "lld35",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLD35 – אירובוטיקס ק.גת",
+    "en": "AIP changed: LLD35"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "lld50",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLD50 – אזור תעשיה קיסריה",
+    "en": "AIP changed: LLD50"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp44",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP44 – תחנת אתגל",
+    "en": "AIP changed: LLP44"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp171",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP171 – יהודה ושומרון צפון",
+    "en": "AIP changed: LLP171"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llr83",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLR83 – שט\"ן 83",
+    "en": "AIP changed: LLR83"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llr90",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLR90 – מטווח 90",
+    "en": "AIP changed: LLR90"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llr801",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLR801 – מטווח 80 צפון",
+    "en": "AIP changed: LLR801"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llr802",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLR802 – מטווח 80 צפון",
+    "en": "AIP changed: LLR802"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llr803",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLR803 – מטווח 80 צפון",
+    "en": "AIP changed: LLR803"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "changed",
+   "id": "llp3000",
+   "text": {
+    "he": "פמ\"ת – עודכן: LLP3000 – בלון מעוגן (מוצב מפגש)",
+    "en": "AIP changed: LLP3000 – tethered balloon"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lll1",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLL1 – שמורת טבע חי בר",
+    "en": "AIP added: LLL1"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lll2",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLL2 – שמורת טבע עין גדי",
+    "en": "AIP added: LLL2"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llp29",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLP29 – פלוגות רחפנים",
+    "en": "AIP added: LLP29"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llp31",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLP31 – באר יעקב",
+    "en": "AIP added: LLP31"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llp32",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLP32 – רמלה",
+    "en": "AIP added: LLP32"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llp33",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLP33 – נאעורה",
+    "en": "AIP added: LLP33"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llr107",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLR107 – שטח אש 107",
+    "en": "AIP added: LLR107"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llr120",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLR120 – שטחי אש 120",
+    "en": "AIP added: LLR120"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llr31",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLR31 – נאעורה בלונים",
+    "en": "AIP added: LLR31"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "llr601",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLR601 – שטחי אש 601",
+    "en": "AIP added: LLR601"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld101",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD101 – אזור בראשית 101",
+    "en": "AIP added: LLD101 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld102",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD102 – אזור בראשית 102",
+    "en": "AIP added: LLD102 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld233",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD233 – אזור בראשית 233",
+    "en": "AIP added: LLD233 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld234",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD234 – אזור בראשית 234",
+    "en": "AIP added: LLD234 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld235",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD235 – אזור בראשית 235",
+    "en": "AIP added: LLD235 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld236",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD236 – אזור בראשית 236",
+    "en": "AIP added: LLD236 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld237",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD237 – אזור בראשית 237",
+    "en": "AIP added: LLD237 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld238",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD238 – אזור בראשית 238",
+    "en": "AIP added: LLD238 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld239",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD239 – אזור בראשית 239",
+    "en": "AIP added: LLD239 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld240",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD240 – אזור בראשית 240",
+    "en": "AIP added: LLD240 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld241",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD241 – אזור בראשית 241",
+    "en": "AIP added: LLD241 Bereshit area"
+   }
+  },
+  {
+   "at": "2026-11-09T09:59:59Z",
+   "source": "aip",
+   "kind": "added",
+   "id": "lld242",
+   "text": {
+    "he": "פמ\"ת – נוסף: LLD242 – אזור בראשית 242",
+    "en": "AIP added: LLD242 Bereshit area"
+   }
+  }
+ ],
  "demo": false,
  "aip": {
-  "updatedAt": "2026-11-09T09:12:36Z",
+  "updatedAt": "2026-11-09T09:59:59Z",
   "edition": "פמ\"ת עדכון 1/26 (06.08.2026), עמודי הפרקים עודכנו 29.10.2026",
-  "count": 255,
+  "count": 831,
   "summary": {
-   "he": "טעינה ראשונה: 255 אזורים ונקודות · פמ\"ת עדכון 1/26 (06.08.2026), עמודי הפרקים עודכנו 29.10.2026",
-   "en": "Initial load: 255 features"
-  },
-  "checkedAt": "2026-11-09T09:12:36Z"
+   "he": "אומת מול שכבות ה-GIS של רת\"א (101 מתוך 111 אזורים זהים); נוספו מרחבי פיקוח צבאיים, מגבלות רט\"ג ואזורים חדשים; תוקנו LLP44, LLD28, LLR27",
+   "en": "Cross-checked with CAAI GIS layers"
+  }
  },
  "notam": {
   "updatedAt": "2026-11-09T09:34:10Z",
@@ -45,5 +517,5 @@
    "en": "43 on map (7 approximate), 1 general"
   }
  },
- "generatedAt": "2026-11-09T09:34:10Z"
+ "generatedAt": "2026-11-09T09:59:59Z"
 }
