@@ -1,0 +1,1361 @@
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 003/2022                                          CAA
+                                       22-FEB-2024
+
+
+
+
+AIP                                                                                                  ENR-5.1 - 1
+ISRAEL                                                                                              22-FEB-2024
+
+ENR 5 NAVIGATION WARNINGS
+ENR 5.1       PROHIBITED, RESTRICTED AND DANGER AREAS
+1.            PROHIBITED AREAS
+
+     Identification, name and lateral limits             Upper limit / Lower               Remarks
+                                                                limit             (time of activity, type of
+                                                                                restriction, nature of hazard,
+                                                                                     risk of interception)
+
+                          1                                           2                       3
+ LLP03                                                 3000 FT ALT /0 FT       H24
+ 325141N 0350521E - 325125N 0350501E - 325126N
+ 0350344E - 325335N 0350426E - 325334N 0350504E -
+ 325141N 0350521E
+
+ LLP04                                                 3000 FT ALT 0 FT/       H24
+ 324738N 0350421E - 324700N 0350334E - 324736N
+ 0350304E - 324756N 0350257E - 324815N 0350317E -
+ 324738N 0350421E
+
+ LLP05                                                 2000 FT ALT /0 FT       H24
+ 324043N 0345639E - 324045N 0345510E - 324232N
+ 0345513E - 324230N 0345641E - 324043N 0345639E
+
+ LLP05                                                 2000 FT ALT /0 FT       H24
+ 324043N 0345639E - 324045N 0345510E - 324232N
+ 0345513E - 324230N 0345641E - 324043N 0345639E
+
+ LLP07                                                 2000 FT ALT /0 FT       H24
+ A circle radius 1 KM centered on 322813N 0345311E
+
+ LLP08                                                 1100 FT ALT /0 FT       H24
+ 320938N 0345109E - 320934N 0345151E - 320800N
+ 0345215E - 320759N 0345235E - 320737N 0345242E -
+ 320714N 0345226E - 320718N 0345148E - 320741N
+ 0345133E - 320757N 0345145E - 320817N 0345040E -
+ 320938N 0345109E
+
+ LLP11                                                 8000 FT ALT /0 FT       H24
+ A circle radius 1.5 KM centered on 314641N 0351409E
+
+ LLP12                                                 3000 FT ALT /0 FT       H24
+ 314452N 0345247E - 314223N 0345522E - 314215N
+ 0345603E - 314236N 0345725E - 314451N 0345824E -
+ 314533N 0345613E - 314726N 0345347E - 314819N
+ 0345237E - 314623N 0345124E - 314456N 0345105E -
+ 314452N 0345247E
+
+ LLP13                                                 4000 FT ALT /0 FT       H24
+ A circle radius 6 KM centered on 314704N 0351234E
+
+ LLP14                                                 7000 FT ALT /0 FT       H24
+ 310757N 0345000E - 310828N 0345231E - 310806N
+ 0345740E - 310736N 0345809E - 310553N 0345801E -
+ 310509N 0345720E - 310428N 0345558E - 310428N
+ 0345130E - 310757N 0345000E
+
+ LLP15                                                 FL 999 /0 FT            H24
+ 310259N 0351049E - 310251N 0351051E - 310253N
+ 0351100E - 310152N 0351145E - 305625N 0350845E -
+ 305634N 0350650E then a clockwise arc radius 5 KM
+ centered on 305819N 0350427E - 310059N 0350355E -
+ 310100N 0350359E - 310113N 0350427E - 310056N
+ 0350502E - 310212N 0350550E - 310217N 0350832E -
+ 310259N 0351049E
+
+
+
+
+CAA                                                                                      AIRAC AMDT 001/2024
+                                               15 MAY 2025
+
+
+
+
+ENR-5.1 - 2                                                                                                       AIP
+15 MAY 2025                                                                                                    ISRAEL
+
+
+    Identification, name and lateral limits                    Upper limit / Lower               Remarks
+                                                                      limit             (time of activity, type of
+                                                                                      restriction, nature of hazard,
+                                                                                           risk of interception)
+
+                          1                                                 2                       3
+ LLP171                                                      6000 FT ALT /0 FT       H24
+ 321347N 0352651E - 320357N 0352252E - 320926N
+ 0351002E - 321356N 0345958E - 321513N 0350213E -
+ 321732N 0345934E - 322019N 0345956E - 322207N
+ 0350155E - 322342N 0350140E - 322710N 0350311E -
+ 322916N 0350829E - 323045N 0350823E - 323313N
+ 0351119E - 323404N 0351359E - 323150N 0351608E -
+ 323212N 0352129E - 323104N 0352439E - 322754N
+ 0352617E - 321347N 0352651E
+
+ LLP172                                                      6000 FT ALT /0 FT       H24
+ 314900N 0351537E then a counter-clockwise arc radius
+ 6 KM centered on 314704N 0351234E - 314745N
+ 0350851E - 314851N 0350516E - 315017N 0350413E -
+ 315008N 0350255E - 315134N 0350121E - 315824N
+ 0345806E - 320030N 0345926E - 320332N 0345843E -
+ 320714N 0345935E - 320933N 0345709E - 321159N
+ 0345630E - 321222N 0345712E - 321356N 0345958E -
+ 320926N 0351002E - 320357N 0352252E - 315520N
+ 0351923E - 314900N 0351537E
+
+ LLP173                                                      6000 FT ALT /0 FT       H24
+ 314428N 0351018E then a counter-clockwise arc radius
+ 6 KM centered on 314704N 0351234E - 314442N
+ 0351510E - 314443N 0351525E - 314356N 0351924E -
+ 314309N 0351938E - 313901N 0351751E - 313408N
+ 0351143E - 313105N 0351225E - 312517N 0351139E -
+ 312044N 0350411E - 312202N 0345808E - 312030N
+ 0345428E - 312120N 0345302E - 312531N 0345229E -
+ 312940N 0345514E - 313253N 0345542E - 313955N
+ 0345942E - 314428N 0351018E
+
+ LLP18                                                       6000 FT ALT /0 FT       H24
+ 315431N 0352738E - 315313N 0352753E - 315227N
+ 0353019E - 314944N 0353045E - 314808N 0352921E -
+ 314803N 0352605E - 314851N 0352500E - 315426N
+ 0352455E - 315431N 0352738E
+
+ LLP19                                                       FL 999 /0 FT            H24
+ 313858N 0342917E - 313836N 0343116E - 313421N
+ 0343709E - 313305N 0343740E - 313140N 0343744E -
+ 313037N 0343722E - 312929N 0343618E - 312735N
+ 0343348E - 312705N 0343233E - 312602N 0343109E -
+ 312427N 0342934E - 312144N 0342610E - 312058N
+ 0342548E - 311817N 0342613E - 311555N 0342519E -
+ 311423N 0342322E - 311150N 0341950E - 311023N
+ 0341704E - 311125N 0341641E - 311747N 0341408E -
+ 311922N 0341305E - 312032N 0341155E - 312114N
+ 0341138E - 312217N 0341125E - 312733N 0341715E -
+ 313210N 0342148E - 313641N 0342542E - 313834N
+ 0342735E - 313858N 0342917E
+
+
+
+
+AIRAC AMDT 001/2025                                                                                               CAA
+                                        11 AUG 2022
+
+
+
+
+AIP                                                                                                                ENR-5.1 - 3
+ISRAEL                                                                                                            11 AUG 2022
+
+2.            RESTRICTED AREAS
+
+     Identification, name and lateral limits               Upper limit / Lower                    Remarks
+                                                                  limit                  (time of activity, type of
+                                                                                       restriction, nature of hazard,
+                                                                                            risk of interception)
+
+                           1                                         2                                     3
+ LLR01                                                   40000 FT ALT /7000 FT ALT   TRG
+ 330511N 0345455E - 325356N 0345459E - 322626N                                       MIL
+ 0344629E - 322956N 0342629E - 323837N 0341926E                                      Sun 06:15 (UTCW) - Fri 10:30 (UTCW)
+ then a clockwise arc radius 47 NM centered on 320051N                               IDF/AF Training Areas
+ 0345232E - 324452N 0343249E - 324636N 0343236E -                                    Except holiday eve 10:30 (09:30) until day
+ 325148N 0343342E - 330518N 0343630E - 330600N                                       after holidat 06:15 (05:15)
+ 0344300E - 330511N 0345455E
+
+ LLR02                                                   FL 400 /5000 FT ALT         TRG
+ 314214N 0342711E - 312458N 0341103E - 312408N                                       H24
+ 0341018E - 315035N 0335838E then a clockwise arc                                    IDF/AF Training Areas
+ radius 47 NM centered on 320051N 0345232E - 320010N
+ 0335719E - 315910N 0340501E - 315241N 0341608E -
+ 314214N 0342711E
+
+ LLR20                                                   12000 FT ALT /0 FT ALT      PARACHUTE
+ 323954N 0345731E then a counter-clockwise arc radius                                H24
+ 1.6 NM centered on 323900N 0345558E - 323756N                                       "Habonim" parachuting area.
+ 0345722E - 323954N 0345731E
+
+ LLR24                                                   FL 990 /0 FT ALT            MILOPS
+ 315809N 0343353E - 315838N 0344415E - 315556N                                       CIVIL
+ 0344317E - 315455N 0343157E - 315809N 0343353E                                      Sun SR - Sun SS
+                                                                                     Mon SR - Mon SS
+                                                                                     Thu SR - Thu SS
+                                                                                     Wed SR - Wed SS
+                                                                                     Tue SR - Tue SS
+                                                                                     Except holiday eve until day after holiday at
+                                                                                     Sunrise
+
+ LLR27                                                   23000 FT ALT /0 FT          OTHER
+ 293956N 0345202E - 294017N 0345600E - 293522N                                       "Eilat" Restricted area.
+ 0345849E - 293209N 0345723E - 292931N 0345415E -                                    Activated by NOTAM
+ 293956N 0345202E
+
+ LLR309                                                  5000 FT ALT /0 FT           FIRE
+ 312434N 0345139E - 312537N 0344751E - 313133N                                       MIL
+ 0344744E - 313136N 0345153E - 313002N 0345233E -                                    Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 313120N 0345419E - 313016N 0345619E - 312910N                                       Except holiday eve. 12:00 (11:00) until day
+ 0345620E - 312613N 0345342E - 312604N 0345149E -                                    after holiday 04:00 (03:00)
+ 312434N 0345139E
+
+ LLR36                                                   99000 FT ALT /0 FT          Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 305717N 0344150E - 305359N 0344225E - 304851N                                       Except holiday eve. 12:00 (11:00) until day
+ 0344126E - 304735N 0344251E - 304503N 0344234E -                                    after holiday 04:00 (03:00)
+ 304556N 0344443E - 304250N 0344650E - 304035N
+ 0344527E - 303709N 0344458E - 303539N 0344244E -
+ 303614N 0344131E - 303712N 0344206E - 303731N
+ 0343147E - 304652N 0342756E - 304735N 0343019E -
+ 305155N 0342654E - 305451N 0342625E - 310841N
+ 0341948E - 311103N 0342016E - 311142N 0342316E -
+ 311146N 0342844E - 311045N 0343255E - 310948N
+ 0343247E - 311032N 0343421E - 311153N 0343229E -
+ 311305N 0343315E - 311304N 0343458E - 311233N
+ 0344035E - 310905N 0344420E - 310749N 0344417E -
+ 310625N 0344654E - 310234N 0344836E - 310054N
+ 0344608E - 310554N 0344013E - 310410N 0343920E -
+ 310253N 0344054E - 305935N 0344205E - 305728N
+ 0344008E - 305717N 0344150E
+
+
+
+
+CAA                                                                                                 AIRAC AMDT 003/2022
+                                           11 AUG 2022
+
+
+
+
+ENR-5.1 - 4                                                                                                           AIP
+11 AUG 2022                                                                                                        ISRAEL
+
+
+    Identification, name and lateral limits                Upper limit / Lower                Remarks
+                                                                  limit              (time of activity, type of
+                                                                                   restriction, nature of hazard,
+                                                                                        risk of interception)
+
+                        1                                            2                               3
+ LLR500                                                  14500 FT ALT /0 FT      FIRE
+ 310329N 0345125E - 310509N 0345829E - 310410N                                   MIL
+ 0345824E - 310345N 0345925E - 310150N 0345820E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 305958N 0345633E - 305950N 0345456E - 310329N                                   Except holiday eve. 12:00 (11:00) until day
+ 0345125E                                                                        after holiday 04:00 (03:00)
+
+ LLR502                                                  14500 FT ALT /0 FT      FIRE
+ 310150N 0345820E - 310248N 0350214E - 310116N                                   MIL
+ 0350233E - 310110N 0350355E - 305751N 0350237E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 305926N 0350030E - 305818N 0345816E - 310150N                                   Except holiday eve. 12:00 (11:00) until day
+ 0345820E                                                                        after holiday 04:00 (03:00)
+
+ LLR504                                                  14500 FT ALT /0 FT      FIRE
+ 305841N 0345737E - 305748N 0345758E - 305502N                                   MIL
+ 0345528E - 305610N 0345321E - 305835N 0345510E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 305841N 0345737E                                                                Except holiday eve. 12:00 (11:00) until day
+                                                                                 after holiday 04:00 (03:00)
+
+ LLR520                                                  14500 FT ALT /0 FT      FIRE
+ 304842N 0345104E - 304644N 0345115E - 304151N                                   MIL
+ 0345515E - 303923N 0345024E - 304554N 0344758E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 304842N 0345104E                                                                Except holiday eve. 12:00 (11:00) until day
+                                                                                 after holiday 04:00 (03:00)
+
+ LLR589                                                  14500 FT ALT /0 FT      FIRE
+ 310103N 0344810E - 310054N 0345150E - 305803N                                   MIL
+ 0345350E - 305326N 0344829E - 305941N 0344705E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 305945N 0344807E - 310103N 0344810E                                             Except holiday eve. 12:00 (11:00) until day
+                                                                                 after holiday 04:00 (03:00)
+
+ LLR618                                                  14500 FT ALT /0 FT      FIRE
+ 305717N 0344150E - 305919N 0344546E - 305656N                                   MIL
+ 0344711E - 305407N 0344625E - 305351N 0344509E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 305142N 0344411E - 305359N 0344225E - 305717N                                   Except holiday eve. 12:00 (11:00) until day
+ 0344150E                                                                        after holiday 04:00 (03:00)
+
+ LLR801                                                  11000 FT ALT /0 FT      MILOPS
+ 303343N 0345312E - 302902N 0344202E - 302426N                                   MIL
+ 0343631E - 302322N 0343818E - 301823N 0344011E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 302034N 0345702E - 302942N 0345600E - 303343N                                   Except holiday eve. 12:00 (11:00) until day
+ 0345312E                                                                        after holiday 04:00 (03:00)
+
+ LLR802                                                  11000 FT ALT /0 FT      MILOPS
+ 302942N 0345600E - 302034N 0345702E - 302118N                                   MIL
+ 0350300E - 302648N 0350300E - 302942N 0345600E                                  Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+                                                                                 Except holiday eve. 12:00 (11:00) until day
+                                                                                 after holiday 04:00 (03:00)
+
+ LLR803                                                  11000 FT ALT /0 FT      MILOPS
+ 303343N 0345312E - 302902N 0344202E - 303343N                                   MIL
+ 0343930E - 303144N 0343509E - 302521N 0343737E -                                Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 303343N 0345312E                                                                Except holiday eve. 12:00 (11:00) until day
+                                                                                 after holiday 04:00 (03:00)
+
+ LLR804                                                  99000 FT ALT /0 FT      MIL
+ 301213N 0345303E - 301018N 0345216E - 300726N                                   Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 0345648E - 300332N 0345449E - 300332N 0345315E -                                Except holiday eve. 12:00 (11:00) until day
+ 295945N 0345329E - 295759N 0345354E - 295639N                                   after holiday 04:00 (03:00)
+ 0345051E - 295647N 0344913E - 295207N 0345057E -
+ 295037N 0345008E - 295038N 0344857E - 300250N
+ 0344416E - 300604N 0344343E - 300956N 0344127E -
+ 301213N 0344657E - 301110N 0344726E - 301122N
+ 0345048E - 301213N 0345303E
+
+
+
+AIRAC AMDT 003/2022                                                                                                     CAA
+                                               11 AUG 2022
+
+
+
+
+AIP                                                                                                                         ENR-5.1 - 5
+ISRAEL                                                                                                                     11 AUG 2022
+
+
+       Identification, name and lateral limits                  Upper limit / Lower                      Remarks
+                                                                       limit                    (time of activity, type of
+                                                                                              restriction, nature of hazard,
+                                                                                                   risk of interception)
+
+                                 1                                         2                                       3
+ LLR805                                                      12500 FT ALT /0 FT            MIL
+ 301402N 0345322E - 301557N 0345922E - 300716N                                             Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 0345934E - 300359N 0345911E - 300020N 0345722E -                                          Except holiday eve. 12:00 (11:00) until day
+ 295759N 0345354E - 295945N 0345329E - 300332N                                             after holiday 04:00 (03:00)
+ 0345315E - 300332N 0345449E - 300726N 0345648E -
+ 301018N 0345216E - 301213N 0345303E - 301402N
+ 0345322E
+
+ LLR82                                                       4000 FT ALT /0 FT ALT         MILOPS
+ 315556N 0344317E - 315543N 0344424E - 315409N                                             CIVIL
+ 0344417E - 315225N 0344311E - 315153N 0344045E -                                          H24
+ 315051N 0344028E - 315107N 0343738E - 315237N
+ 0343426E - 315505N 0343425E - 315556N 0344317E
+
+ LLR83                                                       11000 FT ALT /0 FT            MILOPS
+ 323302N 0352054E - 323043N 0352818E - 320502N                                             MIL
+ 0352642E - 321118N 0351345E - 321540N 0350256E -                                          Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 321726N 0350324E - 322234N 0350905E - 323302N                                             Except holiday eve. 12:00 (11:00) until day
+ 0352054E                                                                                  after holiday 04:00 (03:00)
+
+ LLR90                                                       11000 FT ALT /0 FT            FIRE
+ 305557N 0351425E - 304122N 0350712E - 304914N                                             MIL
+ 0345511E - 305526N 0350120E - 305606N 0350943E -                                          Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 305557N 0351425E                                                                          Except holiday eve. 12:00 (11:00) until day
+                                                                                           after holiday 04:00 (03:00)
+
+ LLR921                                                      5000 FT ALT /0 FT             MIL
+ 312044N 0350719E - 311909N 0350657E - 311726N                                             Sun 04:00 (UTCW) - Thu 19:00 (UTCW)
+ 0350839E - 311706N 0351055E - 311839N 0351605E -                                          Except holiday eve. 12:00 (11:00) until day
+ 312243N 0351740E - 312516N 0351739E - 312809N                                             after holiday 04:00 (03:00)
+ 0352200E - 313101N 0352044E - 313205N 0352216E -
+ 313513N 0352107E - 313604N 0352156E - 313537N
+ 0352313E - 314027N 0352502E - 314132N 0352434E -
+ 314149N 0352545E - 314539N 0352739E - 314648N
+ 0352700E - 314651N 0352527E - 314842N 0352225E -
+ 314806N 0351959E - 314701N 0352037E - 314631N
+ 0351847E - 314548N 0351824E - 314235N 0352023E -
+ 314132N 0351950E - 314153N 0351856E - 314046N
+ 0351936E - 313911N 0351841E - 313346N 0351940E -
+ 312948N 0351711E - 312657N 0351420E - 312644N
+ 0351244E - 312249N 0351413E - 312044N 0350719E
+
+
+3.              DANGER AREAS
+
+                                                                                                     Remarks
+                                                             Upper limit               (time of activity, type of restriction,
+           Identification, name and lateral limits           Lower limit              nature of hazard, risk of interception)
+
+                             1                                   2                                       3
+
+ NIL
+
+
+
+
+CAA                                                                                                          AIRAC AMDT 003/2022
+                         11 AUG 2022
+
+
+
+
+ENR-5.1 - 6                                                   AIP
+11 AUG 2022                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 003/2022                                          CAA
+                        11 AUG 2022
+
+
+
+
+AIP                                                       ENR-5.2 - 1
+ISRAEL                                                   11 AUG 2022
+
+ENR 5.2   MILITARY EXERCISE AND TRAINING AREAS
+NIL
+
+
+
+
+CAA                                              AIRAC AMDT 003/2022
+                         11 AUG 2022
+
+
+
+
+ENR-5.2 - 2                                                   AIP
+11 AUG 2022                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 003/2022                                          CAA
+                                       02 OCT 2025
+
+
+
+
+AIP                                                                                                             ENR-5.3 - 1
+ISRAEL                                                                                                         02 OCT 2025
+
+ENR 5.3       OTHER ACTIVITIES OF A DANGEROUS NATURE
+Thales radar altimeter model ERT530/540 interferences have been reported within the Tel-Aviv FIR. Pilots operating aircraft
+equipped with these radar altimeters are advised to exercise increased vigilance during all phases of flight and to report any
+anomalies or suspected interference to ATC immediately.
+
+
+
+
+CAA                                                                                                  AIRAC AMDT 02/2025
+                         02 OCT 2025
+
+
+
+
+ENR-5.3 - 2                                                   AIP
+02 OCT 2025                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 002/2025                                          CAA
+                                        31 OCT 2024
+
+
+
+
+AIP                                                                                                               ENR-5.4 - 1
+ISRAEL                                                                                                           31 OCT 2024
+
+ENR 5.4       AIR NAVIGATION OBSTACLES – EN-ROUTE
+
+                Obstacle data for Area 1 (En-Route Obstacles) is available by contacting the Civil Aviation Authority of Israel
+(refer to Section 6.1 of GEN 3.1 - Aeronautical Information Services).
+
+                Note: The obstacles database provided does not meet the following requirements in the ICAO Annex 15 and
+DOC 10066 (PANS AIM): An analysis performed on a subset of the Israeli obstacle database has shown that the Area 1
+obstacles database as a whole does not meet the quality requirements in the ICAO Annex 15 and ICAO DOC 10066 (PANS
+AIM), laying down common requirement for the provision of air navigation services. It has also been noted that there are issues
+regarding completeness since some obstacles are missing (the database contains only obstacles known by the Civil Aviation
+Authority of Israel). Users of the database should take this information into consideration.
+
+
+
+
+CAA                                                                                                  AIRAC AMDT 003/2024
+                         31 OCT 2024
+
+
+
+
+ENR-5.4 - 2                                                   AIP
+31 OCT 2024                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 003/2024                                          CAA
+                        11 AUG 2022
+
+
+
+
+AIP                                                              ENR-5.5 - 1
+ISRAEL                                                          11 AUG 2022
+
+ENR 5.5   AERIAL SPORTING AND RECREATIONAL ACTIVITIES
+NIL
+
+
+
+
+CAA                                                     AIRAC AMDT 003/2022
+                         11 AUG 2022
+
+
+
+
+ENR-5.5 - 2                                                   AIP
+11 AUG 2022                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 003/2022                                          CAA
+                                          11 AUG 2022
+
+
+
+
+AIP                                                                                                                 ENR-5.6 - 1
+ISRAEL                                                                                                             11 AUG 2022
+
+ENR 5.6          BIRD MIGRATION AND AREAS WITH SENSITIVE FAUNA
+1.               Bird migration
+
+1.1           As a result from Israel located at an intercontinental junction, many bird species and in great numbers pass
+annually across the country in high densities. This makes Israel one of the largest and most densely populated migration
+crossroads in the world.
+
+              Bird migration spreads over the whole year, but mainly from late August to mid November (autumn migration)
+and from early March to end of May (spring migration). It is estimated that several hundreds of millions of birds fly over Israel
+each year. Many of them fly in large dense flocks.
+
+                 Most bird species fly, during migration, below 600 meters (2000 ft) while other flocks fly below 1000 m (3300 ft).
+
+1.2              Autumn migration
+
+               The main migration path over Israel starts from Europe to Africa (generally from N to S). Another route starts
+from Asia to Africa (generally from NE to SW). Soaring birds (e.g. storks, birds of prey) make use of favorable soaring conditions
+during daytime, mainly until late September, and fly south in eastern parts of the country. Later in the season they have
+favorable conditions in western parts of the country along the Mediterranean shoreline.
+
+              Most birds are small songbirds (passerines). They migrate during the night in broad front across the whole
+country's mainland and above the Mediterranean. However some bigger birds, like cranes and herons, are also night migrants.
+
+              Pelicans fly over Israel in large flocks entering from NE and continue along the coastline. They may migrate late
+in the season, until December.
+
+1.3              Spring migration
+
+              During the spring season, birds return from Africa to Europe in the S to N route and from Africa to Asia in the SW
+to NE route. For many bird species, migration paths over Israel differ in spring than those in autumn. Generally, these paths
+are geographically broader than in autumn.
+
+1.4              Bird names directory
+
+              Below is a concise dictionary of bird names, applicable to those species common in Israel. It should be used in
+conjunction with the Bird Concentration, Movement and Migration Charts contained in the ENR & AD sections of the AIP -
+ISRAEL, and when submitting bird-strike reports.
+
+
+        Scientific Name                                 English Name                Hebrew Name
+ Falconiformes                          Raptors                                                         ‫דורסים‬
+
+ Anatinae                               Ducks                                                          ‫ברווזים‬
+
+ Laridae                                Gulls                                                           ‫שחפים‬
+
+ Sterninae                              Terns                                                          ‫שחפיות‬
+
+ Charadriiformes                        Waders                                                        ‫חופמאים‬
+
+ Ciconia ciconia                        White Stork                                                ‫חסידה לבנה‬
+
+ Pelecanus onocrotalus                  White Pelican                                               ‫שקנאי מצוי‬
+
+ Corvus Corone Cornix                   Hooded Crow                                                  ‫עורב אפור‬
+
+ Strunus vulgaris                       Common Starling                                              ‫זרזיר מצוי‬
+
+ Bubulcus ibis                          Cattle Egret                                                ‫אנפות בקר‬
+
+ Columba livia                          Rock Dove / Feral Pigeon                                  ‫בית‬/‫יונת סלע‬
+
+ Vanellus vanellus                      Northern Lapwing                                          ‫קיווית מצויצת‬
+
+ Alectoris chukar                       Partridge                                                        ‫חוגלה‬
+
+ Vanellus spinosus                      Spur-winged Plover                                              ‫סיקסק‬
+
+
+
+CAA                                                                                                    AIRAC AMDT 003/2022
+                                                 11 AUG 2022
+
+
+
+
+ENR-5.6 - 2                                                                                                              AIP
+11 AUG 2022                                                                                                           ISRAEL
+
+
+         Scientific Name                       English Name                        Hebrew Name
+ Apus apus                             Common Swift                                                 ‫סיס חומות‬
+
+ Streptopelia turtur                   Turtle Dove                                                    ‫תור מצוי‬
+
+ Streptopelia decaocto                 Collard Dove                                                 ‫תור צווארון‬
+
+ Hirundo rustica                       Barn Swallow                                              ‫סנונית רפתות‬
+
+ Corvus monedula                       Jackdaw                                                            ‫קאק‬
+
+ Burhinus oedicnemus                   Stone Curlew                                                       ‫כרוון‬
+
+ Alauda arvensis                       Common Skylark                                             ‫זרעית השדה‬
+
+ Grus grus                             Common Crane                                                  ‫עגור אפור‬
+
+
+1.5             Number of birds
+
+                TBD
+
+1.6             Information on densities
+
+                TBD
+
+1.7             Caution note
+
+                TDB
+
+1.8             Reporting of bird strikes
+
+                A number of aerodromes in Israel are affected by large concentration of birds in their vicinity.
+
+               To enable efficient and speedy handling of bird strike occurrence, aircrews and operators are requested to
+forward bird strike reporting forms, (specimen copy is provided on page ENR 5.6-2), including feather remains, to the following
+address:
+
+Israel Airports Authority
+Wildlife Hazard Prevention Unit
+P.O. Box 7
+Ben-Gurion International Airport 70100
+Phone:                 972-50--9750752
+Phone:                 972-3-9758151
+Fax:                   972-3-9758154
+Email:                 kerenbe@iaa.gov.il
+2.              Areas with sensitive fauna
+
+                TBD
+
+
+
+
+AIRAC AMDT 003/2022                                                                                                      CAA
+                            11 AUG 2022
+
+
+
+
+AIP                                                                    ENR-5.6 - 3
+ISRAEL                                                                11 AUG 2022
+
+3.       BIRD STRIKE REPORTING FORM
+
+         *** PLACEHOLDER *** BIRD STRIKE REPORTING FORM ***
+
+         THIS INFORMATION IS REQUIRED FOR AVIATION SAFETY
+
+
+
+
+CAA                                                           AIRAC AMDT 003/2022
+                         11 AUG 2022
+
+
+
+
+ENR-5.6 - 4                                                   AIP
+11 AUG 2022                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 003/2022                                          CAA
+                                              11 AUG 2022
+
+
+
+
+AIP                                                                                     ENR-6 - 1
+ISRAEL                                                                               11 AUG 2022
+
+ENR 6           EN-ROUTE CHARTS
+
+                                                            Chart name              Page
+ En-Route ATS routes and Area navigation (RNAV) chart                    ENR 6.1
+
+ Air traffic service airspace - index chart                              "TO BE DEVELOPED"
+
+ Prohibited, restricted and danger areas - index chart                   ENR 6.6
+
+ Military training areas - index chart                                   "TO BE DEVELOPED"
+
+ Other activities of a dangerous nature                                  "NOT AVAILABLE"
+
+ Aerial sporting and recreational activities - index chart               "DEFINED IN THE
+                                                                         DOMESTIC AIP"
+
+ Radio facility - index chart                                            "TO BE DEVELOPED"
+
+ Bird migration routes - index chart                                     ENR 6.11
+
+ Bird concentrations (OCT-FEB) - index chart                             ENR 6.13
+
+ Bird concentrations (MAR-JUNE) - index chart                            ENR 6.14
+
+
+
+
+CAA                                                                      AIRAC AMDT 003/2022
+                         11 AUG 2022
+
+
+
+
+ENR-6 - 2                                                     AIP
+11 AUG 2022                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 003/2022                                          CAA
+           26 APR 2018
+
+
+
+
+ENR 6.4
+AIP                                                          ENR-6-4 - 1
+ISRAEL                                                      26 APR 2018
+
+
+          AREA NAVIGATION (RNAV) ATS ROUTES
+
+
+
+                     REF ATS ROUTES CHART ENR 6.1
+
+
+
+
+CAA                                                 AIRAC AMDT 002/2018
+                         26 APR 2018
+
+
+
+
+ENR-6-4 - 2                                                   AIP
+26 APR 2018                                                ISRAEL
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 002/2018                                          CAA
+                        04 NOV 2021
+
+
+
+
+ENR 6.5
+AIP                                                                ENR-6-5 - 1
+ISRAEL                                                            15 MAY 2003
+
+          (15$,575$)),&6(59,&($,563$&(,1'(;&+$57
+
+
+                                             
+                                             
+                                             
+                                             
+                                             
+                                             
+                                      72%('(9(/23('
+                                              
+
+
+
+
+CAA                                                             AMENDMENT 10
+                  04 NOV 2021
+
+
+
+
+ENR-6-5 - 2                                            AIP
+15 MAY 2003                                         ISRAEL
+
+
+
+
+               THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AMENDMENT 10                                          CAA
+                                                                          15 MAY 2025
+ENR 6.6
+
+
+
+
+          AIP                                                                                                                                                                               ENR 6.6
+          AIP ISRAEL
+           ISRAEL                                                                                                                                                                     ENR-6-6
+                                                                                                                                                                                        15 MAY- 125
+                                                                                                                                                                                     15 MAY 2025
+          PROHIBITED, RESRTICTED AND DANGER AREAS - INDEX CHART
+                 33°30'                         34°00'                                  34°30'                       35°00'                         35°30'            36°00'                36°30'
+
+                       ALTITUDES ARE IN FEET
+
+                         N                                                                                                                   LEBANON
+
+
+
+
+                                                                                                                                                                                    SYRIA
+
+
+
+
+                                                                                                                                                                                                     33°00'
+                             VAR 5qE 2025
+           33°00'
+
+
+
+
+                                                                                                                                   LLP03
+                                                                                                                                   3 000
+                                                                                                       LLR1             Haifa       GND                     Sea of
+                                                                                                                                                            Galilee
+                                                                                                      40 000       LLP05            LLP04
+                                                                                                       7 000       2 000            3 000
+                                                                                                                  MSL/GND            GND
+                                                                                                                           LLR20
+                                                          Sea
+
+
+
+
+                                                                                                                           12 000
+                                                                                                                          MSL/GND
+
+
+
+
+                                                                                                                                                                                                     32°30'
+                                                      ean
+           32°30'
+
+
+
+
+                                                                                                                    LLP07
+                                                    rran
+
+
+
+
+                                                                                                                    2 000 LLP171
+                                                                                                                 MSL/GND 6 000
+                                                                                                                           GND
+                                                  d ite
+
+
+
+
+                                                                                                                                           LLR83
+                                                Me
+
+
+
+
+                                                                                                                                           11 000
+                                                                                                                LLP08                       GND
+                                                                                                                1 100
+                                                                                                                 GND
+
+                                                                                                 Tel Aviv
+                                                                                   LLR24          Jaffa
+
+
+
+
+                                                                                                                                                                                                     32°00'
+                                                                                    UNL                                           LLP172            LLP18
+                                                                                                                                   6 000
+           32°00'
+
+
+
+
+                                                                                  MSL/GND                                                           6 000
+                                                                                                                                   GND               GND
+                                                                          LLR82
+                                                                                                                  LLP12
+                                                                          4 000                                   3 000                      LLP11
+                                                                         MSL/GND                                   GND                       8 000
+                                                                                                                                              GND
+                                                                                                                           LLP13
+                                                                 LLR2                                                      4 000
+                                                                40 000                                                      GND
+                                                                 5 000                                                                Jerusalem
+                                                                                                   LLP41
+                                                                                                   1 100
+                                                                                                    GND                       LLP173     LLR921
+                                                                                                                               6 000                  Dead
+
+
+
+
+                                                                                                                                                                                                     31°30'
+                                                                                                                                         5 000
+           31°30'
+
+
+
+
+                                                                                                                               GND       GND           Sea
+                                                                          LLP19                       LLR309
+                                                                           UNL                         5 000
+                                                                         MSL/GND                       GND
+
+
+                                                                                                       Beer-Sheba
+                                                                                                               LLP14 LLR500
+                                                                                                               7 000 14 500
+                                                                                                                GND   GND
+                                                                                                                           LLR502 LLP15
+                                                                                                                            14 500 UNL
+                                                                                                                                   GND
+                                                                                                                                                                               JORDAN
+                                                                                                                             GND
+
+
+
+
+                                                                                                                                                                                                     31°00'
+                                                                                           LLR036
+           31°00'
+
+
+
+
+                                                                                            UNL                LLR589
+                                                                                            GND                14 500
+                                                                                                                GND
+                                                                                                                 LLP16
+                                                                                                                 2 700          LLR90
+                                                                                                                  GND           11 000
+                                                                                                                                 GND
+                                                                     LLR618
+                                                                     14 500
+                                                                      GND                                                LLR504
+                                                                                                                         LLR520
+                                                                                                                         14 500
+                                                                                                                          GND
+                                                                                                                                                                                                     30°30'
+
+
+
+                                                                                                                             LLR802
+           30°30'
+
+
+
+
+                                                                                                                              11 000
+                                                                                    LLR803                                     GND
+                                                                                     11 000                LLR801
+                                                                                      GND                   11 000
+                                                                                                             GND
+                                                      EGYPT
+
+                                                                                                                                LLR805
+                                                                                                                                12 500
+                                                                                                                                 GND
+                                                                                                               LLR804
+                                                                                                                UNL
+                                                                                                                                                                                                     30°00'
+
+
+
+
+                                                                                                                GND
+           30°00'
+
+
+
+
+                                                                                                                                                                                                              CHANGES: LLP20 Withdrawn.
+
+
+
+
+                                             SCALE ~1:1,600,000                                                                   LLR27
+                                               Nautical Miles                                                                     23 000
+                        0                         25                                       50                                    MSL/GND
+                                                                                                                              Eilat
+                                                                                                                                                                                                     29°30'
+           29°30'N
+
+
+
+
+                        0                            50                                         100
+                                                 Kilometers                                                             Red
+          CAA                                                                                                           Sea                                           AIRAC AMDT 001/2025
+                     33°30'E                     34°00'                                   34°30'                          35°00'                        35°30'             36°00'
+
+          CAA                                                                                                                                                                  AMENDMENT 1/25
+                         15 MAY 2025
+
+
+
+
+ENR-6-6 - 2                                                AIP ISRAEL
+15 MAY 2025
+
+
+
+
+                      THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+AIRAC AMDT 001/2025                                              CAA
+            01 DEC 1996
+
+
+
+
+ENR 6.7
+AIP                                                   ENR-6-7 - 1
+ISRAEL                                               01 DEC 1996
+
+           0,/,7$5<75$,1,1*$5($6,1'(;&+$57
+
+                                 
+                                     
+                                     
+                                     
+                                     
+                                     
+                                     
+                                     
+                          72%('(9(/23('
+      
+      
+
+
+
+
+CAA                                                 NEW EDITION
+                 01 DEC 1996
+
+
+
+
+ENR-6-7 - 2                                           AIP
+01 DEC 1996                                        ISRAEL
+
+
+
+
+              THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+NEW EDITION                                          CAA
+                        01 DEC 1996
+
+
+
+
+ENR 6.8
+AIP                                                                  ENR-6-8 - 1
+ISRAEL                                                              01 DEC 1996
+
+           27+(5$&7,9,7,(62)$'$1*(52861$785(,1'(;&+$57
+
+                                         
+                                             
+                                             
+                                             
+                                             
+                                             
+                                             
+                                             
+                                       127$9$,/$%/(
+ 
+ 
+
+
+
+
+CAA                                                                NEW EDITION
+                 01 DEC 1996
+
+
+
+
+ENR-6-8 - 2                                           AIP
+01 DEC 1996                                        ISRAEL
+
+
+
+
+              THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+NEW EDITION                                          CAA
+                   01 DEC 1996
+
+
+
+
+ENR 6.9
+AIP                                                                           ENR-6-9 - 1
+ISRAEL                                                                       01 DEC 1996
+  ,65$(/                                                                       '(&
+
+            $(5,$/$1'5(&5($7,21$/$&7,9,7,(6,1'(;&+$57
+
+                                           
+                                               
+                                               
+                                               
+                                               
+                                               
+                                               
+                                               
+                                  '(),1(',17+('20(67,&$,3
+      
+      
+
+
+
+
+CAA                                                              NEW EDITIONNEW EDITION
+                 01 DEC 1996
+
+
+
+
+ENR-6-9 - 2                                           AIP
+01 DEC 1996                                        ISRAEL
+
+
+
+
+              THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+NEW EDITION                                          CAA
+            01 DEC 1996
+
+
+
+
+ENR 6.10
+AIP                                            ENR-6-10 - 1
+ISRAEL                                         01 DEC 1996
+
+            5$',2)$&,/,7<,1'(;&+$57
+
+                              
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  
+                           72%('(9(/23('
+  
+ 
+
+
+
+
+CAA                                           NEW EDITION
+                  01 DEC 1996
+
+
+
+
+ENR-6-10 - 2                                           AIP
+01 DEC 1996                                         ISRAEL
+
+
+
+
+               THIS PAGE INTENTIONALLY LEFT BLANK
+
+
+
+
+NEW EDITION                                           CAA
+                                                                    30 JAN 2020
+
+
+
+
+          ENR 6.11A
+          AIP                                                                                                                                                                         ENR-6-11A - 1
+          ISRAEL                                                                                                                                                                       30 JAN 2020
+
+BIRD CONCENTRATIONS ROUTES DURING SPRING MIGRATION - INDEX CHART
+                               34°00'                                                                   35°00'                                                  36°00'E
+
+           Spring migration dates (night & day) : 1/3 - 25/5
+                                                                                                                           LEBANON
+           Peak of migration season : 1/5 - 8/5                                                                                                                                     SYRIA
+           Night migration is on broad front                                                                          BEIRUT FIR
+
+
+
+
+                                                                                                                                                                                                 33°00'N
+33°00'N
+
+
+
+
+                                                                                                                  HAIFA            Sea of Galilee
+                                                                                                                                                          DA
+                                                                                                         Haifa                                                 MA
+                                                                                                                                                                    SC
+                                                                                                                                                                         US
+                                                                                                                                                                              FIR
+                                         FIR
+
+
+
+
+                                                                                   a
+                                     SIA
+
+
+                                               FIR
+
+
+
+
+                                                                                  S e
+                                    CO
+
+
+                                              VIV
+                                   NI
+
+                                           L-A
+
+
+
+
+                                                                         a n
+                                         TE
+
+
+
+
+                                                                    n e
+                                                               r a
+
+
+
+
+                                                                                                                                                                                                 32°00'
+                                                             e r
+
+
+
+
+                                                                                             Tel Aviv
+32°00'
+
+
+
+
+                                                                             TEL AVIV/
+                                                         i t
+
+
+
+
+                                                                          BEN GURION
+                                                         d
+                                                     e
+                                                     M
+
+
+
+
