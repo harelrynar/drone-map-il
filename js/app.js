@@ -234,6 +234,7 @@
       .sort((a, b) => a.d - b.d);
   }
 
+  let rerender = false; // re-drawing the same panel (language switch, watch toggle) – don't count again
   function openPoint(lat, lon, focusId) {
     state.lastPoint = [lat, lon, focusId];
     if (state.checkMarker) { state.checkMarker.remove(); state.checkMarker = null; }
@@ -274,6 +275,7 @@
     html += vlosHtml();
     html += `<p class="disclaimer">${esc(T("disclaimer"))}</p>`;
     openSheet(html, "point");
+    if (!rerender) Track("point-check", { verdict: v[0], zones: here.length, top: here[0] ? layerKey(here[0]) : "none", mine: !!isMine });
   }
 
   function activeUnlocated(kind) {
@@ -351,6 +353,7 @@
   /* ---------- sheet ---------- */
   let sheetKind = null;
   function openSheet(html, kind) {
+    if (kind !== sheetKind && kind !== "point") Track("panel", { name: kind });
     sheetKind = kind;
     $("#sheetBody").innerHTML = html;
     $("#sheet").hidden = false;
@@ -370,9 +373,10 @@
     if (act === "copy") { try { navigator.clipboard.writeText(b.dataset.v).then(() => toast("✓")).catch(() => {}); } catch (x) {} }
     if (act === "watch" || act === "unwatch") {
       const lat = +b.dataset.lat, lon = +b.dataset.lon;
+      Track(act === "watch" ? "watch-add" : "watch-remove");
       if (act === "watch") state.watch.push({ lat, lon, at: new Date().toISOString() });
       else state.watch = state.watch.filter(w => !(Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4));
-      store.set("watch", state.watch); drawWatch(); openPoint(lat, lon);
+      store.set("watch", state.watch); drawWatch(); rerender = true; openPoint(lat, lon); rerender = false;
     }
     if (act === "focus" || act === "zoomto") focusZone(b.dataset.id);
     if (act === "layer") { state.layersOn[b.dataset.k] = b.checked; store.set("layers", state.layersOn); drawZones(); openLayers(); }
@@ -381,13 +385,16 @@
       Object.keys(CFG.layers).forEach(k => state.layersOn[k] = act === "allOn");
       store.set("layers", state.layersOn); drawZones(); openLayers();
     }
+    if (act === "coords") Track("coords-search");
     if (act === "coords") { const v = Geo.parseCoords($("#coordIn").value); if (!v) toast(T("badCoords")); else { map.setView(v, Math.max(map.getZoom(), 12)); openPoint(v[0], v[1]); } }
     if (act === "resetFilters") { state.altM = null; state.when = null; state.showInactive = false; persistFilters(); drawZones(); openFilters(); }
   });
   $("#sheetBody").addEventListener("change", e => {
     const t = e.target;
+    if (t.matches("[data-ovl]")) Track("overlay-toggle", { id: t.dataset.ovl, on: t.checked });
     if (t.matches("[data-ovl]")) setOverlay(t.dataset.ovl, t.checked);
-    if (t.matches("[data-layer]")) { state.layersOn[t.dataset.layer] = t.checked; store.set("layers", state.layersOn); drawZones(); }
+    if (t.matches("[data-layer]")) { Track("layer-toggle", { layer: t.dataset.layer, on: t.checked }); state.layersOn[t.dataset.layer] = t.checked; store.set("layers", state.layersOn); drawZones(); }
+    if (t.id === "altSel" || t.id === "whenIn" || t.id === "inactiveChk") Track("filter", { kind: t.id, value: t.type === "checkbox" ? String(t.checked) : (t.id === "altSel" ? t.value || "all" : (t.value ? "set" : "now")) });
     if (t.id === "altSel") { state.altM = t.value === "" ? null : +t.value; persistFilters(); drawZones(); }
     if (t.id === "whenIn") { state.when = t.value ? new Date(t.value).toISOString() : null; drawZones(); updateFilterDot(); }
     if (t.id === "inactiveChk") { state.showInactive = t.checked; persistFilters(); drawZones(); }
@@ -405,6 +412,7 @@
     return I18N[state.lang].dir === "rtl" ? { paddingTopLeft: [40, 40], paddingBottomRight: side } : { paddingTopLeft: side, paddingBottomRight: [40, 40] };
   }
   function focusZone(id) {
+    { const f = state.features.find(x => x.properties.id === id); Track("zone-open", { layer: f ? layerKey(f) : "?", id }); }
     const f = state.features.find(x => x.properties.id === id); if (!f) return;
     // make sure it's visible
     const k = layerKey(f);
@@ -506,6 +514,7 @@
      and keeps refining it / following the user. Paused while the page is hidden. */
   let geoWatch = null, geoFirst = false, geoTimer = null;
   function locateMe() {
+    Track("locate-me");
     if (!navigator.geolocation) return toast(T("geoFail"));
     if (!window.isSecureContext) return toast(T("geoInsecure"));
     if (state.myPos) { map.setView(state.myPos, Math.max(map.getZoom(), 14)); openPoint(state.myPos[0], state.myPos[1]); }
@@ -541,6 +550,7 @@
     }
   }
   function onGeoErr(err) {
+    Track("locate-error", { code: err && err.code });
     clearTimeout(geoTimer);
     if (err && err.code === 1) { stopGeoWatch(); geoFirst = false; return toast(T("geoDenied")); }
     if (!state.myPos) toast(T("geoFail"));
@@ -679,6 +689,7 @@
     box.addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return;
       box.hidden = true; inp.value = ""; inp.blur();
+      Track("search-pick", { kind: b.dataset.id ? "zone" : b.dataset.city ? "city" : "coords" });
       if (b.dataset.id) focusZone(b.dataset.id);
       else if (b.dataset.city) map.setView([+b.dataset.lat, +b.dataset.lon], 12);
       else { map.setView([+b.dataset.lat, +b.dataset.lon], 12); openPoint(+b.dataset.lat, +b.dataset.lon); }
@@ -725,7 +736,8 @@
   $("#btnAbout").onclick = openAbout;
   $("#btnLang").onclick = () => {
     state.lang = state.lang === "he" ? "en" : "he"; store.set("lang", state.lang); applyLang();
-    const k = sheetKind; if (k === "layers") openLayers(); else if (k === "filters") openFilters(); else if (k === "check") openCheck(); else if (k === "news") openNews(); else if (k === "about") openAbout(); else if (k === "point" && state.lastPoint) openPoint(...state.lastPoint);
+    Track("language", { to: state.lang });
+    const k = sheetKind; if (k === "layers") openLayers(); else if (k === "filters") openFilters(); else if (k === "check") openCheck(); else if (k === "news") openNews(); else if (k === "about") openAbout(); else if (k === "point" && state.lastPoint) { rerender = true; openPoint(...state.lastPoint); rerender = false; }
   };
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 

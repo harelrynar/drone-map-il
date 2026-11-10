@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.5.1",
+  version: "1.5.2",
 
   map: {
     center: [31.45, 34.95],
@@ -11,6 +11,13 @@ window.APP_CONFIG = {
     minZoom: 7,
     maxZoom: 15,
     bounds: [[28.8, 33.0], [34.2, 37.2]]
+  },
+
+  /* מדידת שימוש – Umami Cloud. להפעלה: להדביק כאן את ה-Website ID מ-cloud.umami.is.
+   * ריק = כבוי. Usage analytics – paste the Umami Website ID to enable; empty = off. */
+  analytics: {
+    websiteId: "",
+    domains: ["harelrynar.github.io"]
   },
 
   // רדיוס (ק"מ) שבו מנחת/שדה תעופה נחשב "קרוב" לנקודה שנבדקה
