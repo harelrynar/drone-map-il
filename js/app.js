@@ -27,7 +27,7 @@
     meta: null, features: [], unlocated: [], basemap: null,
     overlays: [], ovlState: store.get("ovl", {}), ovlLayers: {},
     newIds: new Set(),
-    checkMarker: null
+    checkMarker: null, myMarker: null, myAcc: null, myPos: null
   };
   const T = k => (I18N[state.lang] && I18N[state.lang][k]) ?? I18N.he[k] ?? k;
   const L_ = o => o == null ? "" : (typeof o === "string" ? o : (o[state.lang] ?? o.he ?? o.en ?? ""));
@@ -236,8 +236,9 @@
 
   function openPoint(lat, lon, focusId) {
     state.lastPoint = [lat, lon, focusId];
-    if (state.checkMarker) state.checkMarker.remove();
-    state.checkMarker = L.marker([lat, lon], {
+    if (state.checkMarker) { state.checkMarker.remove(); state.checkMarker = null; }
+    const isMine = state.myPos && Math.abs(state.myPos[0] - lat) < 1e-6 && Math.abs(state.myPos[1] - lon) < 1e-6;
+    if (!isMine) state.checkMarker = L.marker([lat, lon], {
       icon: L.divIcon({ className: "pin", html: "<i></i>", iconSize: [22, 22], iconAnchor: [11, 22] }), zIndexOffset: 1000
     }).addTo(map);
     const here = zonesAt(lat, lon);
@@ -508,10 +509,26 @@
     try {
       navigator.geolocation.getCurrentPosition(pos => {
         done = true; clearTimeout(t);
-        const { latitude: la, longitude: lo } = pos.coords;
+        const { latitude: la, longitude: lo, accuracy } = pos.coords;
+        setMyLocation(la, lo, accuracy);
         map.setView([la, lo], 12); openPoint(la, lo);
       }, () => { done = true; clearTimeout(t); toast(T("geoFail")); }, { enableHighAccuracy: true, timeout: 8000 });
     } catch (e) { done = true; clearTimeout(t); toast(T("geoFail")); }
+  }
+
+  /* Persistent device-location pin: stays on the map after the sheet closes,
+     until the next "My location" replaces it. Tap it to re-check that spot. */
+  function setMyLocation(la, lo, acc) {
+    state.myPos = [la, lo];
+    if (state.myAcc) state.myAcc.remove();
+    if (state.myMarker) state.myMarker.remove();
+    state.myAcc = acc && acc < 5000 ? L.circle([la, lo], { radius: acc, interactive: false, color: "#1a73e8", weight: 1, opacity: .5, fillColor: "#1a73e8", fillOpacity: .12 }).addTo(map) : null;
+    state.myMarker = L.marker([la, lo], {
+      icon: L.divIcon({ className: "mypin", html: "<i></i>", iconSize: [22, 22], iconAnchor: [11, 11] }),
+      zIndexOffset: 1100, title: T("myLocation")
+    }).addTo(map)
+      .bindTooltip(T("myLocation"), { direction: "top", offset: [0, -10], className: "ztip" })
+      .on("click", ev => { L.DomEvent.stopPropagation(ev); openPoint(la, lo); });
   }
 
   /* ---------- what's new / banner ---------- */

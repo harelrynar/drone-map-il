@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.5.0",
+   "date": "2026-11-10",
+   "he": "ב'אפשר לטוס כאן?' → 'המיקום שלי' נשאר על המפה נעץ כחול במיקום המכשיר (עם עיגול דיוק). נגיעה בנעץ בודקת שוב את המקום.",
+   "en": "'My location' now leaves a persistent blue pin (with accuracy circle) at the device position; tap it to re-check."
+  },
+  {
    "version": "1.4.0",
    "date": "2026-11-09",
    "he": "האתר עבר לכתובת ציבורית ב-GitHub Pages (כולל GPS ומפת רחובות). לכל גרסה קישור קבוע משלה – ראו 'גרסאות' בחלון אודות.",

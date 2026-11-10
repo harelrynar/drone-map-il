@@ -60,6 +60,8 @@ a{color:var(--accent)}
 .af-icon.heli text{font:800 12px Heebo,Arial;fill:#2b9348}
 .af-icon.is-new circle{stroke:var(--no);stroke-width:2.6}
 .pin i{display:block;width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--ink);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.mypin i{display:block;width:22px;height:22px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 0 rgba(26,115,232,.5),0 2px 6px rgba(0,0,0,.4);animation:mypulse 2s infinite}
+@keyframes mypulse{70%{box-shadow:0 0 0 12px rgba(26,115,232,0),0 2px 6px rgba(0,0,0,.4)}100%{box-shadow:0 0 0 0 rgba(26,115,232,0),0 2px 6px rgba(0,0,0,.4)}}
 .watch{color:#f4a100;font-size:20px;line-height:20px;text-align:center;text-shadow:0 0 3px #000}
 .ztip{font-family:inherit;font-weight:600}
 
