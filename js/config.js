@@ -16,7 +16,7 @@ window.APP_CONFIG = {
   /* מדידת שימוש – Umami Cloud. להפעלה: להדביק כאן את ה-Website ID מ-cloud.umami.is.
    * ריק = כבוי. Usage analytics – paste the Umami Website ID to enable; empty = off. */
   analytics: {
-    websiteId: "",
+    websiteId: "9a6c2662-e9f4-478a-81e9-ce612221cb95",
     domains: ["harelrynar.github.io"]
   },
 
