@@ -502,33 +502,70 @@
     const lat = +b.dataset.lat, lon = +b.dataset.lon; map.setView([lat, lon], 12); openPoint(lat, lon);
   });
 
+  /* Live device location: watchPosition gives a quick first fix (even a coarse one)
+     and keeps refining it / following the user. Paused while the page is hidden. */
+  let geoWatch = null, geoFirst = false, geoTimer = null;
   function locateMe() {
     if (!navigator.geolocation) return toast(T("geoFail"));
-    let done = false;
-    const t = setTimeout(() => { if (!done) toast(T("geoFail")); }, 9000);
-    try {
-      navigator.geolocation.getCurrentPosition(pos => {
-        done = true; clearTimeout(t);
-        const { latitude: la, longitude: lo, accuracy } = pos.coords;
-        setMyLocation(la, lo, accuracy);
-        map.setView([la, lo], 12); openPoint(la, lo);
-      }, () => { done = true; clearTimeout(t); toast(T("geoFail")); }, { enableHighAccuracy: true, timeout: 8000 });
-    } catch (e) { done = true; clearTimeout(t); toast(T("geoFail")); }
+    if (!window.isSecureContext) return toast(T("geoInsecure"));
+    if (state.myPos) { map.setView(state.myPos, Math.max(map.getZoom(), 14)); openPoint(state.myPos[0], state.myPos[1]); }
+    else toast(T("geoSearching"));
+    startGeoWatch(true);
   }
+  function startGeoWatch(fresh) {
+    if (geoWatch != null) { if (fresh && !state.myPos) geoFirst = true; return; }
+    geoFirst = fresh || geoFirst;
+    clearTimeout(geoTimer);
+    geoTimer = setTimeout(() => { if (!state.myPos) toast(T("geoSlow")); }, 15000);
+    try {
+      geoWatch = navigator.geolocation.watchPosition(onGeo, onGeoErr,
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 });
+    } catch (e) { toast(T("geoFail")); }
+  }
+  function stopGeoWatch() {
+    if (geoWatch != null) { try { navigator.geolocation.clearWatch(geoWatch); } catch (e) {} geoWatch = null; }
+  }
+  function onGeo(pos) {
+    clearTimeout(geoTimer);
+    const { latitude: la, longitude: lo, accuracy } = pos.coords;
+    const prev = state.myPos;
+    const pointOpen = sheetKind === "point" && prev && state.lastPoint &&
+      Math.abs(state.lastPoint[0] - prev[0]) < 1e-6 && Math.abs(state.lastPoint[1] - prev[1]) < 1e-6;
+    setMyLocation(la, lo, accuracy);
+    if (geoFirst) {
+      geoFirst = false;
+      map.setView([la, lo], accuracy > 1000 ? 12 : 15); openPoint(la, lo);
+      if (accuracy > 200) toast(T("geoCoarse").replace("{m}", Math.round(accuracy)));
+    } else if (pointOpen && Geo.distanceM(prev[0], prev[1], la, lo) > 30) {
+      openPoint(la, lo); // keep the open check in sync as the fix improves / user moves
+    }
+  }
+  function onGeoErr(err) {
+    clearTimeout(geoTimer);
+    if (err && err.code === 1) { stopGeoWatch(); geoFirst = false; return toast(T("geoDenied")); }
+    if (!state.myPos) toast(T("geoFail"));
+    // timeout / unavailable: watchPosition keeps trying on its own
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopGeoWatch();
+    else if (state.myPos) startGeoWatch(false);
+  });
 
   /* Persistent device-location pin: stays on the map after the sheet closes,
      until the next "My location" replaces it. Tap it to re-check that spot. */
   function setMyLocation(la, lo, acc) {
     state.myPos = [la, lo];
-    if (state.myAcc) state.myAcc.remove();
-    if (state.myMarker) state.myMarker.remove();
-    state.myAcc = acc && acc < 5000 ? L.circle([la, lo], { radius: acc, interactive: false, color: "#1a73e8", weight: 1, opacity: .5, fillColor: "#1a73e8", fillOpacity: .12 }).addTo(map) : null;
+    if (acc && acc < 5000) {
+      if (state.myAcc) state.myAcc.setLatLng([la, lo]).setRadius(acc);
+      else state.myAcc = L.circle([la, lo], { radius: acc, interactive: false, color: "#1a73e8", weight: 1, opacity: .5, fillColor: "#1a73e8", fillOpacity: .12 }).addTo(map);
+    } else if (state.myAcc) { state.myAcc.remove(); state.myAcc = null; }
+    if (state.myMarker) { state.myMarker.setLatLng([la, lo]); return; }
     state.myMarker = L.marker([la, lo], {
       icon: L.divIcon({ className: "mypin", html: "<i></i>", iconSize: [22, 22], iconAnchor: [11, 11] }),
       zIndexOffset: 1100, title: T("myLocation")
     }).addTo(map)
       .bindTooltip(T("myLocation"), { direction: "top", offset: [0, -10], className: "ztip" })
-      .on("click", ev => { L.DomEvent.stopPropagation(ev); openPoint(la, lo); });
+      .on("click", ev => { L.DomEvent.stopPropagation(ev); openPoint(state.myPos[0], state.myPos[1]); });
   }
 
   /* ---------- what's new / banner ---------- */
