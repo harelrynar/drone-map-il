@@ -666,6 +666,62 @@
 
   /* ---------- search ---------- */
   function closeSearchUI() { const b = $("#searchResults"); if (b) b.hidden = true; }
+  /* Hebrew/English normalisation so "תל-אביב", "קרית שמונה", "פתח תקוה", "ג'סר" etc. all match the CBS names. */
+  const SEARCH_ALIASES = {
+    "תא": "תל אביב", "ת\"א": "תל אביב", "תל אביב יפו": "תל אביב", "יפו": "תל אביב", "tlv": "tel aviv",
+    "בש": "באר שבע", "ב\"ש": "באר שבע", "פת": "פתח תקווה", "פ\"ת": "פתח תקווה", "ראשלצ": "ראשון לציון", "ראשל\"צ": "ראשון לציון",
+    "רג": "רמת גן", "ר\"ג": "רמת גן", "קש": "קריית שמונה", "ק\"ש": "קריית שמונה", "י-ם": "ירושלים",
+    "נצרת עילית": "נוף הגליל", "upper nazareth": "nof hagalil", "מודיעין": "מודיעין-מכבים-רעות", "גבעת עדה": "בנימינה-גבעת עדה",
+    "כרכור": "פרדס חנה-כרכור", "beersheba": "beer sheva", "beer sheba": "beer sheva", "eilat": "elat"
+  };
+  function normQ(s) {
+    return String(s || "").toLowerCase().replace(/[֑-ׇ]/g, "")            // niqqud
+      .replace(/["'`״׳’“”]/g, "").replace(/[-–—_.,()/]/g, " ").replace(/\s+/g, " ").trim();
+  }
+  const loose = s => s.replace(/[וי]/g, "").replace(/\s/g, "");   // ignore ktiv male/haser and spacing
+  // CBS English names use odd transliterations (Qiryat, Tiqwa, Leziyyon) – compare consonant skeletons
+  const enSkel = s => s.replace(/[^a-z]/g, "").replace(/q/g, "k").replace(/w/g, "v").replace(/c(?!h)/g, "k").replace(/t[sz]/g, "z").replace(/(.)\1+/g, "$1").replace(/[aeiouy]/g, "");
+  let cityIndex = null;
+  function getCityIndex() {
+    if (!cityIndex && state.basemap && state.basemap.cities)
+      cityIndex = state.basemap.cities.map(c => { const he = normQ(c.he), en = normQ(c.en); return { c, he, en, hl: loose(he), el: enSkel(en) }; });
+    return cityIndex || [];
+  }
+  function scoreName(n, q) {         // lower is better; -1 = no match
+    if (!n) return -1;
+    if (n === q) return 0;
+    if (n.startsWith(q)) return 1;
+    if ((" " + n).includes(" " + q)) return 2;
+    return n.includes(q) ? 3 : -1;
+  }
+  function searchCities(raw) {
+    let q = normQ(raw); if (!q) return [];
+    const alias = SEARCH_ALIASES[q] || SEARCH_ALIASES[raw.trim().toLowerCase()];
+    const qs = alias ? [normQ(alias), q] : [q];
+    const res = [];
+    getCityIndex().forEach(x => {
+      let best = -1;
+      qs.forEach((qq, i) => {
+        const pen = i && alias ? 1 : 0;
+        [scoreName(x.he, qq), scoreName(x.en, qq)].forEach(s => { if (s >= 0 && (best < 0 || s + pen < best)) best = s + pen; });
+        if (best < 0 && qq.length >= 3) {
+          const ql = loose(qq), qe = /[a-z]/.test(qq) ? enSkel(qq) : "";
+          const hHit = /[\u05d0-\u05ea]/.test(qq) && ql.length >= 2 && x.hl.includes(ql), eHit = qe.length >= 3 && x.el.includes(qe);
+          if (hHit || eHit) best = ((hHit && x.hl.startsWith(ql)) || (eHit && x.el.startsWith(qe)) ? 2 : 4) + pen;
+        }
+      });
+      if (best >= 0) res.push({ c: x.c, s: best });
+    });
+    return res.sort((a, b) => a.s - b.s || b.c.p - a.c.p);
+  }
+  const cityZoom = p => p >= 100000 ? 12 : p >= 10000 ? 13 : 14;
+  let cityMark = null;
+  function markCity(lat, lon, name) {
+    if (cityMark) map.removeLayer(cityMark);
+    cityMark = L.circleMarker([lat, lon], { radius: 9, color: "#0b6bcb", weight: 3, fillColor: "#fff", fillOpacity: .9, interactive: false })
+      .bindTooltip(name, { permanent: true, direction: "top", offset: [0, -8], className: "city-hit" }).addTo(map);
+    const m = cityMark; setTimeout(() => { if (cityMark === m) { map.removeLayer(m); cityMark = null; } }, 6000);
+  }
   function setupSearch() {
     const inp = $("#search"), box = $("#searchResults");
     inp.addEventListener("input", () => {
@@ -674,24 +730,35 @@
       const coords = Geo.parseCoords(inp.value);
       let items = [];
       if (coords) items.push(`<button data-lat="${coords[0]}" data-lon="${coords[1]}">📍 ${fmtCoord(coords[0], coords[1])}</button>`);
+      const zoneItems = [];
       state.features.filter(f => {
         const p = f.properties;
         return [p.name && p.name.he, p.name && p.name.en, p.designator, p.id, p.notam && p.notam.id].some(s => s && String(s).toLowerCase().includes(q));
-      }).slice(0, 12).forEach(f => {
+      }).slice(0, 10).forEach(f => {
         const lc = CFG.layers[layerKey(f)];
-        items.push(`<button data-id="${esc(f.properties.id)}"><i class="sw" style="--zc:${lc.color}"></i>${esc(L_(f.properties.name))}${f.properties.designator ? ` <small class="mono">${esc(f.properties.designator)}</small>` : ""}</button>`);
+        zoneItems.push(`<button data-id="${esc(f.properties.id)}"><i class="sw" style="--zc:${lc.color}"></i>${esc(L_(f.properties.name))}${f.properties.designator ? ` <small class="mono">${esc(f.properties.designator)}</small>` : ""}</button>`);
       });
-      (state.basemap ? state.basemap.cities : []).filter(c => c.he.includes(q) || c.en.toLowerCase().includes(q)).slice(0, 5).forEach(c =>
-        items.push(`<button data-city="1" data-lat="${c.c[1]}" data-lon="${c.c[0]}">🏙 ${esc(state.lang === "he" ? c.he : c.en)}</button>`));
+      const cities = searchCities(inp.value).slice(0, 6);
+      const cityItems = cities.map(({ c }) => {
+        const nm = state.lang === "he" ? c.he : c.en;
+        return `<button data-city="1" data-lat="${c.c[1]}" data-lon="${c.c[0]}" data-z="${cityZoom(c.p)}" data-name="${esc(nm)}">🏘 ${esc(nm)}</button>`;
+      });
+      // a locality that matches the start of its name is what the user most likely meant – list it before zones
+      if (cities.length && cities[0].s <= 2) items = items.concat(cityItems, zoneItems);
+      else items = items.concat(zoneItems, cityItems);
       box.innerHTML = items.length ? items.join("") : `<div class="muted pad">${esc(T("noResults"))}</div>`;
       box.hidden = false;
+    });
+    inp.addEventListener("keydown", e => {
+      if (e.key !== "Enter") return;
+      const first = box.querySelector("button"); if (first && !box.hidden) { e.preventDefault(); first.click(); }
     });
     box.addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return;
       box.hidden = true; inp.value = ""; inp.blur();
       Track("search-pick", { kind: b.dataset.id ? "zone" : b.dataset.city ? "city" : "coords" });
       if (b.dataset.id) focusZone(b.dataset.id);
-      else if (b.dataset.city) map.setView([+b.dataset.lat, +b.dataset.lon], 12);
+      else if (b.dataset.city) { map.setView([+b.dataset.lat, +b.dataset.lon], +b.dataset.z || 13); markCity(+b.dataset.lat, +b.dataset.lon, b.dataset.name); }
       else { map.setView([+b.dataset.lat, +b.dataset.lon], 12); openPoint(+b.dataset.lat, +b.dataset.lon); }
     });
     document.addEventListener("click", e => { if (!e.target.closest("#searchWrap")) box.hidden = true; });

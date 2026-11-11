@@ -1,0 +1,86 @@
+{
+ "checkedAt": "2026-11-11T09:27:35Z",
+ "sources": {
+  "אסורים_לטיסה_וCTRים.zip": "5ca685f9da5482eda1f91a2cebf9d175bdbd6a02126d6199d5ec870acd9ed21a",
+  "RATAG_kmz.zip": "539840f396a3a74e1807778c6a6d0b787528beaec0ddfdb5b720b9ffbd981804"
+ },
+ "officialCounts": {
+  "prd": 111,
+  "ctr": 29,
+  "nature": 542
+ },
+ "known": {
+  "prd:LLR1:missing": {
+   "kind": "prd",
+   "id": "LLR1",
+   "name": "ים צפון",
+   "status": "missing",
+   "detail": "קיים ב-DronesIL/רת\"א ולא מוצג במפה",
+   "firstSeen": "2026-11-11"
+  },
+  "prd:LLR2:missing": {
+   "kind": "prd",
+   "id": "LLR2",
+   "name": "LLR2",
+   "status": "missing",
+   "detail": "קיים ב-DronesIL/רת\"א ולא מוצג במפה",
+   "firstSeen": "2026-11-11"
+  },
+  "prd:LLR801:minor": {
+   "kind": "prd",
+   "id": "LLR801",
+   "name": "מטווח 80 צפון",
+   "status": "minor",
+   "detail": "חפיפה 95%, סטייה מרבית 2524 מ'",
+   "firstSeen": "2026-11-11"
+  },
+  "ctr:LLBG CTR:minor": {
+   "kind": "ctr",
+   "id": "LLBG CTR",
+   "name": "נתבג",
+   "status": "minor",
+   "detail": "חפיפה 90%, סטייה מרבית 6665 מ'",
+   "firstSeen": "2026-11-11"
+  },
+  "ctr:LLER CTR:minor": {
+   "kind": "ctr",
+   "id": "LLER CTR",
+   "name": "אילן ואסף רמון - צפוני",
+   "status": "minor",
+   "detail": "חפיפה 91%, סטייה מרבית 1633 מ'",
+   "firstSeen": "2026-11-11"
+  },
+  "ctr:LLES ATZ:minor": {
+   "kind": "ctr",
+   "id": "LLES ATZ",
+   "name": "עין שמר",
+   "status": "minor",
+   "detail": "חפיפה 94%, סטייה מרבית 199 מ'",
+   "firstSeen": "2026-11-11"
+  },
+  "ctr:LLFK ATZ:minor": {
+   "kind": "ctr",
+   "id": "LLFK ATZ",
+   "name": "פיק",
+   "status": "minor",
+   "detail": "חפיפה 86%, סטייה מרבית 369 מ'",
+   "firstSeen": "2026-11-11"
+  },
+  "ctr:LLKS ATZ:minor": {
+   "kind": "ctr",
+   "id": "LLKS ATZ",
+   "name": "קריית שמונה",
+   "status": "minor",
+   "detail": "חפיפה 88%, סטייה מרבית 300 מ'",
+   "firstSeen": "2026-11-11"
+  },
+  "ctr:LLKZ ATZ:minor": {
+   "kind": "ctr",
+   "id": "LLKZ ATZ",
+   "name": "קציעות",
+   "status": "minor",
+   "detail": "חפיפה 93%, סטייה מרבית 280 מ'",
+   "firstSeen": "2026-11-11"
+  }
+ }
+}

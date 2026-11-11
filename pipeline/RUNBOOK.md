@@ -66,3 +66,16 @@ These are the official layers of the same data family the DronesIL app shows. Th
 5. `python3 build_gis.py && python3 build_prd.py && python3 build_uas.py && python3 build_ad.py`
 6. `python3 assemble.py /home/claude/site/data --aip` and `python3 crosscheck.py /home/claude/site/data/zones.json /home/claude/site/data/crosscheck.json`
 7. Publish zones.json, meta.json, crosscheck.json. In the final message mention new/removed areas and any cross-check status that is "differs".
+
+## D. DronesIL sanity check (daily, owner-only alert)
+DronesIL (CAAI app, Android `il.gov.rata`) has no public API; it shows the chapter-11 CAAI GIS layers. This run downloads them fresh and
+compares them with the live `data/zones.json`. Result goes ONLY to the owner (final message → push). Nothing is written to `data/`.
+1. Setup (section 0, steps 1, 2, 4).
+2. `cd /home/claude/build && python3 govil.py pdf /home/claude/raw/aip/pdf "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90%D7%A1%D7%95%D7%A8%D7%99%D7%9D%20%D7%9C%D7%98%D7%99%D7%A1%D7%94%20%D7%95CTR%D7%99%D7%9D.zip" "https://www.gov.il/BlobFolder/guide/aip/he/RATAG_kmz.zip"`
+3. Section C steps 2–3 (unzip, convert to GeoJSON), then `python3 build_gis.py` (only to produce /home/claude/build/gis.json – do NOT run assemble).
+4. `python3 dronesil_check.py /home/claude/drone-map-il/data/zones.json /home/claude/drone-map-il/pipeline/dronesil_state.json /home/claude/build/dronesil_report.json`
+   Exit 0 = no new gaps, 10 = new gaps, 2 = bad/missing input (report the error, do not commit).
+5. Commit only `pipeline/dronesil_state.json` (message "DronesIL sanity check <date>") and push to main.
+6. Final message (Hebrew): if new gaps – one line per gap (layer, id, name, what differs) + "נפתרו" list if any + whether the CAAI files changed;
+   recommend whether the map needs a fix (e.g. run section C). If none: "אין פערים חדשים מול DronesIL".
+   To accept a gap permanently nothing is needed – each gap is reported once (state keeps it). Delete its key from the state file to re-alert.
