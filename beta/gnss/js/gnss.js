@@ -156,7 +156,8 @@ window.GNSS = (function () {
     for (const f of CFG.feeds) {
       try {
         const ctl = new AbortController(), h = setTimeout(() => ctl.abort(), 12000);
-        const r = await fetch(f.url.replace("{t}", Date.now()), { signal: ctl.signal, cache: "no-store", headers: f.headers || {} });
+        const k = Math.floor((Date.now() - (f.slotShiftSec || 0) * 1000) / 60000) % 10;
+        const r = await fetch(f.url.replace("{t}", Date.now()).replace("{k}", k), { signal: ctl.signal, cache: "no-store", headers: f.headers || {} });
         clearTimeout(h);
         if (!r.ok) throw new Error(f.id + " HTTP " + r.status);
         const j = await r.json();

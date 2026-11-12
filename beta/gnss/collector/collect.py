@@ -14,6 +14,7 @@ LAT, LON, NM = 31.4, 35.05, 160
 BBOX = (28.9, 33.6, 33.9, 36.5)          # S, W, N, E – a margin around the map grid
 KEEP_SEC = 16 * 60
 INTERVAL = 60
+SLOTS = 10
 PROVIDERS = [
     ("adsb.fi", f"https://opendata.adsb.fi/api/v2/lat/{LAT}/lon/{LON}/dist/{NM}"),
     ("adsb.lol", f"https://api.adsb.lol/v2/point/{LAT}/{LON}/{NM}"),   # 500 requests/day – fallback only
@@ -73,9 +74,15 @@ def main():
             print("fetch failed:", e, flush=True)
         snaps = [s for s in snaps if s["t"] >= now - KEEP_SEC * 1000]
         feed.update(v=1, checked=now, intervalSec=INTERVAL, windowSec=KEEP_SEC, snaps=snaps)
-        with open(path, "w") as f:
-            json.dump(feed, f, separators=(",", ":"))
-        git(out, "add", "gnss.json")
+        body = json.dumps(feed, separators=(",", ":"))
+        # raw.githubusercontent.com caches every path for 5 minutes and ignores query strings,
+        # so the same content also goes to a per-minute slot file (s/0..9.json). The site asks
+        # for the slot of ~90 seconds ago, which nobody has requested (= cached) before.
+        os.makedirs(os.path.join(out, "s"), exist_ok=True)
+        for p in (path, os.path.join(out, "s", f"{(now // 60000) % SLOTS}.json")):
+            with open(p, "w") as f:
+                f.write(body)
+        git(out, "add", "gnss.json", "s")
         git(out, "commit", "-q", "--amend", "-m", "GNSS feed (single rolling commit)")
         p = git(out, "push", "-q", "-f", "origin", "HEAD:gnss-data")
         if p.returncode:

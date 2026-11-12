@@ -16,10 +16,12 @@ window.APP_CONFIG = {
     pollSec: 60,            // תדירות דגימה
     cellDeg: 0.2,           // גודל תא (מעלות רוחב, כ-22 ק"מ)
     bbox: [29.4, 34.15, 33.4, 35.95],   // דרום, מערב, צפון, מזרח
-staleSec: 240,          // קובץ שלא התעדכן יותר מזה = "האיסוף נעצר"
+staleSec: 200,          // קובץ שלא התעדכן יותר מזה = "האיסוף נעצר"
     // קובץ הדגימות שהאוסף (beta/gnss/collector, GitHub Actions) מפרסם בענף gnss-data
     feeds: [
-      { id: "raw", url: "https://raw.githubusercontent.com/harelrynar/drone-map-il/gnss-data/gnss.json?t={t}" },
+      // {k} = מספר הדקה (מודולו 10) של לפני כ-90 שניות; כך עוקפים את המטמון של 5 דקות ב-raw.githubusercontent.com
+      { id: "slot", url: "https://raw.githubusercontent.com/harelrynar/drone-map-il/gnss-data/s/{k}.json", slotShiftSec: 90 },
+      { id: "slot-1", url: "https://raw.githubusercontent.com/harelrynar/drone-map-il/gnss-data/s/{k}.json", slotShiftSec: 150 },
       { id: "api", url: "https://api.github.com/repos/harelrynar/drone-map-il/contents/gnss.json?ref=gnss-data&t={t}", headers: { Accept: "application/vnd.github.raw+json" } }
     ],
     maxPosAgeSec: 60,
