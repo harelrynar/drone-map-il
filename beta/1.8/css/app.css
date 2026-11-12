@@ -332,3 +332,4 @@ body.sheet-open .tfc-pill{display:none}
 .wc-brief pre{white-space:pre-wrap;font:inherit;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;line-height:1.6}
 .wc-brief-acts{display:flex;gap:6px}
 .wc-brief-acts .btn{height:36px;font-size:13px}
+.xbox p.muted{font-size:13.5px;margin:4px 0}

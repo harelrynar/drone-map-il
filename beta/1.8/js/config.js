@@ -55,7 +55,7 @@ window.APP_CONFIG = {
    * (GitHub Actions: osm-layers) לרשת תאים של 0.25°. */
   osm: {
     base: "data/osm/",
-    minZoom: { lines: 11, built: 10, pts: 12, crowd: 13 },   // מאיזה קירוב כל תת-שכבה מוצגת
+    minZoom: { lines: 11, built: 10, pts: 12, tall: 14, crowd: 14 },   // מאיזה קירוב כל תת-שכבה מוצגת
     nearObstacleM: 300,      // רדיוס "מכשולים בסביבה" בחלון הנקודה
     nearCrowdM: 300,         // רדיוס "ריכוזי קהל"
     nearBuiltM: 150          // "שטח בנוי במרחק…"

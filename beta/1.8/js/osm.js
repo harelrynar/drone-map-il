@@ -16,7 +16,7 @@
   const CFG = Object.assign({
     base: "data/osm/",
     cellDeg: 0.25,
-    minZoom: { lines: 11, built: 10, pts: 12, crowd: 13 },
+    minZoom: { lines: 11, built: 10, pts: 12, tall: 14, crowd: 14 },
     maxCells: 16,              // לא טוענים יותר מזה בתצוגה אחת
     nearObstacleM: 300,        // רדיוס "מכשולים בסביבה" בחלון הנקודה
     nearCrowdM: 300,
@@ -31,7 +31,7 @@
       none: "לא נמצאו מכשולים ממופים בטווח {r} מ'.",
       caveat: "מבוסס OpenStreetMap: מכשולים שלא מופו (קווי חשמל מקומיים, עגורנים, עצים, כבלים) לא יופיעו. המרחק נמדד מהנקודה שנבחרה.",
       l: "קו מתח עליון", m: "קו חשמל (מתח נמוך / בינוני)", c: "רכבל / כבל עילי",
-      mast: "אנטנה / תורן", tower: "מגדל", chim: "ארובה", crane: "עגורן", wind: "טורבינת רוח", bldg: "בניין גבוה",
+      mast: "אנטנה / תורן", tower: "מגדל", chim: "ארובה", crane: "עגורן", wind: "טורבינת רוח", bldg: "מבנה גבוה", nLines: "{n} קווים, הקרוב:",
       kv: "ק\"ו", h: "גובה {h} מ'", hEst: "כ-{h} מ' (הערכה לפי מספר קומות)", hUnknown: "גובה לא ידוע", mAway: "{d} מ'",
       crossing: "מעל הנקודה / צמוד",
       inBuilt: "הנקודה בתוך שטח בנוי", r: "מגורים", cK: "מסחר", i: "תעשייה",
@@ -49,7 +49,7 @@
       none: "No mapped obstacles within {r} m.",
       caveat: "Based on OpenStreetMap: unmapped obstacles (local power lines, cranes, trees, cables) will not appear. Distance is from the selected point.",
       l: "High-voltage power line", m: "Power line (low / medium voltage)", c: "Cable car / aerial cable",
-      mast: "Antenna / mast", tower: "Tower", chim: "Chimney", crane: "Crane", wind: "Wind turbine", bldg: "Tall building",
+      mast: "Antenna / mast", tower: "Tower", chim: "Chimney", crane: "Crane", wind: "Wind turbine", bldg: "Tall structure", nLines: "{n} lines, nearest:",
       kv: "kV", h: "height {h} m", hEst: "about {h} m (estimated from floors)", hUnknown: "height unknown", mAway: "{d} m",
       crossing: "overhead / adjacent",
       inBuilt: "The point is inside a built-up area", r: "residential", cK: "commercial", i: "industrial",
@@ -107,20 +107,22 @@
         color: col.line, weight: l.k === "l" ? 2.4 : 1.3, opacity: l.k === "l" ? 0.95 : 0.8,
         dashArray: l.k === "m" ? "5 4" : l.k === "c" ? "2 5" : null
       }))));
-      c.layers.pts = L.layerGroup((c.data.pts || []).map(p => L.circleMarker([p.c[1], p.c[0]], Object.assign({}, base, {
-        radius: p.k === "wind" ? 5.5 : 4.5, color: "#fff", weight: 1.5, fillColor: col.pt, fillOpacity: 1
-      }))));
+      const dot = p => L.circleMarker([p.c[1], p.c[0]], Object.assign({}, base, {
+        radius: p.k === "wind" ? 5 : p.k === "bldg" ? 3.2 : 4, color: "#fff", weight: 1.2, fillColor: col.pt, fillOpacity: 1
+      }));
+      c.layers.pts = L.layerGroup((c.data.pts || []).filter(p => p.k !== "bldg").map(dot));    // masts, towers, chimneys, cranes, turbines
+      c.layers.tall = L.layerGroup((c.data.pts || []).filter(p => p.k === "bldg").map(dot));   // tall buildings – only when zoomed in
     } else {
       c.layers.built = L.layerGroup((c.data.built || []).map(b => L.polygon(pairs(b.g), Object.assign({}, base, {
         stroke: false, fillColor: col.built, fillOpacity: 0.22
       }))));
       c.layers.crowd = L.layerGroup((c.data.crowd || []).map(p => L.circleMarker([p.c[1], p.c[0]], Object.assign({}, base, {
-        radius: 5, color: "#fff", weight: 1.5, fillColor: col.crowd, fillOpacity: 1
+        radius: 4, color: "#fff", weight: 1.2, fillColor: col.crowd, fillOpacity: 1
       }))));
     }
     return c;
   }
-  const SUB = { lines: ["obs", "obs"], pts: ["obs", "obs"], built: ["pop", "built"], crowd: ["pop", "crowd"] };  // sub -> [file, toggle]
+  const SUB = { lines: ["obs", "obs"], pts: ["obs", "obs"], tall: ["obs", "obs"], built: ["pop", "built"], crowd: ["pop", "crowd"] };  // sub -> [file, toggle]
 
   let seq = 0;
   function refresh() {
@@ -150,9 +152,9 @@
     map = m;
     Object.assign(on, (opts && opts.on) || {});
     const pane = map.createPane("p_osm");
-    pane.style.zIndex = (opts && opts.z) || 298; pane.style.pointerEvents = "none";
+    pane.style.zIndex = (opts && opts.z) || 301;   // above the base map (300), below the AIP annex overlay and all zones pane.style.pointerEvents = "none";
     renderer = L.canvas({ pane: "p_osm", padding: 0.2 });
-    ["built", "lines", "crowd", "pts"].forEach(s => { groups[s] = L.layerGroup().addTo(map); });
+    ["built", "lines", "crowd", "tall", "pts"].forEach(s => { groups[s] = L.layerGroup().addTo(map); });
     let h = null;
     map.on("moveend zoomend", () => { clearTimeout(h); h = setTimeout(refresh, 120); });
     refresh();
@@ -242,9 +244,14 @@
     if (res.error) return title + `<p class="muted">${o.esc(t(L, "loadErr"))}</p>`;
     if (!res.ok) return title + `<p class="muted">${o.esc(t(L, "noData"))}</p>`;
     const rows = [];
-    res.lines.slice(0, 6).forEach(l => rows.push({
+    const lineGroups = new Map();          // parallel circuits of the same kind and voltage are one row
+    res.lines.forEach(l => {
+      const g = lineGroups.get(l.k + l.v);
+      if (g) g.n++; else lineGroups.set(l.k + l.v, { k: l.k, v: l.v, d: l.d, n: 1 });   // res.lines is sorted, so the first is the nearest
+    });
+    [...lineGroups.values()].slice(0, 6).forEach(l => rows.push({
       d: l.d, cls: "ln-" + l.k,
-      html: `<b>${o.esc(t(L, l.k))}</b>${l.v ? ` · ${l.v} ${o.esc(t(L, "kv"))}` : ""}`
+      html: `<b>${o.esc(t(L, l.k))}</b>${l.v ? ` · ${l.v} ${o.esc(t(L, "kv"))}` : ""}${l.n > 1 ? ` · ${o.esc(t(L, "nLines").replace("{n}", l.n))}` : ""}`
     }));
     res.pts.slice(0, 8).forEach(p => {
       const h = p.h ? t(L, p.e ? "hEst" : "h").replace("{h}", p.h) : t(L, "hUnknown");

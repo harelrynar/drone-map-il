@@ -1,11 +1,12 @@
 # Builds the OSM-based layers (obstacles, built-up areas, crowd places) for the 1.8 test version
-# and publishes them to the `osm-data` branch (one rolling commit). It never writes to main.
+# and publishes them to the `osm-data` branch (one rolling commit). It never writes to main:
+# the files under beta/1.8/data/osm/ are a copy of that branch, committed by hand (see beta/README.md).
 # The OSM extract is not reachable from the Claude build environment, so the fetch runs here.
 name: osm-layers
 on:
   workflow_dispatch:
   push:
-    branches: [beta-1.8]
+    branches: [main, beta-1.8]
     paths:
       - beta/1.8/tools/osm_build.py
       - .github/workflows/osm-layers.yml
