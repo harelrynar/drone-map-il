@@ -35,7 +35,7 @@ window.GNSS = (function () {
       quote: "ציטוט מהנתונים הגולמיים", list: "תאים עם שיבוש כרגע", none: "לא זוהו שיבושים ב-15 הדקות האחרונות בתאים שנדגמו.",
       how: "איך זה מחושב",
       howItems: [
-        "חסימה: מטוס שאיבד קליטת GPS (שדה gpsOkBefore) או שדיווח NACp=0 / NIC=0. המיקום הוא הנקודה האחרונה שבה ה-GPS עוד היה תקין.",
+        "חסימה: מטוס שאיבד קליטת GPS (שדה gpsOkBefore) או שדיווח NACp=0. המיקום הוא הנקודה האחרונה שבה ה-GPS עוד היה תקין.",
         "שיבוש: מטוס עם משדר ADS-B גרסה 2 שדיווח דיוק ירוד (NACp ≤ {nac} או NIC ≤ {nic}).",
         "חשד להונאה: קפיצת מיקום שלא אפשרית פיזית בין שתי דגימות, או פער של יותר מ-{alt} רגל בין גובה ה-GNSS לגובה הברומטרי. זה סימן עקיף בלבד.",
         "תא שבו נפגע מטוס יחיד מסומן בקו מקווקו (ביטחון נמוך)."
@@ -60,7 +60,7 @@ window.GNSS = (function () {
       quote: "Raw data quote", list: "Cells with interference now", none: "No interference detected in the last 15 minutes in sampled cells.",
       how: "How it is computed",
       howItems: [
-        "Jamming: an aircraft that lost GPS (gpsOkBefore field) or reported NACp=0 / NIC=0. Plotted at its last good GPS position.",
+        "Jamming: an aircraft that lost GPS (gpsOkBefore field) or reported NACp=0. Plotted at its last good GPS position.",
         "Interference: an ADS-B version 2 aircraft reporting degraded accuracy (NACp ≤ {nac} or NIC ≤ {nic}).",
         "Suspected spoofing: a physically impossible position jump between two samples, or more than {alt} ft between GNSS and barometric altitude. Indirect evidence only.",
         "A cell where a single aircraft was affected is drawn dashed (low confidence)."
@@ -123,7 +123,8 @@ window.GNSS = (function () {
     if (lat == null || lon == null) return null;
     if (num(a.seen_pos) != null && a.seen_pos > CFG.maxPosAgeSec) return null;
     const adsb = type.startsWith("adsb");
-    if (adsb && (nac === 0 || nic === 0) && ver === 2)
+    // NIC=0 next to a good NACp is usually a light-aircraft GPS that does not report integrity, not jamming
+    if (adsb && ver === 2 && (nac === 0 || (nic === 0 && (nac == null || nac <= CFG.nacDegraded))))
       return { st: "jam", lat, lon, fl, raw: base, why: "nac0" };
 
     // 2. suspected spoofing – indirect signs only
@@ -141,7 +142,7 @@ window.GNSS = (function () {
       return { st: "spoof", lat, lon, fl, raw: `${base} alt_geom=${ag} alt_baro=${ab}`, why: "alt" };
 
     // 3. degraded accuracy
-    if (adsb && ver === 2 && ((nac != null && nac <= CFG.nacDegraded) || (nic != null && nic <= CFG.nicDegraded)))
+    if (adsb && ver === 2 && ((nac != null && nac <= CFG.nacDegraded) || (nic != null && nic > 0 && nic <= CFG.nicDegraded)))
       return { st: "degraded", lat, lon, fl, raw: base, why: "nac" };
     if (adsb && (nac != null || nic != null)) return { st: "ok", lat, lon, fl, raw: base, why: "" };
     return null; // MLAT / Mode-S only: says nothing about GNSS quality
