@@ -1,0 +1,40 @@
+# Builds the OSM-based layers (obstacles, built-up areas, crowd places) for the 1.8 test version
+# and publishes them to the `osm-data` branch (one rolling commit). It never writes to main.
+# The Overpass API is not reachable from the Claude build environment, so the fetch runs here.
+name: osm-layers
+on:
+  workflow_dispatch:
+  push:
+    branches: [beta-1.8]
+    paths:
+      - beta/1.8/tools/osm_build.py
+      - .github/workflows/osm-layers.yml
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Live API checks (shape of the responses the site relies on)
+        continue-on-error: true
+        run: |
+          echo "--- open-meteo elevation"
+          curl -sS -m 30 -D - "https://api.open-meteo.com/v1/elevation?latitude=31.7780,32.0853,31.5590&longitude=35.2350,34.7818,35.4730" -H "Origin: https://harelrynar.github.io" | head -40
+          echo
+          echo "--- overpass CORS"
+          curl -sS -m 30 -D - -o /dev/null "https://overpass-api.de/api/status" -H "Origin: https://harelrynar.github.io" | head -20
+      - name: Build
+        run: python3 beta/1.8/tools/osm_build.py osm-out data/basemap.json
+      - name: Publish to osm-data
+        run: |
+          cd osm-out
+          ls | head; du -sh .
+          git init -q
+          git config user.name "osm-layers"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -q --orphan data
+          git add -A
+          git commit -q -m "OSM layers $(date -u +%F)"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:osm-data
