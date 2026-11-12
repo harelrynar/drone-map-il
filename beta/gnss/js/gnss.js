@@ -2,9 +2,10 @@
  * שכבת GNSS (בטא) – שיבושים, חסימות והונאות ב-15 הדקות האחרונות.
  * GNSS layer (beta) – interference seen in the last 15 minutes.
  *
- * מקור: נתוני ADS-B חיים מרשתות קהילתיות (airplanes.live / adsb.lol / adsb.fi).
- * כל מטוס משדר את דיוק הניווט שלו (NACp / NIC). הדפדפן דוגם את המטוסים שמעל
- * ישראל פעם בדקה, שומר 15 דקות אחרונות, ומסכם לכל תא במפה.
+ * מקור: נתוני ADS-B חיים מרשתות קהילתיות (adsb.fi / adsb.lol).
+ * כל מטוס משדר את דיוק הניווט שלו (NACp / NIC). אוסף ב-GitHub Actions דוגם את
+ * המטוסים שמעל ישראל פעם בדקה ומפרסם את 16 הדקות האחרונות; הדפדפן מוריד את
+ * הקובץ פעם בדקה, מסווג כל מטוס ומסכם לכל תא במפה.
  *
  * זו הערכה: המדידה היא ממטוסים בגובה, לא מגובה הקרקע.
  * ========================================================= */
@@ -23,7 +24,8 @@ window.GNSS = (function () {
       okS: "תקין", nodataS: "אין נתונים", degradedS: "שיבוש", jamS: "חסימה", spoofS: "הונאה",
       updated: "עודכן", never: "עדיין לא התקבלו נתונים", loading: "טוען נתונים…",
       err: "אין חיבור למקור הנתונים החי. השכבה לא מעודכנת.",
-      window: "חלון זמן", windowFull: "15 הדקות האחרונות", windowPart: "{m} דקות (מאז פתיחת הדף; החלון המלא נבנה בהדרגה)",
+      errStale: "האיסוף נעצר. הנתונים האחרונים הם משעה",
+      window: "חלון זמן", windowFull: "15 הדקות האחרונות", windowPart: "{m} דקות (האיסוף התחיל לאחרונה; החלון המלא נבנה בהדרגה)",
       sampled: "מטוסים שנדגמו בתא", affected: "מטוסים שנפגעו", conf: "רמת ביטחון", confHigh: "בינונית-גבוהה", confLow: "נמוכה (מטוס יחיד)",
       cell: "תא", status: "סטטוס", source: "מקור", provider: "רשת ADS-B",
       estTitle: "הערכה בלבד",
@@ -47,7 +49,8 @@ window.GNSS = (function () {
       okS: "OK", nodataS: "No data", degradedS: "Degraded", jamS: "Jamming", spoofS: "Spoofing",
       updated: "Updated", never: "No data received yet", loading: "Loading…",
       err: "Cannot reach the live data source. The layer is not up to date.",
-      window: "Time window", windowFull: "Last 15 minutes", windowPart: "{m} min (since the page was opened; the full window builds up gradually)",
+      errStale: "Collection has stopped. Latest data is from",
+      window: "Time window", windowFull: "Last 15 minutes", windowPart: "{m} min (collection started recently; the full window builds up gradually)",
       sampled: "Aircraft sampled in cell", affected: "Aircraft affected", conf: "Confidence", confHigh: "Medium-high", confLow: "Low (single aircraft)",
       cell: "Cell", status: "Status", source: "Source", provider: "ADS-B network",
       estTitle: "Estimate only",
@@ -144,27 +147,27 @@ window.GNSS = (function () {
     return null; // MLAT / Mode-S only: says nothing about GNSS quality
   }
 
-  /* ---------- fetch ---------- */
-  async function fetchAircraft() {
-    let lastErr = null;
-    const order = CFG.providers.slice();
-    if (S.provider) order.sort((a, b) => (b.id === S.provider) - (a.id === S.provider));
-    for (const p of order) {
+  /* ---------- fetch ----------
+   * The ADS-B APIs cannot be called from a browser (no CORS), so a GitHub Actions job
+   * (beta/gnss/collector) samples them every minute and publishes the last 16 minutes
+   * as one JSON file. Here we download it and replay the samples we have not seen yet. */
+  async function fetchFeed() {
+    let lastErr = null, best = null;
+    for (const f of CFG.feeds) {
       try {
-        const url = p.url.replace("{lat}", CFG.query.lat).replace("{lon}", CFG.query.lon).replace("{nm}", CFG.query.radiusNm);
         const ctl = new AbortController(), h = setTimeout(() => ctl.abort(), 12000);
-        const r = await fetch(url, { signal: ctl.signal, cache: "no-store" });
+        const r = await fetch(f.url.replace("{t}", Date.now()), { signal: ctl.signal, cache: "no-store", headers: f.headers || {} });
         clearTimeout(h);
-        if (!r.ok) throw new Error(p.id + " HTTP " + r.status);
+        if (!r.ok) throw new Error(f.id + " HTTP " + r.status);
         const j = await r.json();
-        const ac = j.ac || j.aircraft;
-        if (!Array.isArray(ac)) throw new Error(p.id + " bad payload");
-        let now = Number(j.now || j.ctime || Date.now()); if (now < 1e12) now *= 1000;
-        if (Math.abs(now - Date.now()) > 120000) now = Date.now();
-        return { ac, now, provider: p.id };
+        if (!j || !Array.isArray(j.snaps)) throw new Error(f.id + " bad payload");
+        if (!best || (j.updated || 0) > (best.updated || 0)) best = j;
+        // a CDN copy may lag a few minutes – only then try the next (rate-limited) address
+        if (Date.now() - (j.updated || 0) < CFG.staleSec * 1000) break;
       } catch (e) { lastErr = e; }
     }
-    throw lastErr || new Error("no provider");
+    if (!best) throw lastErr || new Error("no feed");
+    return best;
   }
 
   function ingest(ac, now) {
@@ -172,18 +175,18 @@ window.GNSS = (function () {
       if (!a || !a.hex) return;
       let c; try { c = classify(a, now); } catch (e) { return; }
       if (!c) return;
+      if (now < Date.now() - CFG.windowMin * 60000) return;
       const cell = cellOf(c.lat, c.lon); if (!cell) return;
       const key = a.hex + "|" + cell, old = obs.get(key);
       // keep the worst state seen for this aircraft in this cell during the window
       if (old && RANK[old.st] > RANK[c.st]) { old.seen = now; return; }
       obs.set(key, { t: now, seen: now, st: c.st, fl: c.fl, hex: a.hex, raw: c.raw, why: c.why, cell });
     });
-    prune(now);
   }
   function prune(now) {
     const lim = now - CFG.windowMin * 60000;
     obs.forEach((o, k) => { if (o.t < lim) obs.delete(k); });
-    lastPos.forEach((p, k) => { if (p.t < now - 300000) lastPos.delete(k); });
+    lastPos.forEach((p, k) => { if (p.t < now - 1200000) lastPos.delete(k); });
   }
   function summarize() {
     const cells = {}; const hexes = new Set();
@@ -203,38 +206,26 @@ window.GNSS = (function () {
   }
   function cellInfo(id) { return S.cells[id] || { n: 0, bad: 0, st: "nodata", items: [], low: false }; }
 
-  function persist() {
-    try {
-      const arr = []; obs.forEach(o => arr.push(o));
-      localStorage.setItem("uasmap.gnssObs", JSON.stringify({ started: S.started, lastOk: S.lastOk, provider: S.provider, obs: arr.slice(-1500) }));
-    } catch (e) { /* ignore */ }
-  }
-  function restore() {
-    try {
-      const j = JSON.parse(localStorage.getItem("uasmap.gnssObs") || "null"); if (!j) return;
-      const now = Date.now(), lim = now - CFG.windowMin * 60000;
-      // a gap of more than 3 min in sampling means the window is no longer continuous
-      if (!j.lastOk || now - j.lastOk > 180000) return;
-      (j.obs || []).forEach(o => { if (o.t >= lim && o.cell) obs.set(o.hex + "|" + o.cell, o); });
-      S.started = j.started; S.lastOk = j.lastOk; S.provider = j.provider;
-    } catch (e) { /* ignore */ }
-  }
-
   async function tick(force) {
     if (!S.on || busy || (document.hidden && !force)) return;
     busy = true; S.lastTry = Date.now();
     try {
-      const { ac, now, provider } = await fetchAircraft();
-      if (S.lastOk && now - S.lastOk > 180000) { S.started = now; } // sampling gap – restart the window clock
-      if (!S.started) S.started = now;
-      S.provider = provider; S.lastOk = now; S.error = null;
-      ingest(ac, now);
+      const feed = await fetchFeed();
+      feed.snaps.slice().sort((x, y) => x.t - y.t).forEach(sn => {
+        if (sn.t <= (S.lastSnap || 0)) return;
+        ingest(sn.ac || [], sn.t); S.lastSnap = sn.t;
+      });
+      prune(Date.now());
+      S.started = feed.snaps.length ? Math.min(...feed.snaps.map(x => x.t)) : null;
+      S.provider = feed.provider; S.lastOk = feed.updated || null; S.feedError = feed.error || null;
+      S.stale = !S.lastOk || Date.now() - S.lastOk > CFG.staleSec * 1000;
+      S.error = S.stale ? "stale" : null;
     } catch (e) {
       S.error = String(e && e.message || e);
       prune(Date.now());
     }
     busy = false;
-    summarize(); persist(); draw(); pill();
+    summarize(); draw(); pill();
     if (app && app.sheetKind() === "gnss") reopen();
   }
 
@@ -277,7 +268,7 @@ window.GNSS = (function () {
     const el = document.getElementById("gnssPill"); if (!el) return;
     el.hidden = false;
     const bad = badCells().length;
-    const st = !S.on ? "off" : S.error && !S.lastOk ? "err" : !S.lastOk ? "load" : worst();
+    const st = !S.on ? "off" : S.error && (!S.lastOk || !obs.size) ? "err" : !S.lastOk ? "load" : worst();
     el.className = "gnss-pill p-" + st + (S.error ? " stale" : "");
     const txt = !S.on ? "—" : st === "err" ? "!" : st === "load" ? "…" : bad ? String(bad) : "✓";
     el.innerHTML = `<i></i><b>${esc(t("pill"))}</b><span>${esc(txt)}</span>${S.lastOk && S.on ? `<time>${hhmm(S.lastOk)}</time>` : ""}`;
@@ -287,10 +278,10 @@ window.GNSS = (function () {
   function windowText() {
     if (!S.started || !S.lastOk) return t("never");
     const m = Math.floor((S.lastOk - S.started) / 60000);
-    return m >= CFG.windowMin - 1 ? t("windowFull") : t("windowPart").replace("{m}", Math.max(1, m));
+    return m >= CFG.windowMin - 2 ? t("windowFull") : t("windowPart").replace("{m}", Math.max(1, m));
   }
   function statusLine() {
-    if (S.error) return `<div class="gnss-err">⚠ ${esc(t("err"))}${S.lastOk ? ` (${esc(t("updated"))} ${hhmm(S.lastOk)})` : ""}</div>`;
+    if (S.error) return `<div class="gnss-err">⚠ ${esc(t(S.lastOk ? "errStale" : "err"))}${S.lastOk ? ` ${hhmm(S.lastOk)}` : ""}</div>`;
     if (!S.lastOk) return `<p class="muted">${esc(t("loading"))}</p>`;
     return `<p class="muted gnss-upd">${esc(t("updated"))} ${hhmm(S.lastOk)} · ${esc(t("counts").replace("{d}", badCells().length).replace("{n}", S.total))}</p>`;
   }
@@ -384,7 +375,7 @@ window.GNSS = (function () {
     map.createPane("p_gnssTop").style.zIndex = CFG.paneTopZ || 372;    // affected cells: above the zones
     group = L.layerGroup().addTo(map);
     S.on = app.store.get("gnssOn", CFG.on !== false);
-    restore(); summarize(); draw(); pill();
+    summarize(); draw(); pill();
     const el = document.getElementById("gnssPill"); if (el) el.onclick = openPanel;
     map.on("zoomend", draw);
     document.addEventListener("visibilitychange", () => { if (!document.hidden && S.on && (!S.lastTry || Date.now() - S.lastTry > CFG.pollSec * 1000)) tick(true); });

@@ -9,14 +9,19 @@ window.APP_CONFIG = {
   dataBase: "../../",
 
   /* שכבת GNSS – שיבושים/חסימות/הונאות ב-15 הדקות האחרונות, מתוך ADS-B חי.
-   * providers: מנסים לפי הסדר; כולם מחזירים את פורמט ADSBExchange v2. */
+   * הנתונים נאספים בשרת (GitHub Actions) כי ספקי ה-ADS-B לא מאפשרים קריאה ישירה מדפדפן. */
   gnss: {
     on: true,
     windowMin: 15,          // חלון הזמן בדקות
     pollSec: 60,            // תדירות דגימה
     cellDeg: 0.2,           // גודל תא (מעלות רוחב, כ-22 ק"מ)
     bbox: [29.4, 34.15, 33.4, 35.95],   // דרום, מערב, צפון, מזרח
-    query: { lat: 31.4, lon: 35.05, radiusNm: 160 },
+staleSec: 240,          // קובץ שלא התעדכן יותר מזה = "האיסוף נעצר"
+    // קובץ הדגימות שהאוסף (beta/gnss/collector, GitHub Actions) מפרסם בענף gnss-data
+    feeds: [
+      { id: "raw", url: "https://raw.githubusercontent.com/harelrynar/drone-map-il/gnss-data/gnss.json?t={t}" },
+      { id: "api", url: "https://api.github.com/repos/harelrynar/drone-map-il/contents/gnss.json?ref=gnss-data&t={t}", headers: { Accept: "application/vnd.github.raw+json" } }
+    ],
     maxPosAgeSec: 60,
     nacDegraded: 7,         // NACp ≤ 7  (דיוק גרוע מ-0.05 מייל ימי)
     nicDegraded: 6,         // NIC ≤ 6
@@ -27,9 +32,8 @@ window.APP_CONFIG = {
     paneZ: 312, paneTopZ: 372,
     colors: { ok: "#12a37a", nodata: "#7d8a97", degraded: "#f5a700", jam: "#1f1f1f", spoof: "#b5179e" },
     providers: [
-      { id: "airplanes.live", name: "airplanes.live", site: "https://airplanes.live", url: "https://api.airplanes.live/v2/point/{lat}/{lon}/{nm}" },
-      { id: "adsb.lol", name: "adsb.lol", site: "https://www.adsb.lol", url: "https://api.adsb.lol/v2/point/{lat}/{lon}/{nm}" },
-      { id: "adsb.fi", name: "adsb.fi", site: "https://adsb.fi", url: "https://opendata.adsb.fi/api/v2/lat/{lat}/lon/{lon}/dist/{nm}" }
+      { id: "adsb.fi", name: "adsb.fi", site: "https://adsb.fi" },
+      { id: "adsb.lol", name: "adsb.lol", site: "https://www.adsb.lol" }
     ]
   },
 
@@ -94,6 +98,6 @@ window.APP_CONFIG = {
       { he: "AIP ישראל (eAIP) – ENR 5.1, AD 2", url: "https://www.gov.il/en/Departments/General/electronic-aip" }
     ],
     notam: { he: "נוטאם – רת\"א", url: "https://brin.iaa.gov.il/aeroinfo/AeroInfo.aspx?msgType=Notam" },
-    gnss: [{ he: "GNSS – נתוני ADS-B חיים: airplanes.live", url: "https://airplanes.live" }, { he: "GNSS – adsb.lol", url: "https://www.adsb.lol" }]
+    gnss: [{ he: "GNSS – נתוני ADS-B חיים: adsb.fi", url: "https://adsb.fi" }, { he: "GNSS – adsb.lol", url: "https://www.adsb.lol" }]
   }
 };

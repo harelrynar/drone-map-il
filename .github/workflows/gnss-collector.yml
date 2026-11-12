@@ -1,0 +1,44 @@
+# GNSS beta – samples live ADS-B once a minute and publishes the last 16 minutes
+# to the `gnss-data` branch (one rolling commit). It never writes to main.
+# One run works for ~5.5 hours and then starts its successor; the schedule is only a watchdog.
+name: gnss-collector
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+    inputs:
+      takeover:
+        description: "start collecting even if the feed is fresh"
+        default: "false"
+permissions:
+  contents: write
+  actions: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: beta/gnss/collector
+      - name: Prepare data branch
+        run: |
+          git config --global user.name "gnss-collector"
+          git config --global user.email "actions@users.noreply.github.com"
+          git init -q out && cd out
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin gnss-data 2>/dev/null; then git checkout -q -b work FETCH_HEAD; else
+            git checkout -q --orphan work; echo '{}' > gnss.json; git add gnss.json; git commit -q -m "GNSS feed"; fi
+      - name: Is another collector already running?
+        id: chk
+        run: |
+          fresh=$(python3 -c "import json,time;j=json.load(open('out/gnss.json'));print(int(time.time()*1000-j.get('checked',0) < 180000))")
+          if [ "$fresh" = "1" ] && [ "${{ inputs.takeover }}" != "true" ]; then echo "run=0" >> "$GITHUB_OUTPUT"; else echo "run=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Collect
+        if: steps.chk.outputs.run == '1'
+        run: python3 beta/gnss/collector/collect.py out 19800
+      - name: Start successor
+        if: steps.chk.outputs.run == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run gnss-collector.yml -R "${{ github.repository }}" --ref main -f takeover=true
