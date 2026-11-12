@@ -1,6 +1,6 @@
 # Builds the OSM-based layers (obstacles, built-up areas, crowd places) for the 1.8 test version
 # and publishes them to the `osm-data` branch (one rolling commit). It never writes to main.
-# The Overpass API is not reachable from the Claude build environment, so the fetch runs here.
+# The OSM extract is not reachable from the Claude build environment, so the fetch runs here.
 name: osm-layers
 on:
   workflow_dispatch:
@@ -25,8 +25,23 @@ jobs:
           echo
           echo "--- overpass CORS"
           curl -sS -m 30 -D - -o /dev/null "https://overpass-api.de/api/status" -H "Origin: https://harelrynar.github.io" | head -20
+      - name: Download and pre-filter the OSM extract (Geofabrik, updated daily)
+        run: |
+          sudo apt-get install -y -q osmium-tool > /dev/null
+          pip install -q osmium
+          curl -sS -L -m 900 -o il.osm.pbf https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf
+          ls -la il.osm.pbf
+          osmium tags-filter il.osm.pbf \
+            w/power=line,minor_line w/aerialway \
+            nwr/man_made=mast,tower,communications_tower,chimney,crane nwr/generator:source=wind \
+            nwr/landuse=residential,commercial,retail,industrial \
+            nwr/amenity=school,university,college,hospital,marketplace,bus_station \
+            nwr/leisure=stadium,water_park nwr/shop=mall nwr/tourism=theme_park,zoo nwr/natural=beach nwr/railway=station \
+            nwr/building:levels nwr/height \
+            -o filtered.osm.pbf
+          ls -la filtered.osm.pbf
       - name: Build
-        run: python3 beta/1.8/tools/osm_build.py osm-out data/basemap.json
+        run: python3 beta/1.8/tools/osm_build.py osm-out data/basemap.json --pbf filtered.osm.pbf
       - name: Publish to osm-data
         run: |
           cd osm-out

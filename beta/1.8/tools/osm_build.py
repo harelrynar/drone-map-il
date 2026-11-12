@@ -9,7 +9,9 @@ downloads the cells it is looking at:
   <out>/obs/<cell>.json       {"lines": [...], "pts": [...]}     power lines, masts, turbines...
   <out>/pop/<cell>.json       {"built": [...], "crowd": [...]}   built-up polygons, crowd places
 
-usage: osm_build.py <out_dir> <basemap.json> [--from-cache <dir>]
+usage: osm_build.py <out_dir> <basemap.json> --pbf <extract.osm.pbf>     (preferred: Geofabrik extract, needs `pip install osmium`)
+       osm_build.py <out_dir> <basemap.json>                            (Overpass API – slow and rate-limited)
+       osm_build.py <out_dir> <basemap.json> --from-cache <dir>         (tests)
 Data (c) OpenStreetMap contributors, ODbL.
 """
 import json, math, os, sys, time, urllib.parse, urllib.request
@@ -83,6 +85,82 @@ def fetch(kind, cache=None):
         os.makedirs(cache, exist_ok=True)
         json.dump(out, open(os.path.join(cache, kind + ".json"), "w"))
     return out
+
+
+# ---------- OSM extract (.osm.pbf) ----------
+MM = ("mast", "tower", "communications_tower", "chimney", "crane")
+LANDUSE = ("residential", "commercial", "retail", "industrial")
+AERIAL = ("cable_car", "gondola", "chair_lift", "mixed_lift", "zip_line", "goods")
+
+
+def kinds_of(t):
+    """Which of the raw lists a point-like element belongs to (same rules as the Overpass queries)."""
+    out = []
+    if t.get("man_made") in MM or (t.get("power") == "generator" and t.get("generator:source") == "wind"):
+        out.append("pts")
+    if "building" in t:
+        h, lv = num(t.get("height")), num(t.get("building:levels"))
+        if (h is not None and h >= 45) or (lv is not None and lv >= 15):
+            out.append("tall")
+    if (t.get("amenity") in ("school", "university", "college", "hospital", "marketplace", "bus_station")
+            or t.get("leisure") in ("stadium", "water_park") or t.get("shop") == "mall"
+            or t.get("tourism") in ("theme_park", "zoo") or t.get("natural") == "beach" or t.get("railway") == "station"):
+        out.append("crowd")
+    return out
+
+
+def read_pbf(path):
+    import osmium
+    raw = {k: [] for k in QUERIES}
+    s, w, n, e = BBOX
+
+    def inside(lat, lon):
+        return s - 0.3 <= lat <= n + 0.3 and w - 0.3 <= lon <= e + 0.3
+
+    class H(osmium.SimpleHandler):
+        def node(self, o):
+            t = dict(o.tags)
+            ks = kinds_of(t) if t else []
+            if ks and o.location.valid() and inside(o.location.lat, o.location.lon):
+                el = {"type": "node", "id": o.id, "lat": o.location.lat, "lon": o.location.lon, "tags": t}
+                for k in ks:
+                    raw[k].append(el)
+
+        def way(self, o):
+            t = o.tags
+            if t.get("power") in ("line", "minor_line") or t.get("aerialway") in AERIAL:
+                g = [{"lat": nd.location.lat, "lon": nd.location.lon} for nd in o.nodes if nd.location.valid()]
+                if len(g) >= 2 and inside(g[0]["lat"], g[0]["lon"]):
+                    raw["lines"].append({"type": "way", "id": o.id, "tags": dict(t), "geometry": g})
+
+        def area(self, o):          # closed ways and multipolygon relations
+            t = dict(o.tags)
+            lu = t.get("landuse") in LANDUSE
+            ks = kinds_of(t)
+            if not lu and not ks:
+                return
+            typ = "way" if o.from_way() else "relation"
+            rings = []
+            for ring in o.outer_rings():
+                pts = [(nd.lon, nd.lat) for nd in ring if nd.location.valid()]
+                if len(pts) >= 4:
+                    rings.append(pts)
+            if not rings or not inside(rings[0][0][1], rings[0][0][0]):
+                return
+            if lu:
+                for i, pts in enumerate(rings):
+                    raw["built"].append({"type": "way", "id": f"{typ[0]}{o.orig_id()}_{i}", "tags": t,
+                                         "geometry": [{"lat": la, "lon": lo} for lo, la in pts]})
+            if ks:
+                big = max(rings, key=len)
+                lats = [p[1] for p in big]; lons = [p[0] for p in big]
+                el = {"type": typ, "id": o.orig_id(), "tags": t,
+                      "center": {"lat": (min(lats) + max(lats)) / 2, "lon": (min(lons) + max(lons)) / 2}}
+                for k in ks:
+                    raw[k].append(el)
+
+    H().apply_file(path, locations=True)
+    return raw
 
 
 # ---------- geometry ----------
@@ -400,10 +478,15 @@ def build(raw, cells):
 def main():
     out, basemap = sys.argv[1], sys.argv[2]
     cache = sys.argv[4] if len(sys.argv) > 4 and sys.argv[3] == "--from-cache" else None
+    pbf = sys.argv[4] if len(sys.argv) > 4 and sys.argv[3] == "--pbf" else None
     cells = wanted_cells(load_country_rings(basemap))
     print(len(cells), "cells", flush=True)
     raw, errors = {}, {}
-    for kind in QUERIES:
+    if pbf:
+        raw = read_pbf(pbf)
+        for kind in QUERIES:
+            print(kind, len(raw[kind]), "elements", flush=True)
+    for kind in ([] if pbf else QUERIES):
         try:
             raw[kind] = fetch(kind, cache)
             print(kind, len(raw[kind]), "elements total", flush=True)
@@ -416,7 +499,7 @@ def main():
     os.makedirs(os.path.join(out, "obs"), exist_ok=True)
     os.makedirs(os.path.join(out, "pop"), exist_ok=True)
     index = {"v": 1, "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "cellDeg": CELL, "bbox": BBOX,
-             "counts": counts, "errors": errors, "source": "OpenStreetMap contributors (ODbL), via Overpass API", "cells": {}}
+             "counts": counts, "errors": errors, "source": "OpenStreetMap contributors (ODbL), via " + ("Geofabrik extract" if pbf else "Overpass API"), "cells": {}}
     total = 0
     for c in sorted(cells):
         o, p = obs[c], pop[c]
