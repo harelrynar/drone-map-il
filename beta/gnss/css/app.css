@@ -224,3 +224,17 @@ body.sheet-open .gnss-pill{display:none}
 .gnss-list{list-style:none;padding:0}
 .gnss-list .linkish{display:inline-flex;gap:6px;align-items:center}
 .gnss-legend{columns:1}
+
+/* GNSS button = view switch */
+.gnss-pill{cursor:pointer}
+.gnss-pill.p-off i{background:#5f6b76}
+.gnss-pill.active{background:var(--ink);color:#fff}
+.gnss-pill.active time{color:#c5ccd3}
+.gnss-pill.active span{color:#fff}
+.gnss-pill.active.p-ok i{background:#3ddc97}.gnss-pill.active.p-jam i{background:#fff}
+.gnss-pill em{font-style:normal;font-weight:700;opacity:.8;margin-left:2px}
+.gnss-info{position:fixed;z-index:950;left:12px;top:calc(var(--top-h) + var(--safe-t) + 56px);width:36px;height:36px;border-radius:50%;border:0;background:#fff;box-shadow:var(--shadow);font:italic 800 16px Georgia,serif;color:var(--ink)}
+@media (min-width:821px){[dir=rtl] .gnss-info{left:58px}}
+.ribbon:not([hidden]) ~ .gnss-info{top:calc(var(--top-h) + var(--safe-t) + 88px)}
+body.sheet-open .gnss-info{display:none}
+@media (max-width:820px){.banner:not([hidden]) ~ .gnss-info{top:auto;bottom:calc(80px + var(--safe-b))}}

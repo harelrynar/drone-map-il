@@ -40,6 +40,8 @@ window.GNSS = (function () {
         "חשד להונאה: קפיצת מיקום שלא אפשרית פיזית בין שתי דגימות, או פער של יותר מ-{alt} רגל בין גובה ה-GNSS לגובה הברומטרי. זה סימן עקיף בלבד.",
         "תא שבו נפגע מטוס יחיד מסומן בקו מקווקו (ביטחון נמוך)."
       ],
+      modeOn: "הצג שיבושי GNSS בלבד", modeOff: "סגור תצוגת GNSS והחזר שכבות",
+      modeHint: "תצוגת GNSS בלבד · שכבות רגילות דרך \"שכבות\"",
       refresh: "רענן עכשיו", showLayer: "הצג את השכבה במפה", here: "GNSS בנקודה", zoom: "הצג במפה",
       legend: "מקרא", counts: "{d} תאים משובשים · {n} מטוסים נדגמו", min: "דק'"
     },
@@ -65,6 +67,8 @@ window.GNSS = (function () {
         "Suspected spoofing: a physically impossible position jump between two samples, or more than {alt} ft between GNSS and barometric altitude. Indirect evidence only.",
         "A cell where a single aircraft was affected is drawn dashed (low confidence)."
       ],
+      modeOn: "Show GNSS interference only", modeOff: "Close GNSS view and restore layers",
+      modeHint: "GNSS view only · add regular layers via \"Layers\"",
       refresh: "Refresh now", showLayer: "Show layer on map", here: "GNSS at this point", zoom: "Show on map",
       legend: "Legend", counts: "{d} cells affected · {n} aircraft sampled", min: "min"
     }
@@ -271,9 +275,14 @@ window.GNSS = (function () {
     el.hidden = false;
     const bad = badCells().length;
     const st = !S.on ? "off" : S.error && (!S.lastOk || !obs.size) ? "err" : !S.lastOk ? "load" : worst();
-    el.className = "gnss-pill p-" + st + (S.error ? " stale" : "");
-    const txt = !S.on ? "—" : st === "err" ? "!" : st === "load" ? "…" : bad ? String(bad) : "✓";
-    el.innerHTML = `<i></i><b>${esc(t("pill"))}</b><span>${esc(txt)}</span>${S.lastOk && S.on ? `<time>${hhmm(S.lastOk)}</time>` : ""}`;
+    el.className = "gnss-pill p-" + st + (S.on ? " active" : "") + (S.on && S.error ? " stale" : "");
+    el.setAttribute("aria-pressed", S.on ? "true" : "false");
+    el.title = t(S.on ? "modeOff" : "modeOn");
+    const txt = st === "err" ? "!" : st === "load" ? "…" : bad ? String(bad) : "✓";
+    el.innerHTML = S.on
+      ? `<i></i><b>${esc(t("pill"))}</b><span>${esc(txt)}</span>${S.lastOk ? `<time>${hhmm(S.lastOk)}</time>` : ""}<em>✕</em>`
+      : `<i></i><b>${esc(t("pill"))}</b>`;
+    const info = document.getElementById("gnssInfo"); if (info) info.hidden = !S.on;
   }
 
   /* ---------- panels ---------- */
@@ -359,9 +368,33 @@ window.GNSS = (function () {
     return `<h3>${esc(t("here"))}</h3>${cellCard(id, RANK[cellInfo(id).st] >= 2)}`;
   }
   function setOn(v) {
-    S.on = !!v; app.store.set("gnssOn", S.on);
+    S.on = !!v;
     if (window.Track) Track("layer-toggle", { layer: "gnss", on: S.on });
     if (S.on) { schedule(); tick(true); } else { clearInterval(timer); timer = null; draw(); pill(); }
+  }
+  /* The GNSS button is a view switch: first press hides the regular airspace layers and shows
+     only the interference cells; second press removes the cells and brings the layers back.
+     While it is on, the user can still switch regular layers on from the "Layers" panel. */
+  function toggleMode() {
+    const st = app.state;
+    if (!S.on) {
+      S.saved = Object.assign({}, st.layersOn);
+      app.store.set("gnssSavedLayers", S.saved);
+      Object.keys(st.layersOn).forEach(k => st.layersOn[k] = false);
+      app.drawZones();
+      setOn(true);
+      app.toast(t("modeHint"));
+    } else {
+      setOn(false);
+      restoreLayers();
+      if (app.sheetKind() === "gnss") app.closeSheet();
+    }
+    if (window.Track) Track("gnss-mode", { on: S.on });
+  }
+  function restoreLayers() {
+    const saved = S.saved || app.store.get("gnssSavedLayers", null);
+    if (saved) { Object.assign(app.state.layersOn, saved); app.store.set("layers", app.state.layersOn); app.drawZones(); }
+    S.saved = null; app.store.set("gnssSavedLayers", null);
   }
   function schedule() { clearInterval(timer); timer = setInterval(() => tick(false), CFG.pollSec * 1000); }
   function onClick(act, b) {
@@ -376,9 +409,11 @@ window.GNSS = (function () {
     map.createPane("p_gnss").style.zIndex = CFG.paneZ || 312;          // normal / no-data cells: under the zones
     map.createPane("p_gnssTop").style.zIndex = CFG.paneTopZ || 372;    // affected cells: above the zones
     group = L.layerGroup().addTo(map);
-    S.on = app.store.get("gnssOn", CFG.on !== false);
+    S.on = false;
+    restoreLayers(); // the page was reloaded while the GNSS view was on – bring the regular layers back
     summarize(); draw(); pill();
-    const el = document.getElementById("gnssPill"); if (el) el.onclick = openPanel;
+    const el = document.getElementById("gnssPill"); if (el) el.onclick = toggleMode;
+    const info = document.getElementById("gnssInfo"); if (info) info.onclick = openPanel;
     map.on("zoomend", draw);
     document.addEventListener("visibilitychange", () => { if (!document.hidden && S.on && (!S.lastTry || Date.now() - S.lastTry > CFG.pollSec * 1000)) tick(true); });
     if (S.on) { schedule(); tick(true); }

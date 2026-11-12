@@ -838,6 +838,6 @@
       toast("Data load error: " + err.message);
     }
   }
-  window.__app = { map, openPoint, focusZone, state, openSheet, toast, store, sheetKind: () => sheetKind };
+  window.__app = { map, openPoint, focusZone, state, drawZones, closeSheet, openSheet, toast, store, sheetKind: () => sheetKind };
   init().then(() => { if (window.GNSS) GNSS.init(window.__app); });
 })();
