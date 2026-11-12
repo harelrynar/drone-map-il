@@ -1,36 +1,25 @@
-# Builds the OSM-based layers (obstacles, built-up areas, crowd places) for the 1.8 test version
-# and publishes them to the `osm-data` branch (one rolling commit). It never writes to main:
-# the files under beta/1.8/data/osm/ are a copy of that branch, committed by hand (see beta/README.md).
-# The OSM extract is not reachable from the Claude build environment, so the fetch runs here.
+# Rebuilds the OSM-based layers of the map (obstacles, built-up areas, crowd places) once a week
+# and commits them to data/osm/ on main. The OSM extract is not reachable from the Claude build
+# environment, so the fetch runs here. Script: pipeline/osm_build.py
 name: osm-layers
 on:
   workflow_dispatch:
-  push:
-    branches: [main, beta-1.8]
-    paths:
-      - beta/1.8/tools/osm_build.py
-      - .github/workflows/osm-layers.yml
+  schedule:
+    - cron: "17 1 * * 1"        # Mondays 01:17 UTC
 permissions:
   contents: write
+concurrency: osm-layers
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Live API checks (shape of the responses the site relies on)
-        continue-on-error: true
-        run: |
-          echo "--- open-meteo elevation"
-          curl -sS -m 30 -D - "https://api.open-meteo.com/v1/elevation?latitude=31.7780,32.0853,31.5590&longitude=35.2350,34.7818,35.4730" -H "Origin: https://harelrynar.github.io" | head -40
-          echo
-          echo "--- overpass CORS"
-          curl -sS -m 30 -D - -o /dev/null "https://overpass-api.de/api/status" -H "Origin: https://harelrynar.github.io" | head -20
       - name: Download and pre-filter the OSM extract (Geofabrik, updated daily)
         run: |
           sudo apt-get install -y -q osmium-tool > /dev/null
           pip install -q osmium
-          curl -sS -L -m 900 -o il.osm.pbf https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf
+          curl -sS -L -f -m 900 -o il.osm.pbf https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf
           ls -la il.osm.pbf
           osmium tags-filter il.osm.pbf \
             w/power=line,minor_line w/aerialway \
@@ -42,15 +31,24 @@ jobs:
             -o filtered.osm.pbf
           ls -la filtered.osm.pbf
       - name: Build
-        run: python3 beta/1.8/tools/osm_build.py osm-out data/basemap.json --pbf filtered.osm.pbf
-      - name: Publish to osm-data
+        run: python3 pipeline/osm_build.py osm-out data/basemap.json --pbf filtered.osm.pbf
+      - name: Sanity check (never publish a broken or shrunken data set)
         run: |
-          cd osm-out
-          ls | head; du -sh .
-          git init -q
+          python3 - <<'PY'
+          import json, sys
+          new = json.load(open("osm-out/index.json"))["counts"]
+          old = json.load(open("data/osm/index.json"))["counts"]
+          print("old", old); print("new", new)
+          for k in ("lines", "minor", "pts", "built", "crowd"):
+              if new[k] < 0.7 * old[k]:
+                  sys.exit(f"{k}: {old[k]} -> {new[k]} (more than 30% fewer) - not publishing")
+          PY
+      - name: Commit to main
+        run: |
+          rm -rf data/osm && mv osm-out data/osm
           git config user.name "osm-layers"
           git config user.email "actions@users.noreply.github.com"
-          git checkout -q --orphan data
-          git add -A
+          git add data/osm
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -q -m "OSM layers $(date -u +%F)"
-          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:osm-data
+          git push -q origin HEAD:main || { git pull -q --rebase origin main && git push -q origin HEAD:main; }

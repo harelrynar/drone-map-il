@@ -2,7 +2,7 @@
  * מכשולים, שטח בנוי וריכוזי קהל (1.8) – מתוך OpenStreetMap.
  * Obstacles, built-up areas and crowd places, from OpenStreetMap (ODbL).
  *
- * הנתונים נבנים מראש (tools/osm_build.py ב-GitHub Actions) לרשת תאים של 0.25°, כך שהטלפון
+ * הנתונים נבנים מראש (pipeline/osm_build.py ב-GitHub Actions, פעם בשבוע) לרשת תאים של 0.25°, כך שהטלפון
  * מוריד רק את התאים שמוצגים. אין קריאה חיה ל-OSM מהדפדפן.
  *
  * Osm.init(map, { lang, on })   · Osm.set(kind, on)   kind: "obs" | "built" | "crowd"

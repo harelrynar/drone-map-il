@@ -13,6 +13,7 @@ usage: osm_build.py <out_dir> <basemap.json> --pbf <extract.osm.pbf>     (prefer
        osm_build.py <out_dir> <basemap.json>                            (Overpass API – slow and rate-limited)
        osm_build.py <out_dir> <basemap.json> --from-cache <dir>         (tests)
 Data (c) OpenStreetMap contributors, ODbL.
+Workflow: .github/workflows/osm-layers.yml (weekly) – commits the result to data/osm/ on main.
 """
 import json, math, os, sys, time, urllib.parse, urllib.request
 

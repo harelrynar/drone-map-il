@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.8",
+   "date": "2026-11-12",
+   "he": "חמישה פיצ'רים חדשים בחלון הנקודה ובמפה: גובה הקרקע בנקודה וגבולות האזורים במטרים מעל הקרקע (התשובה מתחשבת בגובה הטיסה שנבחר); מכשולים בטווח 300 מ' – קווי מתח, אנטנות, ארובות, עגורנים, טורבינות ומבנים גבוהים; שטח בנוי וריכוזי קהל; כלי טיס נמוכים שמשדרים ADS-B; ולחצן \"למי מתקשרים?\" עם חיוג בלחיצה ונוסח מוכן לתיאום. מקורות: Open-Meteo, OpenStreetMap, ADS-B קהילתי.",
+   "en": "Five new features: ground elevation and zone limits in metres above ground (the answer takes the selected flight height into account); obstacles within 300 m – power lines, masts, chimneys, cranes, turbines and tall structures; built-up areas and crowd places; low-level ADS-B traffic; and a \"Who do I call?\" button with tap-to-dial and a ready coordination text. Sources: Open-Meteo, OpenStreetMap, community ADS-B."
+  },
+  {
    "version": "1.7",
    "date": "2026-11-12",
    "he": "נתונים מטאורולוגיים: בחלון של כל נקודה יש לחצן \"נתונים מטאורולוגיים\" שמציג רוח וכיוון, משבים, רוח ב-100 מ', גשם (מ\"מ/שעה), טמפרטורה, ראות, בסיס ענן משוער, זריחה ושקיעה ותחזית קצרה ל-3 שעות, עם מעבר בין knots ל-m/s וחותמת זמן. המקור: Open-Meteo (ערכי מודל לנקודה).",

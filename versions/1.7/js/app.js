@@ -28,11 +28,7 @@
     overlays: [], ovlState: store.get("ovl", {}), ovlLayers: {},
     newIds: new Set(),
     checkMarker: null, myMarker: null, myAcc: null, myPos: null,
-    wxUnit: store.get("wxUnit", "kn"), wxOpenAt: null,  // weather panel: speed unit, point it is open for
-    /* 1.8 */
-    xl: Object.assign({ obs: true, built: true, crowd: true, traffic: true }, store.get("xl", {})),   // extra layers on/off
-    wcOpenAt: null,          // point the "who do I call" panel is open for
-    pt: null                 // async extras of the open point: { lat, lon, elev, osm, here, near }
+    wxUnit: store.get("wxUnit", "kn"), wxOpenAt: null   // weather panel: speed unit, point it is open for
   };
   const T = k => (I18N[state.lang] && I18N[state.lang][k]) ?? I18N.he[k] ?? k;
   const L_ = o => o == null ? "" : (typeof o === "string" ? o : (o[state.lang] ?? o.he ?? o.en ?? ""));
@@ -239,14 +235,6 @@
       .sort((a, b) => a.d - b.d);
   }
 
-  /* skip: ids of zones whose floor is above the selected flight height at this point (known only once the ground elevation arrives) */
-  function verdictOf(here, near, skip) {
-    const sev = Math.max(0, ...here.filter(f => !(skip && skip.has(f.properties.id))).map(f => {
-      const s = CFG.layers[layerKey(f)].severity;
-      return timeStatus(f) === "active" ? s : Math.min(s, 2);
-    }), near.length ? 2 : 0);
-    return sev >= 3 ? ["no", T("verdictNo")] : sev === 2 ? ["caution", T("verdictCaution")] : ["ok", T("verdictInfo")];
-  }
   let rerender = false; // re-drawing the same panel (language switch, watch toggle) – don't count again
   function openPoint(lat, lon, focusId) {
     state.lastPoint = [lat, lon, focusId];
@@ -257,7 +245,11 @@
     }).addTo(map);
     const here = zonesAt(lat, lon);
     const near = airfieldsNear(lat, lon);
-    const v = verdictOf(here, near);
+    const sev = Math.max(0, ...here.map(f => {
+      const s = CFG.layers[layerKey(f)].severity;
+      return timeStatus(f) === "active" ? s : Math.min(s, 2);
+    }), near.length ? 2 : 0);
+    const v = sev >= 3 ? ["no", T("verdictNo")] : sev === 2 ? ["caution", T("verdictCaution")] : ["ok", T("verdictInfo")];
     here.sort((a, b) => (b.properties.id === focusId) - (a.properties.id === focusId) || CFG.layers[layerKey(b)].severity - CFG.layers[layerKey(a)].severity);
 
     const watched = state.watch.some(w => Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4);
@@ -266,13 +258,11 @@
         <div class="v-title">${esc(v[1])}</div>
         <div class="v-sub">${esc(T("verdictInfoSub"))}</div>
       </div>
-      ${whoCallSlot(lat, lon, here, near)}
       <div class="pt-row">
         <span class="mono">${fmtCoord(lat, lon)}</span>
         <button class="mini" data-act="copy" data-v="${fmtCoord(lat, lon)}">⧉</button>
         ${CFG.features.watchPoints ? `<button class="mini" data-act="${watched ? "unwatch" : "watch"}" data-lat="${lat}" data-lon="${lon}">${watched ? "★ " + esc(T("watched")) : "☆ " + esc(T("watch"))}</button>` : ""}
       </div>
-      ${X.terrain ? `<div id="terrBox" class="terr">${Terrain.loadingHtml(xo())}</div>` : ""}
       ${weatherSlot(lat, lon)}
       ${filterSummary()}
       <h3>${esc(T("zonesHere"))} <small>(${here.length})</small></h3>
@@ -283,14 +273,11 @@
         `<li><button class="linkish" data-act="focus" data-id="${esc(x.f.properties.id)}">${esc(L_(x.f.properties.name))}</button> · ${(x.d / 1000).toFixed(1)} ${esc(T("km"))}${contactInline(x.f.properties)}</li>`
       ).join("") + "</ul>";
     }
-    if (X.osm) html += `<div id="pplBox" class="xbox">${Osm.peopleHtml(null, xo())}</div><div id="obsBox" class="xbox">${Osm.obstaclesHtml(null, xo())}</div>`;
-    if (X.traffic) html += `<div id="tfcBox" class="xbox">${Traffic.nearHtml(lat, lon, xo())}</div>`;
     html += generalNoticesHtml();
     html += vlosHtml();
     html += `<p class="disclaimer">${esc(T("disclaimer"))}</p>`;
     openSheet(html, "point");
     if (wxIsOpenFor(lat, lon)) showWeather(lat, lon); else state.wxOpenAt = null;
-    loadPointExtras(lat, lon, here, near, v[0]);
     if (!rerender) Track("point-check", { verdict: v[0], zones: here.length, top: here[0] ? layerKey(here[0]) : "none", mine: !!isMine });
   }
 
@@ -341,152 +328,6 @@
     showWeather(+btn.dataset.lat, +btn.dataset.lon);
   }
 
-
-  /* ---------- 1.8: terrain, obstacles, built-up, traffic, who-to-call ---------- */
-  const X = {
-    terrain: !!(CFG.features.terrain && window.Terrain),
-    osm: !!(CFG.features.osm && window.Osm),
-    traffic: !!(CFG.features.traffic && window.Traffic),
-    whoCall: !!(CFG.features.whoCall && window.WhoCall)
-  };
-  const xo = () => ({ lang: state.lang, esc, L_, layers: CFG.layers, altM: state.altM });
-  const samePt = (a, lat, lon) => !!(a && Math.abs(a[0] - lat) < 1e-6 && Math.abs(a[1] - lon) < 1e-6);
-
-  function nearestCity(lat, lon) {
-    let best = null, bd = 6000;
-    ((state.basemap && state.basemap.cities) || []).forEach(c => {
-      const d = Geo.distanceM(lat, lon, c.c[1], c.c[0]);
-      if (d < bd) { bd = d; best = c; }
-    });
-    return best ? (state.lang === "he" ? best.he : best.en) : "";
-  }
-  function whoCallResult(here, near) {
-    return WhoCall.build(here, near, { layerKey, timeStatus, severity: k => (CFG.layers[k] || {}).severity || 0 });
-  }
-  function whoCallOpts(lat, lon, res) {
-    const zones = [];
-    res.steps.forEach(s => s.zones.forEach(z => { const n = z.designator || L_(z.name); if (!zones.includes(n)) zones.push(n); }));
-    const elev = state.pt && samePt([state.pt.lat, state.pt.lon], lat, lon) ? state.pt.elev : null;
-    return Object.assign(xo(), {
-      open: samePt(state.wcOpenAt, lat, lon),
-      brief: WhoCall.briefText({ coords: fmtCoord(lat, lon), city: nearestCity(lat, lon), zones: zones.slice(0, 6), altM: state.altM, groundM: elev }, state.lang)
-    });
-  }
-  // zones that start above the selected flight height (pt.above) need no coordination for this flight
-  const wcZones = pt => pt.above && pt.above.size ? pt.here.filter(f => !pt.above.has(f.properties.id)) : pt.here;
-  function whoCallInner(lat, lon, here, near) {
-    const res = whoCallResult(here, near);
-    return WhoCall.buttonHtml(res, whoCallOpts(lat, lon, res));
-  }
-  function whoCallSlot(lat, lon, here, near) {
-    return X.whoCall ? `<div id="wcSlot">${whoCallInner(lat, lon, here, near)}</div>` : "";
-  }
-  function toggleWhoCall(btn) {
-    const box = $("#wcBox"), pt = state.pt; if (!box || !pt) return;
-    const open = box.hidden;
-    btn.setAttribute("aria-expanded", String(open));
-    const caret = btn.querySelector(".wx-caret"); if (caret) caret.textContent = open ? "▴" : "▾";
-    box.hidden = !open;
-    state.wcOpenAt = open ? [pt.lat, pt.lon] : null;
-    if (open) { drawWhoCall(); Track("whocall-open"); }
-  }
-  function drawWhoCall() {
-    const box = $("#wcBox"), pt = state.pt; if (!box || box.hidden || !pt) return;
-    const res = whoCallResult(wcZones(pt), pt.near);
-    box.innerHTML = WhoCall.panelHtml(res, whoCallOpts(pt.lat, pt.lon, res));
-  }
-
-  /* NOTAMs whose Q-code is QOB.. are obstacles (cranes, masts) – listed with the OSM obstacles */
-  function notamObstaclesHtml(lat, lon) {
-    const R = (window.Osm && Osm.cfg.nearObstacleM) || 300;
-    const items = state.features.filter(f => {
-      const p = f.properties, raw = p.notam && p.notam.raw;
-      if (!raw || !/\/QOB/.test(raw) || timeStatus(f) === "inactive") return false;
-      if (Geo.contains(f, lat, lon)) return true;
-      const c = Geo.featureCenter(f);
-      return Geo.distanceM(lat, lon, c[0], c[1]) <= R;
-    });
-    if (!items.length) return "";
-    return `<ul class="obs">${items.map(f => `<li class="pt nt"><i></i><span><b>${state.lang === "he" ? "מכשול לפי נוטאם" : "Obstacle per NOTAM"}</b> <button class="linkish" data-act="focus" data-id="${esc(f.properties.id)}">${esc(L_(f.properties.name))}</button></span></li>`).join("")}</ul>`;
-  }
-
-  let ptSeq = 0;
-  function loadPointExtras(lat, lon, here, near, verdict) {
-    const seq = ++ptSeq;
-    const keep = state.pt && samePt([state.pt.lat, state.pt.lon], lat, lon) ? state.pt : {};
-    state.pt = { lat, lon, here, near, verdict, elev: keep.elev ?? null, osm: keep.osm ?? null };
-    drawPointExtras();
-    const live = () => seq === ptSeq && sheetKind === "point";
-    if (X.terrain) Terrain.get(lat, lon).then(e => { if (!live()) return; state.pt.elev = e; state.pt.elevErr = false; drawPointExtras(); })
-      .catch(e => { console.warn(e); if (!live()) return; state.pt.elevErr = true; drawPointExtras(); });
-    if (X.osm) Osm.at(lat, lon).then(r => { if (!live()) return; state.pt.osm = r; drawPointExtras(); })
-      .catch(e => { console.warn(e); if (!live()) return; state.pt.osm = { error: true }; drawPointExtras(); });
-  }
-  function drawPointExtras() {
-    const pt = state.pt; if (!pt || sheetKind !== "point") return;
-    const o = xo();
-    const tb = $("#terrBox");
-    if (tb) tb.innerHTML = pt.elev != null ? Terrain.boxHtml(pt.elev, o) : pt.elevErr ? Terrain.errorHtml(o) : Terrain.loadingHtml(o);
-    // zones whose floor (sea-level referenced) is above the selected flight height here, with a margin for the elevation model
-    const above = new Set();
-    if (pt.elev != null && state.altM != null) pt.here.forEach(f => {
-      const lo = f.properties.lower;
-      if (!lo || !(lo.ref === "AMSL" || lo.ref === "FL" || lo.u === "FL")) return;
-      const a = Terrain.aglM(lo, pt.elev);
-      if (a != null && a > state.altM + ((CFG.terrain && CFG.terrain.marginM) || 30)) above.add(f.properties.id);
-    });
-    o.above = pt.above = above;
-    const ws = $("#wcSlot");
-    if (ws && above.size) ws.innerHTML = whoCallInner(pt.lat, pt.lon, wcZones(pt), pt.near);
-    const vd0 = $("#sheetBody .verdict");
-    if (vd0 && pt.elev != null) {
-      const v2 = verdictOf(pt.here, pt.near, above);
-      pt.verdict = v2[0];
-      vd0.className = "verdict v-" + v2[0];
-      vd0.querySelector(".v-title").textContent = v2[1];
-      vd0.querySelector(".v-sub").textContent = (above.size ? Terrain.t(state.lang, above.size === 1 ? "skipped1" : "skipped").replace("{n}", above.size).replace("{a}", state.altM) + " " : "") + T("verdictInfoSub");
-    }
-    if (pt.elev != null) document.querySelectorAll("#sheetBody .agl-slot").forEach(el => {
-      const f = state.features.find(x => x.properties.id === el.dataset.zid); if (!f) return;
-      const html = Terrain.zoneHtml(f.properties, pt.elev, o);
-      el.innerHTML = html;
-      const note = el.parentNode.querySelector(".amsl-note"); if (note && html) note.hidden = true;   // replaced by real numbers
-    });
-    if (X.osm) {
-      const ob = $("#obsBox"), pb = $("#pplBox");
-      if (ob) ob.innerHTML = Osm.obstaclesHtml(pt.osm, o).replace("</h3>", "</h3>" + notamObstaclesHtml(pt.lat, pt.lon));
-      if (pb) pb.innerHTML = Osm.peopleHtml(pt.osm, o);
-      // a point inside a built-up area is never "no restrictions found"
-      const vd = $("#sheetBody .verdict");
-      if (vd && pt.osm && pt.osm.built && pt.verdict === "ok") {
-        vd.className = "verdict v-caution";
-        vd.querySelector(".v-title").textContent = T("verdictCaution");
-        vd.querySelector(".v-sub").textContent = Osm.t(state.lang, "inBuilt") + ". " + vd.querySelector(".v-sub").textContent;
-      }
-    }
-    const tf = $("#tfcBox"); if (tf && X.traffic) tf.innerHTML = Traffic.nearHtml(pt.lat, pt.lon, o);
-    drawWhoCall();   // the brief includes the ground elevation once it is known
-  }
-  function extraLayersHtml() {
-    if (!X.osm && !X.traffic) return "";
-    const he = state.lang === "he";
-    const z = k => Osm.t(state.lang, "zoomHint").replace("{z}", Osm.cfg.minZoom[k]);
-    const row = (k, sw, label, hint) => `<label class="lrow"><input type="checkbox" data-xl="${k}" ${state.xl[k] ? "checked" : ""}>
-        <i class="sw xsw ${sw}"></i><span>${esc(label)}</span><small>${esc(hint)}</small></label>`;
-    let h = `<h3>${he ? "שכבות נוספות" : "More layers"} <em class="newtag">${he ? "חדש ב-1.8" : "new in 1.8"}</em></h3><div class="lrows">`;
-    if (X.osm) h += row("obs", "x-obs", he ? "מכשולים: קווי מתח, אנטנות, טורבינות" : "Obstacles: power lines, masts, turbines", z("lines"))
-      + row("built", "x-built", he ? "שטח בנוי" : "Built-up area", z("built"))
-      + row("crowd", "x-crowd", he ? "ריכוזי קהל: בתי ספר, קניונים, אצטדיונים…" : "Crowd places: schools, malls, stadiums…", z("crowd"));
-    if (X.traffic) h += row("traffic", "x-tfc", he ? "תנועה אווירית נמוכה (ADS-B)" : "Low-level traffic (ADS-B)", he ? `מתחת ל-${Traffic.cfg.maxAltFt.toLocaleString()} רגל` : `below ${Traffic.cfg.maxAltFt.toLocaleString()} ft`);
-    return h + `</div><p class="fine">${he ? "מכשולים, שטח בנוי וריכוזי קהל מבוססים על OpenStreetMap ואינם מלאים. תנועה אווירית: רק מי שמשדר ADS-B, בעיכוב של דקה עד שתיים." : "Obstacles, built-up areas and crowd places come from OpenStreetMap and are incomplete. Traffic: ADS-B only, delayed by one to two minutes."}</p>`;
-  }
-  function setExtraLayer(k, v) {
-    state.xl[k] = v; store.set("xl", state.xl);
-    if (k === "traffic") { if (X.traffic) Traffic.set(v); } else if (X.osm) Osm.set(k, v);
-    Track("layer-toggle", { layer: "x-" + k, on: v });
-  }
-  function openTraffic() { openSheet(Traffic.listHtml(xo()), "traffic"); }
-
   function activeUnlocated(kind) {
     const t = nowT();
     return state.unlocated.filter(u => u.kind === kind && (!u.valid || !u.valid.to || new Date(u.valid.to) >= t) && (!u.valid || !u.valid.from || new Date(u.valid.from) <= t || state.showInactive));
@@ -524,8 +365,7 @@
     rows.push([T("status"), `<span class="st st-${st}">${esc(T(st))}</span>`]);
     if (p.lower || p.upper) {
       let lim = `<bdi>${esc(fmtLimit(p.lower))}</bdi> ← <bdi>${esc(fmtLimit(p.upper))}</bdi>`.replace("←", state.lang === "he" ? "←" : "→");
-      if (p.lower && (p.lower.ref === "AMSL")) lim += `<div class="note amsl-note">${esc(T("amslNote"))}</div>`;
-      if (X.terrain) lim += `<div class="agl-slot" data-zid="${esc(p.id)}"></div>`;
+      if (p.lower && (p.lower.ref === "AMSL")) lim += `<div class="note">${esc(T("amslNote"))}</div>`;
       rows.push([T("limits"), lim]);
     }
     if (!(key === "airfield" || key === "heliport")) rows.push([T("validity"), (v.from || v.to) ? `${esc(T("from"))} ${fmtTime(v.from) || "—"} ${esc(T("to"))} ${v.to ? fmtTime(v.to) : esc(T("permanent"))}` : esc(T("permanent"))]);
@@ -571,7 +411,7 @@
     document.body.classList.add("sheet-open");
   }
   function closeSheet() {
-    $("#sheet").hidden = true; sheetKind = null; state.wxOpenAt = null; state.wcOpenAt = null; state.pt = null; ptSeq++;
+    $("#sheet").hidden = true; sheetKind = null; state.wxOpenAt = null;
     document.body.classList.remove("sheet-open");
     if (state.checkMarker) { state.checkMarker.remove(); state.checkMarker = null; }
   }
@@ -589,15 +429,6 @@
       store.set("watch", state.watch); drawWatch(); rerender = true; openPoint(lat, lon); rerender = false;
     }
     if (act === "wx") toggleWeather(b);
-    if (act === "wc") toggleWhoCall(b);
-    if (act === "wcCopy" || act === "wcShare") {
-      const txt = ($("#wcBrief") || {}).textContent || "";
-      Track("whocall-brief", { how: act === "wcCopy" ? "copy" : "share" });
-      if (act === "wcShare" && navigator.share) navigator.share({ text: txt }).catch(() => {});
-      else { try { navigator.clipboard.writeText(txt).then(() => toast(WhoCall.t(state.lang, "copied"))).catch(() => {}); } catch (x) {} }
-    }
-    if (act === "terrRetry" && state.pt) { Terrain.get(state.pt.lat, state.pt.lon, true).catch(() => {}); rerender = true; openPoint(...state.lastPoint); rerender = false; }
-    if (act === "tfcGo") { map.setView([+b.dataset.lat, +b.dataset.lon], Math.max(map.getZoom(), 11)); }
     if (act === "wxUnit") { state.wxUnit = b.dataset.u === "ms" ? "ms" : "kn"; store.set("wxUnit", state.wxUnit); Track("weather-unit", { unit: state.wxUnit }); drawWeather(); }
     if (act === "wxRefresh" && state.wxOpenAt) showWeather(state.wxOpenAt[0], state.wxOpenAt[1], true);
     if (act === "focus" || act === "zoomto") focusZone(b.dataset.id);
@@ -611,10 +442,8 @@
     if (act === "coords") { const v = Geo.parseCoords($("#coordIn").value); if (!v) toast(T("badCoords")); else { map.setView(v, Math.max(map.getZoom(), 12)); openPoint(v[0], v[1]); } }
     if (act === "resetFilters") { state.altM = null; state.when = null; state.showInactive = false; persistFilters(); drawZones(); openFilters(); }
   });
-  $("#sheetBody").addEventListener("click", e => { const a = e.target.closest("[data-wc]"); if (a) Track("whocall-" + a.dataset.wc); });
   $("#sheetBody").addEventListener("change", e => {
     const t = e.target;
-    if (t.matches("[data-xl]")) setExtraLayer(t.dataset.xl, t.checked);
     if (t.matches("[data-ovl]")) Track("overlay-toggle", { id: t.dataset.ovl, on: t.checked });
     if (t.matches("[data-ovl]")) setOverlay(t.dataset.ovl, t.checked);
     if (t.matches("[data-layer]")) { Track("layer-toggle", { layer: t.dataset.layer, on: t.checked }); state.layersOn[t.dataset.layer] = t.checked; store.set("layers", state.layersOn); drawZones(); }
@@ -659,7 +488,7 @@
     if (!on) { if (state.ovlLayers[id]) { state.ovlLayers[id].remove(); } return; }
     if (!state.ovlLayers[id]) {
       try {
-        const r = await fetch((CFG.dataBase || "") + o.file); const blob = await r.blob();
+        const r = await fetch(o.file); const blob = await r.blob();
         state.ovlLayers[id] = L.imageOverlay(URL.createObjectURL(blob), o.bounds, { pane: "p_annex", opacity: st.opacity, interactive: false });
       } catch (e) { toast("Overlay load error"); return; }
     }
@@ -689,7 +518,7 @@
     }).join("");
     let html = `<h2>${esc(T("layers"))}</h2>
       <div class="lbtns"><button class="btn" data-act="allOn">✓ ${esc(T("selectAll"))}</button><button class="btn" data-act="allOff">✕ ${esc(T("clearAll"))}</button></div>
-      <div class="lrows">${rows}</div>` + extraLayersHtml() + overlaysHtml();
+      <div class="lrows">${rows}</div>` + overlaysHtml();
     const gen = activeUnlocated("general"), ad = activeUnlocated("ad"), oth = state.unlocated.filter(u => u.kind !== "general" && u.kind !== "ad");
     if (gen.length) html += `<h3>⚠ ${esc(T("generalNotices"))} <small>(${gen.length})</small></h3>` + gen.map(unlocatedItem).join("");
     if (ad.length) html += `<h3>${esc(T("adClosures"))} <small>(${ad.length})</small></h3>` + ad.map(unlocatedItem).join("");
@@ -878,7 +707,7 @@
       <p class="disclaimer">${esc(T("disclaimer"))}</p>
       <h3>${esc(T("legend"))}</h3><ul class="legend">${legend}</ul>
       <h3>${esc(T("sourcesTitle"))}</h3>
-      <ul class="near">${CFG.sources.aip.concat([CFG.sources.notam], CFG.sources.weather ? [CFG.sources.weather] : [], CFG.sources.extra || []).map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.he)}</a></li>`).join("")}</ul>
+      <ul class="near">${CFG.sources.aip.concat([CFG.sources.notam], CFG.sources.weather ? [CFG.sources.weather] : []).map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.he)}</a></li>`).join("")}</ul>
       ${m.aip && m.aip.edition ? `<p class="muted">${esc(m.aip.edition)}</p>` : ""}
       <p class="fsum">${esc(T("gaps"))}</p>
       ${crosscheckHtml()}
@@ -1028,14 +857,13 @@
   $("#btnLang").onclick = () => {
     state.lang = state.lang === "he" ? "en" : "he"; store.set("lang", state.lang); applyLang();
     Track("language", { to: state.lang });
-    if (X.traffic) Traffic.redraw();
-    const k = sheetKind; if (k === "layers") openLayers(); else if (k === "filters") openFilters(); else if (k === "check") openCheck(); else if (k === "news") openNews(); else if (k === "about") openAbout(); else if (k === "traffic") openTraffic(); else if (k === "point" && state.lastPoint) { rerender = true; openPoint(...state.lastPoint); rerender = false; }
+    const k = sheetKind; if (k === "layers") openLayers(); else if (k === "filters") openFilters(); else if (k === "check") openCheck(); else if (k === "news") openNews(); else if (k === "about") openAbout(); else if (k === "point" && state.lastPoint) { rerender = true; openPoint(...state.lastPoint); rerender = false; }
   };
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 
   /* ---------- load ---------- */
   async function getJSON(path) {
-    const r = await fetch((CFG.dataBase || "") + path + "?v=" + Date.now(), { cache: "no-store" });
+    const r = await fetch(path + "?v=" + Date.now(), { cache: "no-store" });
     if (!r.ok) throw new Error(path + " " + r.status);
     return r.json();
   }
@@ -1058,15 +886,6 @@
       console.error(err);
       toast("Data load error: " + err.message);
     }
-  }
-  if (X.osm) Osm.init(map, { on: { obs: state.xl.obs, built: state.xl.built, crowd: state.xl.crowd } });
-  if (X.traffic) {
-    const pill = $("#tfcPill");
-    if (pill) pill.onclick = openTraffic;
-    Traffic.init(map, {
-      lang: () => state.lang, on: state.xl.traffic, pill,
-      onUpdate: () => { if (sheetKind === "point") drawPointExtras(); else if (sheetKind === "traffic") openTraffic(); }
-    });
   }
   window.__app = { map, openPoint, focusZone, state };
   init();
