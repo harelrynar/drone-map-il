@@ -1,0 +1,35 @@
+name: gnss-probe
+on:
+  push:
+    branches: [gnss-probe]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in \
+            "https://api.airplanes.live/v2/point/31.4/35.05/160" \
+            "https://api.adsb.lol/v2/point/31.4/35.05/160" \
+            "https://opendata.adsb.fi/api/v2/lat/31.4/lon/35.05/dist/160" \
+            "https://api.adsb.one/v2/point/31.4/35.05/160" ; do
+            echo "=== $u"
+            curl -sS -m 20 -D /tmp/h -o /tmp/b -H "Origin: https://harelrynar.github.io" -H "User-Agent: Mozilla/5.0" "$u" || echo "CURL FAIL"
+            head -1 /tmp/h; grep -i "access-control\|content-type\|retry\|ratelimit" /tmp/h || echo "(no CORS headers)"
+            python3 - <<'PY'
+          import json
+          try:
+              j=json.load(open('/tmp/b')); ac=j.get('ac') or j.get('aircraft') or []
+              print('keys',list(j.keys())[:8],'n',len(ac),'now',j.get('now'))
+              from collections import Counter
+              print('types',Counter(a.get('type') for a in ac).most_common(6))
+              print('nac_p',sorted(Counter(a.get('nac_p') for a in ac).items(), key=lambda x:str(x[0])))
+              print('nic',sorted(Counter(a.get('nic') for a in ac).items(), key=lambda x:str(x[0])))
+              print('gpsOk',sum('gpsOkBefore' in a for a in ac),'version',Counter(a.get('version') for a in ac).most_common())
+              inb=[a for a in ac if a.get('lat') and 29.4<=a['lat']<=33.4 and 34.15<=a.get('lon',0)<=35.95]
+              print('in bbox',len(inb))
+              for a in [a for a in ac if 'gpsOkBefore' in a][:3]+inb[:3]: print(json.dumps({k:a.get(k) for k in ('hex','flight','type','lat','lon','alt_baro','alt_geom','gs','nic','nac_p','version','seen_pos','gpsOkBefore','gpsOkLat','gpsOkLon')}))
+          except Exception as e:
+              print('ERR',e, open('/tmp/b','rb').read()[:200])
+          PY
+            sleep 2
+          done
