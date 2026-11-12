@@ -20,7 +20,8 @@ PROVIDERS = [
     ("adsb.lol", f"https://api.adsb.lol/v2/point/{LAT}/{LON}/{NM}"),   # 500 requests/day – fallback only
 ]
 FIELDS = ("hex", "flight", "r", "type", "lat", "lon", "alt_baro", "alt_geom", "gs", "nic", "nac_p",
-          "version", "seen_pos", "gpsOkBefore", "gpsOkLat", "gpsOkLon")
+          "version", "seen_pos", "gpsOkBefore", "gpsOkLat", "gpsOkLon",
+          "t", "track", "category")      # used by the low-level traffic layer (beta/1.8/js/traffic.js)
 
 
 def fetch():

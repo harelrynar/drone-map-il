@@ -3,7 +3,10 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.7",
+  version: "1.8-beta",
+
+  // גרסת בדיקה: נתוני הפמ"ת והנוטאם נקראים מהתיקייה של האתר הראשי, כך שהם תמיד עדכניים
+  dataBase: "../../",
 
   map: {
     center: [31.45, 34.95],
@@ -16,7 +19,7 @@ window.APP_CONFIG = {
   /* מדידת שימוש – Umami Cloud. להפעלה: להדביק כאן את ה-Website ID מ-cloud.umami.is.
    * ריק = כבוי. Usage analytics – paste the Umami Website ID to enable; empty = off. */
   analytics: {
-    websiteId: "9a6c2662-e9f4-478a-81e9-ce612221cb95",
+    websiteId: "",   // כבוי בגרסת הבדיקה, כדי לא לערבב עם נתוני האתר הראשי
     domains: ["harelrynar.github.io"]
   },
 
@@ -35,7 +38,34 @@ window.APP_CONFIG = {
     updateBanner: true,
     watchPoints: true,       // נקודות מעקב והתראות על שינויים לידן
     search: true,
-    weather: true            // לחצן "נתונים מטאורולוגיים" בחלון הנקודה (js/weather.js)
+    weather: true,           // לחצן "נתונים מטאורולוגיים" בחלון הנקודה (js/weather.js)
+    terrain: true,           // 1.8: גובה קרקע ותקרה אמיתית (js/terrain.js)
+    osm: true,               // 1.8: מכשולים, שטח בנוי וריכוזי קהל (js/osm.js)
+    traffic: true,           // 1.8: תנועה אווירית נמוכה (js/traffic.js)
+    whoCall: true            // 1.8: "למי מתקשרים?" (js/whocall.js)
+  },
+
+  /* 1.8 – גובה קרקע: Open-Meteo Elevation (Copernicus DEM ~90 מ'), נשלף מהדפדפן בכל בדיקת נקודה. */
+  terrain: {
+    url: "https://api.open-meteo.com/v1/elevation",
+    marginM: 30              // אזור שרצפתו (ביחס לפני הים) גבוהה מגובה הטיסה שנבחר ביותר מזה – לא נספר בתשובה
+  },
+
+  /* 1.8 – מכשולים / שטח בנוי / ריכוזי קהל מ-OpenStreetMap. הקבצים נבנים ב-tools/osm_build.py
+   * (GitHub Actions: osm-layers) לרשת תאים של 0.25°. */
+  osm: {
+    base: "data/osm/",
+    minZoom: { lines: 11, built: 10, pts: 12, crowd: 13 },   // מאיזה קירוב כל תת-שכבה מוצגת
+    nearObstacleM: 300,      // רדיוס "מכשולים בסביבה" בחלון הנקודה
+    nearCrowdM: 300,         // רדיוס "ריכוזי קהל"
+    nearBuiltM: 150          // "שטח בנוי במרחק…"
+  },
+
+  /* 1.8 – תנועה אווירית נמוכה: אותו קובץ ADS-B שהאוסף של בטא ה-GNSS מפרסם פעם בדקה. */
+  traffic: {
+    maxAltFt: 5000,          // "נמוך" = מתחת לגובה ברומטרי זה
+    nearKm: 10,              // רדיוס "תנועה בסביבה" בחלון הנקודה
+    staleSec: 240
   },
 
   /* מזג אוויר – Open-Meteo (ללא מפתח, נשלף מהדפדפן בזמן הלחיצה).
@@ -76,6 +106,11 @@ window.APP_CONFIG = {
       { he: "AIP ישראל (eAIP) – ENR 5.1, AD 2", url: "https://www.gov.il/en/Departments/General/electronic-aip" }
     ],
     notam: { he: "נוטאם – רת\"א", url: "https://brin.iaa.gov.il/aeroinfo/AeroInfo.aspx?msgType=Notam" },
-    weather: { he: "מזג אוויר – Open-Meteo (CC BY 4.0)", url: "https://open-meteo.com/" }
+    weather: { he: "מזג אוויר – Open-Meteo (CC BY 4.0)", url: "https://open-meteo.com/" },
+    extra: [
+      { he: "גובה קרקע – Open-Meteo Elevation (Copernicus DEM)", url: "https://open-meteo.com/en/docs/elevation-api" },
+      { he: "מכשולים, שטח בנוי וריכוזי קהל – © OpenStreetMap contributors (ODbL)", url: "https://www.openstreetmap.org/copyright" },
+      { he: "תנועה אווירית – ADS-B קהילתי: adsb.fi", url: "https://adsb.fi" }
+    ]
   }
 };
