@@ -27,7 +27,8 @@
     meta: null, features: [], unlocated: [], basemap: null,
     overlays: [], ovlState: store.get("ovl", {}), ovlLayers: {},
     newIds: new Set(),
-    checkMarker: null, myMarker: null, myAcc: null, myPos: null
+    checkMarker: null, myMarker: null, myAcc: null, myPos: null,
+    wxUnit: store.get("wxUnit", "kn"), wxOpenAt: null   // weather panel: speed unit, point it is open for
   };
   const T = k => (I18N[state.lang] && I18N[state.lang][k]) ?? I18N.he[k] ?? k;
   const L_ = o => o == null ? "" : (typeof o === "string" ? o : (o[state.lang] ?? o.he ?? o.en ?? ""));
@@ -262,6 +263,7 @@
         <button class="mini" data-act="copy" data-v="${fmtCoord(lat, lon)}">⧉</button>
         ${CFG.features.watchPoints ? `<button class="mini" data-act="${watched ? "unwatch" : "watch"}" data-lat="${lat}" data-lon="${lon}">${watched ? "★ " + esc(T("watched")) : "☆ " + esc(T("watch"))}</button>` : ""}
       </div>
+      ${weatherSlot(lat, lon)}
       ${filterSummary()}
       <h3>${esc(T("zonesHere"))} <small>(${here.length})</small></h3>
       ${here.length ? here.map((f, i) => zoneCard(f, i === 0 || f.properties.id === focusId)).join("") : `<p class="muted">—</p>`}
@@ -275,7 +277,55 @@
     html += vlosHtml();
     html += `<p class="disclaimer">${esc(T("disclaimer"))}</p>`;
     openSheet(html, "point");
+    if (wxIsOpenFor(lat, lon)) showWeather(lat, lon); else state.wxOpenAt = null;
     if (!rerender) Track("point-check", { verdict: v[0], zones: here.length, top: here[0] ? layerKey(here[0]) : "none", mine: !!isMine });
+  }
+
+  /* ---------- weather (js/weather.js) ---------- */
+  const wxOn = () => CFG.features.weather && window.Weather;
+  // the panel stays open when the same spot is re-rendered (language switch, GPS refinement, watch toggle)
+  function wxIsOpenFor(lat, lon) {
+    return !!(wxOn() && state.wxOpenAt && Geo.distanceM(state.wxOpenAt[0], state.wxOpenAt[1], lat, lon) < 500);
+  }
+  function weatherSlot(lat, lon) {
+    if (!wxOn()) return "";
+    const open = wxIsOpenFor(lat, lon);
+    return `<button class="btn wide wx-btn" type="button" data-act="wx" data-lat="${lat}" data-lon="${lon}" aria-expanded="${open}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h10.5a2.5 2.5 0 1 0-2.4-3.2M3 12h15.5a2.5 2.5 0 1 1-2.4 3.2M3 16h8.5a2.5 2.5 0 1 1-2.4 3.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>${esc(Weather.t(state.lang, "wxButton"))}</span><i class="wx-caret">${open ? "▴" : "▾"}</i></button>
+      <div id="wxBox" class="wx" ${open ? "" : "hidden"}></div>`;
+  }
+  let wxSeq = 0, wxData = null;
+  function drawWeather() {
+    const box = $("#wxBox"); if (!box || !wxData) return;
+    box.innerHTML = Weather.render(wxData, { lang: state.lang, unit: state.wxUnit, esc });
+  }
+  async function showWeather(lat, lon, force) {
+    let box = $("#wxBox"); if (!box) return;
+    const seq = ++wxSeq;
+    state.wxOpenAt = [lat, lon];
+    box.hidden = false;
+    box.innerHTML = `<p class="muted wx-load">${esc(Weather.t(state.lang, "wxLoading"))}</p>`;
+    try {
+      const d = await Weather.get(lat, lon, force);
+      if (seq !== wxSeq) return;            // a newer request replaced this one
+      wxData = d; drawWeather();
+    } catch (e) {
+      if (seq !== wxSeq) return;
+      console.warn(e);
+      box = $("#wxBox"); if (!box) return;
+      box.innerHTML = `<p class="wx-err">${esc(Weather.t(state.lang, "wxError"))}</p><button class="btn" type="button" data-act="wxRefresh">↻ ${esc(Weather.t(state.lang, "wxRetry"))}</button>`;
+      Track("weather-error");
+    }
+  }
+  function toggleWeather(btn) {
+    const box = $("#wxBox"); if (!box) return;
+    const open = box.hidden;
+    btn.setAttribute("aria-expanded", String(open));
+    const caret = btn.querySelector(".wx-caret"); if (caret) caret.textContent = open ? "▴" : "▾";
+    if (!open) { box.hidden = true; state.wxOpenAt = null; wxSeq++; return; }
+    Track("weather-open");
+    showWeather(+btn.dataset.lat, +btn.dataset.lon);
   }
 
   function activeUnlocated(kind) {
@@ -361,7 +411,7 @@
     document.body.classList.add("sheet-open");
   }
   function closeSheet() {
-    $("#sheet").hidden = true; sheetKind = null;
+    $("#sheet").hidden = true; sheetKind = null; state.wxOpenAt = null;
     document.body.classList.remove("sheet-open");
     if (state.checkMarker) { state.checkMarker.remove(); state.checkMarker = null; }
   }
@@ -378,6 +428,9 @@
       else state.watch = state.watch.filter(w => !(Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4));
       store.set("watch", state.watch); drawWatch(); rerender = true; openPoint(lat, lon); rerender = false;
     }
+    if (act === "wx") toggleWeather(b);
+    if (act === "wxUnit") { state.wxUnit = b.dataset.u === "ms" ? "ms" : "kn"; store.set("wxUnit", state.wxUnit); Track("weather-unit", { unit: state.wxUnit }); drawWeather(); }
+    if (act === "wxRefresh" && state.wxOpenAt) showWeather(state.wxOpenAt[0], state.wxOpenAt[1], true);
     if (act === "focus" || act === "zoomto") focusZone(b.dataset.id);
     if (act === "layer") { state.layersOn[b.dataset.k] = b.checked; store.set("layers", state.layersOn); drawZones(); openLayers(); }
     if (act === "geo") locateMe();
@@ -654,7 +707,7 @@
       <p class="disclaimer">${esc(T("disclaimer"))}</p>
       <h3>${esc(T("legend"))}</h3><ul class="legend">${legend}</ul>
       <h3>${esc(T("sourcesTitle"))}</h3>
-      <ul class="near">${CFG.sources.aip.concat([CFG.sources.notam]).map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.he)}</a></li>`).join("")}</ul>
+      <ul class="near">${CFG.sources.aip.concat([CFG.sources.notam], CFG.sources.weather ? [CFG.sources.weather] : []).map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.he)}</a></li>`).join("")}</ul>
       ${m.aip && m.aip.edition ? `<p class="muted">${esc(m.aip.edition)}</p>` : ""}
       <p class="fsum">${esc(T("gaps"))}</p>
       ${crosscheckHtml()}

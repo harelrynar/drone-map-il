@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.7",
+   "date": "2026-11-12",
+   "he": "נתונים מטאורולוגיים: בחלון של כל נקודה יש לחצן \"נתונים מטאורולוגיים\" שמציג רוח וכיוון, משבים, רוח ב-100 מ', גשם (מ\"מ/שעה), טמפרטורה, ראות, בסיס ענן משוער, זריחה ושקיעה ותחזית קצרה ל-3 שעות, עם מעבר בין knots ל-m/s וחותמת זמן. המקור: Open-Meteo (ערכי מודל לנקודה).",
+   "en": "Point weather: a \"Weather data\" button in every point panel shows wind and direction, gusts, wind at 100 m, rain (mm/h), temperature, visibility, estimated cloud base, sunrise/sunset and a short 3-hour outlook, with a knots / m/s switch and a time stamp. Source: Open-Meteo (model values for the point)."
+  },
+  {
    "version": "1.6",
    "date": "2026-11-11",
    "he": "חיפוש יישובים: אפשר להקליד שם של עיר או יישוב (כל 1,319 היישובים של הלמ\"ס) בשדה החיפוש ולקפוץ אליו במפה. החיפוש מבין כתיב מלא וחסר, מקפים, ראשי תיבות (ת\"א, פ\"ת, ב\"ש) ושמות באנגלית.",

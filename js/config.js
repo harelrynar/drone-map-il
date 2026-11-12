@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.6",
+  version: "1.7",
 
   map: {
     center: [31.45, 34.95],
@@ -34,7 +34,17 @@ window.APP_CONFIG = {
     languages: ["he", "en"],
     updateBanner: true,
     watchPoints: true,       // נקודות מעקב והתראות על שינויים לידן
-    search: true
+    search: true,
+    weather: true            // לחצן "נתונים מטאורולוגיים" בחלון הנקודה (js/weather.js)
+  },
+
+  /* מזג אוויר – Open-Meteo (ללא מפתח, נשלף מהדפדפן בזמן הלחיצה).
+   * Weather – Open-Meteo, no key; fetched from the browser on demand. */
+  weather: {
+    url: "https://api.open-meteo.com/v1/forecast",
+    cacheMinutes: 5,         // לא שולפים שוב את אותה נקודה (תא של ~1 ק"מ) בתוך פרק הזמן הזה
+    forecastHours: 3,        // אורך התחזית במשפט הקצר
+    minVisibilityKm: 3       // מתחת לזה הראות מסומנת (תנאי VLOS בב'-09)
   },
 
   /* שכבות. severity קובע את הצבע של תשובת "אפשר לטוס כאן?":
@@ -65,6 +75,7 @@ window.APP_CONFIG = {
       { he: "פמ\"ת ב'-09 – טיסות כטב\"ם", url: "https://www.gov.il/BlobFolder/guide/aip/he/%D7%91'-09.pdf" },
       { he: "AIP ישראל (eAIP) – ENR 5.1, AD 2", url: "https://www.gov.il/en/Departments/General/electronic-aip" }
     ],
-    notam: { he: "נוטאם – רת\"א", url: "https://brin.iaa.gov.il/aeroinfo/AeroInfo.aspx?msgType=Notam" }
+    notam: { he: "נוטאם – רת\"א", url: "https://brin.iaa.gov.il/aeroinfo/AeroInfo.aspx?msgType=Notam" },
+    weather: { he: "מזג אוויר – Open-Meteo (CC BY 4.0)", url: "https://open-meteo.com/" }
   }
 };
