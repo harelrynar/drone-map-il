@@ -12,12 +12,15 @@ The claude.ai artifact (444ddce3-…) is a legacy preview and is no longer updat
 4. `pip install --break-system-packages -q pdfplumber shapely pyproj requests playwright geopandas pyogrio`;
    if `/usr/bin/google-chrome` is missing: `python3 -m playwright install chromium`.
 5. Publishing = `cd /home/claude/drone-map-il && git add data pipeline && git commit -m "<what changed>" && git push origin main`
-   (if the push is rejected: `git pull --rebase origin main` once, then push). Never push tags (blocked); never touch `versions/`.
+   (if the push is rejected: `git pull --rebase origin main` once, then push). Never push tags (blocked).
    After a NOTAM run also copy `/home/claude/build/notam_ai.json` to `data/notam_ai.json` before committing.
 
-## Versions
-Frozen copies live in `versions/<v>/` (index.html, css, js, data) and are listed in `data/versions.json`; each also has a branch `release-<v>`.
-Only create a new version when the user asks.
+## Versions (only the current version is public)
+`main` holds only the live site. Do not add `versions/`, `beta/` or any other copy of the site to `main` – everything on `main` is public.
+- Frozen versions: branch `release-<v>` (v1.4: branch `archive-site-folders`), listed in `data/versions.json` (no public URLs).
+  To freeze a version, only when the user asks: `git branch release-<v> && git push origin release-<v>`, then add an entry to `data/versions.json`.
+- Betas: develop on a branch `beta-<name>`; preview locally or as a private claude.ai artifact; merge to `main` only when the user approves.
+- After any change to `index.html`, run `python3 pipeline/make_en.py` and commit `en/index.html` with it (the English landing page for Google).
 
 ## A. NOTAM run (every 6 hours)
 1. `cd /home/claude/build && python3 -I notam_fetch.py /home/claude/raw/notam/all.json` (≈3 min, 0.8 s between requests – do not speed up; the site has a WAF).

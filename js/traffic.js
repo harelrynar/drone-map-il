@@ -3,7 +3,7 @@
  * Low-level air traffic – aircraft broadcasting ADS-B below a set altitude.
  *
  * המקור הוא אותו קובץ שהאוסף של בטא ה-GNSS מפרסם פעם בדקה לענף gnss-data
- * (beta/gnss/collector, GitHub Actions; ספקים: adsb.fi / adsb.lol). אין קריאה ישירה לספקים מהדפדפן.
+ * (pipeline/gnss_collector, GitHub Actions; ספקים: adsb.fi / adsb.lol). אין קריאה ישירה לספקים מהדפדפן.
  *
  * מגבלות שחייבים להכיר:
  *  - מוצג רק מי שמשדר ADS-B ונקלט במקלטי הקהילה. רוב כלי הטיס הצבאיים, חלק מהמסוקים,

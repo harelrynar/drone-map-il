@@ -12,9 +12,13 @@
 עדכון אוטומטי: משימות מתוזמנות של Claude (נוטאם כל 6 שעות, פמ"ת יומי) מבצעות commit לתיקיית `data/`.
 ## קישורים
 - **אתר חי (מתעדכן):** https://harelrynar.github.io/drone-map-il/
-- **גרסאות מוקפאות:** כל גרסה נשמרת בתיקייה `versions/<גרסה>/` ומקבלת קישור קבוע, למשל https://harelrynar.github.io/drone-map-il/versions/1.1/ .
-  רשימת הגרסאות: `data/versions.json` (מוצגת גם בחלון "אודות" באתר).
-- **שחזור גרסה:** להעתיק את תוכן `versions/<גרסה>/` חזרה לשורש (או לבקש מ-Claude "חזור לגרסה X").
+- **English page:** https://harelrynar.github.io/drone-map-il/en/ – נוצר אוטומטית מ-`index.html` ע"י `python3 pipeline/make_en.py` (להריץ אחרי כל שינוי ב-`index.html`).
+- **רק הגרסה הנוכחית מפורסמת.** גרסאות ישנות וגרסאות צד/בטא לא נמצאות ב-`main` ולכן לא מוגשות באתר:
+  - גרסאות מוקפאות: בענפים `release-<גרסה>` (גרסה 1.4 בענף `archive-site-folders`). הרשימה: `data/versions.json`.
+  - גרסאות בטא: בענפים `beta-<שם>` בלבד. בודקים אותן מקומית (`python3 -m http.server` מתוך תיקייה בשם `drone-map-il`) או כתצוגה פרטית ב-claude.ai, ולא מעלים ל-`main` עד שהן מוכנות.
+  - העותקים שהיו בתיקיות `versions/` ו-`beta/` שמורים בענף `archive-site-folders`.
+- **שחזור גרסה:** להעתיק את תוכן הענף `release-<גרסה>` לשורש של `main` (או לבקש מ-Claude "חזור לגרסה X").
+- **אוסף GNSS / תנועה אווירית:** `pipeline/gnss_collector/` (GitHub Actions, מפרסם לענף `gnss-data`).
 
 ---
 

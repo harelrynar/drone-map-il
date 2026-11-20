@@ -1,7 +1,7 @@
 window.I18N = {
   he: {
     dir: "rtl",
-    title: "מפת מרחב אווירי לכטב\"ם",
+    title: "מפת רחפנים וכטב\"ם",
     subtitle: "ישראל · פמ\"ת + נוטאם",
     layers: "שכבות",
     filters: "סינון",
@@ -93,7 +93,7 @@ window.I18N = {
   },
   en: {
     dir: "ltr",
-    title: "UAS Airspace Map",
+    title: "Israel Drone Map",
     subtitle: "Israel · AIP + NOTAM",
     layers: "Layers",
     filters: "Filters",

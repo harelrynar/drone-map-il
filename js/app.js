@@ -17,7 +17,7 @@
   /* ---------- state ---------- */
   const defaultsLayers = Object.fromEntries(Object.entries(CFG.layers).map(([k, v]) => [k, v.on]));
   const state = {
-    lang: store.get("lang", "he"),
+    lang: window.APP_LANG || store.get("lang", "he"),   // APP_LANG is set by the static /en/ page
     layersOn: Object.assign({}, defaultsLayers, store.get("layers", {})),
     altM: store.get("altM", 120),           // null = all altitudes; default: typical small-UAS ceiling
     when: null,                              // null = now
@@ -882,7 +882,7 @@
       ${m.aip && m.aip.edition ? `<p class="muted">${esc(m.aip.edition)}</p>` : ""}
       <p class="fsum">${esc(T("gaps"))}</p>
       ${crosscheckHtml()}
-      ${state.versions ? `<h3>${state.lang === "he" ? "גרסאות (קישור קבוע לכל גרסה)" : "Versions"}</h3><ul class="near">${state.versions.map(v => `<li><a href="${esc(v.url)}" target="_blank" rel="noopener"><b>${esc(v.v)}</b></a>${v.live ? (state.lang === "he" ? " (נוכחית, מתעדכנת)" : " (live)") : ""} – ${esc(v.he)}</li>`).join("")}</ul>` : ""}
+      ${state.versions ? `<h3>${state.lang === "he" ? "גרסאות" : "Versions"}</h3><ul class="near">${state.versions.map(v => `<li><b>${esc(v.v)}</b>${v.live ? (state.lang === "he" ? " (נוכחית, מתעדכנת)" : " (live)") : ""} – ${esc(v.he)}</li>`).join("")}</ul>` : ""}
       <h3>${esc(T("changelog"))}</h3><ul class="near">${log}</ul>
       <p class="muted">${esc(T("version"))} ${esc(CFG.version)}</p>
     `, "about");
@@ -1010,6 +1010,7 @@
     $("#btnLang").textContent = T("lang");
     zoomCtl.setPosition(d.dir === "rtl" ? "topleft" : "topright");
     $("#btnAbout").textContent = `${T("version")} ${CFG.version} · ${T("sourcesTitle")} · ${T("legend")}`;
+    if ($("#btnInfo")) $("#btnInfo").textContent = state.lang === "he" ? "מידע ושאלות נפוצות" : "About & FAQ";
     updatedLine();
     if (state.basemap) drawCities();
   }
@@ -1025,11 +1026,18 @@
   $("#btnCheck").onclick = openCheck;
   $("#btnNews").onclick = openNews;
   $("#btnAbout").onclick = openAbout;
+  /* About & FAQ: static text kept in the HTML (#seoInfo) so search engines can read it */
+  function openInfo() {
+    const box = $("#seoInfo"); if (!box) return;
+    const part = box.querySelector(`[lang="${state.lang}"]`) || box.firstElementChild;
+    openSheet(part.innerHTML, "info");
+  }
+  if ($("#btnInfo")) $("#btnInfo").onclick = openInfo;
   $("#btnLang").onclick = () => {
     state.lang = state.lang === "he" ? "en" : "he"; store.set("lang", state.lang); applyLang();
     Track("language", { to: state.lang });
     if (X.traffic) Traffic.redraw();
-    const k = sheetKind; if (k === "layers") openLayers(); else if (k === "filters") openFilters(); else if (k === "check") openCheck(); else if (k === "news") openNews(); else if (k === "about") openAbout(); else if (k === "traffic") openTraffic(); else if (k === "point" && state.lastPoint) { rerender = true; openPoint(...state.lastPoint); rerender = false; }
+    const k = sheetKind; if (k === "layers") openLayers(); else if (k === "filters") openFilters(); else if (k === "check") openCheck(); else if (k === "news") openNews(); else if (k === "about") openAbout(); else if (k === "info") openInfo(); else if (k === "traffic") openTraffic(); else if (k === "point" && state.lastPoint) { rerender = true; openPoint(...state.lastPoint); rerender = false; }
   };
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 

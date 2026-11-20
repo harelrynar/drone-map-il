@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: beta/gnss/collector
+          sparse-checkout: pipeline/gnss_collector
       - name: Prepare data branch
         run: |
           git config --global user.name "gnss-collector"
@@ -36,7 +36,7 @@ jobs:
           if [ "$fresh" = "1" ] && [ "${{ inputs.takeover }}" != "true" ]; then echo "run=0" >> "$GITHUB_OUTPUT"; else echo "run=1" >> "$GITHUB_OUTPUT"; fi
       - name: Collect
         if: steps.chk.outputs.run == '1'
-        run: python3 beta/gnss/collector/collect.py out 19800
+        run: python3 pipeline/gnss_collector/collect.py out 19800
       - name: Start successor
         if: steps.chk.outputs.run == '1'
         env:
