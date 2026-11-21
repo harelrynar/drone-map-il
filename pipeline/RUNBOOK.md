@@ -32,14 +32,17 @@ The claude.ai artifact (444ddce3-…) is a legacy preview and is no longer updat
    - FIR-wide restrictions that affect drones → `kind: "general"`.
    - Never invent a precise shape: if location/size is uncertain mark `confidence: "approx"`, explain in `approxReason`; the raw NOTAM is always shown as a quote.
    - Remove entries for NOTAM ids that no longer exist. Re-run step 2.
-4. `python3 assemble.py /home/claude/site/data --notam`
+4. `python3 assemble.py /home/claude/site/data --notam` (sets `meta.notam.updatedAt` and `checkedAt`).
 5. Publish (see 0.5): commit `data/notams.json`, `data/meta.json`, `data/notam_ai.json`.
+   - Fetch OK but the NOTAM id set is identical to the published file and nothing changed: instead of steps 4–5 you may run
+     `python3 mark_checked.py /home/claude/site/data notam` and publish only `data/meta.json` (the site shows "בדיקה אחרונה").
+   - Fetch failed, or the change waits for the owner's approval (change-size guard): do NOT run mark_checked and do not commit.
 6. If there are new NOTAMs relevant to drones (UAS activity, closures/obstacles up to ~1,500 ft AGL, new general notices), finish with a short
    Hebrew summary (what/where/when) – it is sent to the owner as a push notification. Otherwise end with "אין שינויים מהותיים".
 
 ## B. AIP run (daily)
 1. `python3 aip_check.py /home/claude/site/data/aip_state.json /home/claude/build/aip_state.json` → JSON report.
-2. If nothing changed: only set `meta.aip.checkedAt` = now (edit `data/meta.json`), publish `data/meta.json`, `data/aip_state.json`. Done.
+2. If nothing changed: `python3 mark_checked.py /home/claude/site/data aip` (sets `meta.aip.checkedAt` = now), publish `data/meta.json`, `data/aip_state.json`. Done.
 3. If `א'-17*.pdf` changed: `python3 build_prd.py` (automatic parse). Check the log for `NO GEOMETRY` and review curated.py remarks/contacts against the new text.
 4. If `ב'-09.pdf`, airport/airstrip pages, or `א'-07.pdf` changed: extract text (`pdftotext -layout`), compare with the transcriptions in
    `build_uas.py` / `build_ad.py` / `curated.py`, edit them, run them.

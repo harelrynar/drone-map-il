@@ -838,6 +838,14 @@
     state.lastSeen = new Date().toISOString(); store.set("lastSeen", state.lastSeen);
     $("#banner").hidden = true; state.newIds = new Set(); $("#newsBadge").hidden = true; drawZones();
   }
+  // one "last updated / last checked" box for the What's-new sheet (src = meta.aip | meta.notam)
+  function updBox(src, key) {
+    src = src || {};
+    const chk = src.checkedAt && (!src.updatedAt || new Date(src.checkedAt) >= new Date(src.updatedAt)) ? src.checkedAt : src.updatedAt;
+    return `<div><span>${esc(T(key))}</span><b>${fmtTime(src.updatedAt) || "—"}</b>` +
+      (chk ? `<span class="chk">${esc(T("lastChecked"))}: ${fmtTime(chk)}</span>` : "") +
+      (src.summary ? `<p>${esc(L_(src.summary))}</p>` : "") + `</div>`;
+  }
   function openNews() {
     const m = state.meta || {};
     const all = (m.changes || []).slice().sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, 60);
@@ -845,8 +853,8 @@
     const kindLbl = k => T(k) || k;
     let html = `<h2>${esc(T("whatsNew"))}</h2>
       <div class="upd">
-        <div><span>${esc(T("aipUpdated"))}</span><b>${fmtTime(m.aip && m.aip.updatedAt) || "—"}</b>${m.aip && m.aip.checkedAt ? `<span>${state.lang === "he" ? "נבדק לאחרונה" : "Last checked"}: ${fmtTime(m.aip.checkedAt)}</span>` : ""}${m.aip && m.aip.summary ? `<p>${esc(L_(m.aip.summary))}</p>` : ""}</div>
-        <div><span>${esc(T("notamUpdated"))}</span><b>${fmtTime(m.notam && m.notam.updatedAt) || "—"}</b>${m.notam && m.notam.summary ? `<p>${esc(L_(m.notam.summary))}</p>` : ""}</div>
+        ${updBox(m.aip, "aipUpdated")}
+        ${updBox(m.notam, "notamUpdated")}
       </div>`;
     html += all.length ? `<ul class="chg">` + all.map(c => `
       <li class="${fresh.has(c) ? "fresh" : ""}">

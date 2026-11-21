@@ -151,6 +151,7 @@ a{color:var(--accent)}
 .upd>div{background:#f4f6f8;border-radius:10px;padding:10px;font-size:13px}
 .upd span{display:block;color:var(--muted)}
 .upd p{margin:6px 0 0;font-size:12.5px}
+.upd span.chk{margin-top:3px;font-size:12px}
 .chg{list-style:none;padding:0;margin:12px 0}
 .chg li{border-bottom:1px solid #f0f2f4;padding:9px 0;font-size:13.5px;display:grid;grid-template-columns:auto auto 1fr;gap:4px 8px;align-items:center}
 .chg li div{grid-column:1/-1}

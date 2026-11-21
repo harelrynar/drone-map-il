@@ -35,7 +35,7 @@ if "--aip" in sys.argv:
                                 "text": {"he": f"פמ\"ת – {lbl[kind]}: {f['properties']['name']['he']}", "en": f"AIP {kind}: {f['properties']['name'].get('en', '')}"}})
     json.dump({"type": "FeatureCollection", "features": feats}, open(zp, "w"), ensure_ascii=False, separators=(",", ":"))
     ed = sys.argv[sys.argv.index("--aip-edition") + 1] if "--aip-edition" in sys.argv else meta.get("aip", {}).get("edition")
-    meta["aip"] = {"updatedAt": now, "edition": ed, "count": len(feats),
+    meta["aip"] = {"updatedAt": now, "checkedAt": now, "edition": ed, "count": len(feats),
                    "summary": {"he": (f"{len(ch)} שינויים בפמ\"ת" if oldm else f"טעינה ראשונה: {len(feats)} אזורים ונקודות") + (f" · {ed}" if ed else ""),
                                "en": f"{len(ch)} AIP changes" if oldm else f"Initial load: {len(feats)} features"}}
     print("AIP features", len(feats), "changes", len(ch))
@@ -47,7 +47,7 @@ if "--notam" in sys.argv:
     loc = n["located"]["features"]
     nap = sum(1 for f in loc if f["properties"]["confidence"] == "approx")
     gen = [u for u in n["unlocated"] if u["kind"] == "general"]
-    meta["notam"] = {"updatedAt": now, "count": len(loc) + len(n["unlocated"]),
+    meta["notam"] = {"updatedAt": now, "checkedAt": now, "count": len(loc) + len(n["unlocated"]),
                      "summary": {"he": f"{len(loc)} נוטאמים על המפה ({nap} במיקום משוער), {len(gen)} הודעות כלליות, {len(n['unlocated']) - len(gen)} נוספים ברשימה" + (f" · {len(n.get('changes', []))} שינויים" if n.get("changes") else ""),
                                  "en": f"{len(loc)} on map ({nap} approximate), {len(gen)} general"}}
     print("NOTAM located", len(loc), "changes", len(n.get("changes", [])))
