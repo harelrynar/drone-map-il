@@ -1022,9 +1022,32 @@
     updatedLine();
     if (state.basemap) drawCities();
   }
+  // header: when each source was last CHECKED (checkedAt or updatedAt, the newer), green dot = checked in the last 36 h
+  function lastCheck(src) {
+    src = src || {};
+    const a = src.checkedAt ? new Date(src.checkedAt) : null, b = src.updatedAt ? new Date(src.updatedAt) : null;
+    return a && b ? (a > b ? a : b) : (a || b);
+  }
+  function fmtRel(d) {
+    const day = x => x.toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+    const hm = d.toLocaleTimeString(state.lang === "he" ? "he-IL" : "en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit" });
+    const now = new Date(), y = new Date(now.getTime() - 864e5);
+    if (day(d) === day(now)) return `${T("today")} ${hm}`;
+    if (day(d) === day(y)) return `${T("yesterday")} ${hm}`;
+    return fmtTime(d.toISOString());
+  }
   function updatedLine() {
-    const m = state.meta;
-    $("#updatedLine").textContent = m ? `${T("aipUpdated")} ${fmtTime(m.aip && m.aip.updatedAt) || "—"} · ${T("notamUpdated")} ${fmtTime(m.notam && m.notam.updatedAt) || "—"}` : T("subtitle");
+    const m = state.meta, el = $("#updatedLine");
+    if (!m) { el.textContent = T("subtitle"); return; }
+    const part = (src, key) => {
+      const d = lastCheck(src);
+      if (!d || isNaN(d)) return `<span class="fr old"></span>${esc(T(key))}: —`;
+      const fresh = Date.now() - d.getTime() < 36 * 3600e3;
+      return `<span class="fr ${fresh ? "ok" : "old"}" title="${esc(fresh ? T("freshOk") : T("freshOld"))}"></span>` +
+        `${esc(T(key))} ${esc(T("checkedShort"))} ${fmtRel(d)}`;
+    };
+    el.innerHTML = `${part(m.aip, "aipShort")} · ${part(m.notam, "notamShort")}`;
+    el.title = `${T("aipUpdated")} ${fmtTime(m.aip && m.aip.updatedAt) || "—"} · ${T("notamUpdated")} ${fmtTime(m.notam && m.notam.updatedAt) || "—"}`;
   }
 
   /* ---------- events ---------- */
@@ -1033,6 +1056,7 @@
   $("#btnFilters").onclick = openFilters;
   $("#btnCheck").onclick = openCheck;
   $("#btnNews").onclick = openNews;
+  $("#updatedLine").onclick = openNews;
   $("#btnAbout").onclick = openAbout;
   /* About & FAQ: static text kept in the HTML (#seoInfo) so search engines can read it */
   function openInfo() {

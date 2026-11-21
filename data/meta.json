@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.8.2",
+   "date": "2026-11-21",
+   "he": "בראש המפה מוצג מתי נבדקו הפמ\"ת והנוטאם (\"נבדק היום 10:52\"), עם נקודה ירוקה כשהבדיקה בוצעה ב-36 השעות האחרונות וכתומה כשלא. נגיעה בשורה פותחת את \"מה חדש\". הנוטאמים נקראים עכשיו מהאתר החדש של רשות שדות התעופה.",
+   "en": "The header now shows when the AIP and NOTAMs were last checked (\"checked today 10:52\"), with a green dot when checked in the last 36 hours and orange otherwise. Tap it to open \"What's new\". NOTAMs are now read from the IAA's new site."
+  },
+  {
    "version": "1.8.1",
    "date": "2026-11-21",
    "he": "בחלון \"מה חדש\" מוצג עכשיו גם מועד הבדיקה האחרונה של הפמ\"ת ושל הנוטאם – כך רואים שהנתונים נבדקו גם כשלא היה בהם שינוי.",
