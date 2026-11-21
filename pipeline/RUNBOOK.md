@@ -23,7 +23,16 @@ The claude.ai artifact (444ddce3-…) is a legacy preview and is no longer updat
 - After any change to `index.html`, run `python3 pipeline/make_en.py` and commit `en/index.html` with it (the English landing page for Google).
 
 ## A. NOTAM run (every 6 hours)
-1. `cd /home/claude/build && python3 -I notam_fetch.py /home/claude/raw/notam/all.json` (≈3 min, 0.8 s between requests – do not speed up; the site has a WAF).
+1. **Fetch in the owner's Chrome (since 21.11.2026).** The IAA moved the NOTAM list to `aeroinfo.iaa.gov.il` (JSON API behind a WAF;
+   cloud requests are blocked, so `notam_fetch.py` no longer works). In the owner's Chrome (Claude in Chrome), in a new tab:
+   - open `https://brin.iaa.gov.il/aeroinfo/AeroInfo.aspx?msgType=Notam` (redirects to the new site; opening aeroinfo directly is blocked);
+   - **search 1:** run `pipeline/notam_browser.js` with javascript_tool (it clicks "Notams", sets Hours ahead 99, Non Active off,
+     clicks Search once); export with the EXPORT steps at the end of that file → `/home/claude/raw/notam/s1.json`;
+   - **search 2:** click the "Valid from" field, click today + 4 days in the calendar (typing into the field does not work),
+     set `window.__NJ_EXPECT='YYYY-MM-DD'`, run the script again, export → `s2.json`. If search 2 fails, continue with s1 only.
+   - Never use Hours ahead above 99, never call the API directly, never retry in a loop. Close the tab.
+   - `python3 -I notam_convert.py /home/claude/raw/notam/s1.json /home/claude/raw/notam/s2.json /home/claude/raw/notam/all.json`
+     (merges, drops cancelled/replaced/expired NOTAMs). Expect roughly 70–110 NOTAMs.
 2. `python3 notam_build.py /home/claude/raw/notam/all.json /home/claude/site/data/basemap.json /home/claude/site/data/notams.json /home/claude/build/notams.json /home/claude/build/notam_ai.json`
 3. **Interpretation review (this is the AI step).** For every NOTAM id that is NEW compared to the previous `data/notams.json`:
    - read its raw text; if the auto `name`/`remarks` is unclear, the kind is wrong, or the geometry is `approx`/`unplaced`,
