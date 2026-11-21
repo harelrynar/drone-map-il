@@ -841,9 +841,9 @@
   // one "last updated / last checked" box for the What's-new sheet (src = meta.aip | meta.notam)
   function updBox(src, key) {
     src = src || {};
-    const chk = src.checkedAt && (!src.updatedAt || new Date(src.checkedAt) >= new Date(src.updatedAt)) ? src.checkedAt : src.updatedAt;
-    return `<div><span>${esc(T(key))}</span><b>${fmtTime(src.updatedAt) || "—"}</b>` +
-      (chk ? `<span class="chk">${esc(T("lastChecked"))}: ${fmtTime(chk)}</span>` : "") +
+    const chk = lastCheck(src);
+    return `<div><span>${esc(T(key))}</span><b>${chk && !isNaN(chk) ? asOfTxt(fmtTime(chk.toISOString())) : "—"}</b>` +
+      (src.updatedAt ? `<span class="chk">${esc(T("lastChange"))}: ${fmtTime(src.updatedAt)}</span>` : "") +
       (src.summary ? `<p>${esc(L_(src.summary))}</p>` : "") + `</div>`;
   }
   function openNews() {
@@ -853,8 +853,8 @@
     const kindLbl = k => T(k) || k;
     let html = `<h2>${esc(T("whatsNew"))}</h2>
       <div class="upd">
-        ${updBox(m.aip, "aipUpdated")}
-        ${updBox(m.notam, "notamUpdated")}
+        ${updBox(m.aip, "aipShort")}
+        ${updBox(m.notam, "notamShort")}
       </div>`;
     html += all.length ? `<ul class="chg">` + all.map(c => `
       <li class="${fresh.has(c) ? "fresh" : ""}">
@@ -1028,13 +1028,14 @@
     const a = src.checkedAt ? new Date(src.checkedAt) : null, b = src.updatedAt ? new Date(src.updatedAt) : null;
     return a && b ? (a > b ? a : b) : (a || b);
   }
+  const asOfTxt = t => { const a = T("asOf"); return a.endsWith("-") ? a + t : a + " " + t; };
   function fmtRel(d) {
     const day = x => x.toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
     const hm = d.toLocaleTimeString(state.lang === "he" ? "he-IL" : "en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit" });
     const now = new Date(), y = new Date(now.getTime() - 864e5);
-    if (day(d) === day(now)) return `${T("today")} ${hm}`;
-    if (day(d) === day(y)) return `${T("yesterday")} ${hm}`;
-    return fmtTime(d.toISOString());
+    if (day(d) === day(now)) return `${T("asOfToday")} ${hm}`;
+    if (day(d) === day(y)) return `${T("asOfYesterday")} ${hm}`;
+    return asOfTxt(fmtTime(d.toISOString()));
   }
   function updatedLine() {
     const m = state.meta, el = $("#updatedLine");
@@ -1044,10 +1045,10 @@
       if (!d || isNaN(d)) return `<span class="fr old"></span>${esc(T(key))}: —`;
       const fresh = Date.now() - d.getTime() < 36 * 3600e3;
       return `<span class="fr ${fresh ? "ok" : "old"}" title="${esc(fresh ? T("freshOk") : T("freshOld"))}"></span>` +
-        `${esc(T(key))} ${esc(T("checkedShort"))} ${fmtRel(d)}`;
+        `${esc(T(key))} ${esc(fmtRel(d))}`;
     };
     el.innerHTML = `${part(m.aip, "aipShort")} · ${part(m.notam, "notamShort")}`;
-    el.title = `${T("aipUpdated")} ${fmtTime(m.aip && m.aip.updatedAt) || "—"} · ${T("notamUpdated")} ${fmtTime(m.notam && m.notam.updatedAt) || "—"}`;
+    el.title = `${T("aipShort")} – ${T("lastChange")}: ${fmtTime(m.aip && m.aip.updatedAt) || "—"} · ${T("notamShort")} – ${T("lastChange")}: ${fmtTime(m.notam && m.notam.updatedAt) || "—"}`;
   }
 
   /* ---------- events ---------- */
