@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.8.2",
+  version: "1.9",
 
   map: {
     center: [31.45, 34.95],
@@ -39,7 +39,8 @@ window.APP_CONFIG = {
     terrain: true,           // 1.8: גובה קרקע ותקרה אמיתית (js/terrain.js)
     osm: true,               // 1.8: מכשולים, שטח בנוי וריכוזי קהל (js/osm.js)
     traffic: true,           // 1.8: תנועה אווירית נמוכה (js/traffic.js)
-    whoCall: true            // 1.8: "למי מתקשרים?" (js/whocall.js)
+    whoCall: true,           // 1.8: "למי מתקשרים?" (js/whocall.js)
+    pwa: true                // 1.9: התקנה כאפליקציה + עבודה בלי קליטה (js/pwa.js, sw.js)
   },
 
   /* 1.8 – גובה קרקע: Open-Meteo Elevation (Copernicus DEM ~90 מ'), נשלף מהדפדפן בכל בדיקת נקודה. */

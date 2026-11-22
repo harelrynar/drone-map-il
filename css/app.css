@@ -335,3 +335,10 @@ body.sheet-open .tfc-pill{display:none}
 /* 1.8.2 header freshness dots */
 .fr{display:inline-block;width:7px;height:7px;border-radius:50%;margin-inline-end:4px;vertical-align:1px}
 .fr.ok{background:var(--ok)} .fr.old{background:var(--caution)}
+
+/* ---------- 1.9: התקנה כאפליקציה (js/pwa.js) ---------- */
+.pwa-steps{padding-inline-start:22px;line-height:1.7}
+.pwa-steps li{margin:4px 0}
+#btnInstall{font-weight:700}
+html.offline #updatedLine::after{content:" · ⚠ offline";color:var(--caution);font-weight:700}
+html.offline[lang=he] #updatedLine::after{content:" · ⚠ אין קליטה"}

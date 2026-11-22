@@ -1110,5 +1110,7 @@
     });
   }
   window.__app = { map, openPoint, focusZone, state };
+  // used by js/pwa.js (install button / offline notice)
+  window.UASApp = { openSheet, closeSheet, toast, lang: () => state.lang };
   init();
 })();
