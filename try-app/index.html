@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<!-- try-app: temporary copy of beta-pwa (1.9) for installing on a phone before release. Delete this folder after testing. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- seo:head (the English page en/index.html is generated from this file by pipeline/make_en.py) -->
+<title>מפת רחפנים ישראל – איפה מותר להטיס רחפן? | Israel Drone Map</title>
+<meta name="description" content="מפת רחפנים וכטב&quot;ם לישראל, בחינם: איפה מותר להטיס רחפן, אזורים אסורים, אזורי טיסה, מנחתים וסגירות זמניות (נוטאם). מתעדכן אוטומטית לפי הפמ&quot;ת והנוטאם, עם מזג אוויר וגובה קרקע.">
+<link rel="canonical" href="https://harelrynar.github.io/drone-map-il/">
+<meta name="theme-color" content="#17212b">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="רחפנים בדיקה">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="מפת רחפנים ישראל">
+<meta property="og:title" content="מפת רחפנים ישראל – איפה מותר להטיס רחפן?">
+<meta property="og:description" content="אזורי טיסה, אזורים אסורים, מנחתים וסגירות זמניות (נוטאם) לרחפנים וכטב&quot;ם בישראל. בחינם, מתעדכן אוטומטית.">
+<meta property="og:url" content="https://harelrynar.github.io/drone-map-il/">
+<meta property="og:image" content="https://harelrynar.github.io/drone-map-il/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"מפת רחפנים ישראל","alternateName":["Israel Drone Map","מפת מרחב אווירי לכטב\"ם"],"url":"https://harelrynar.github.io/drone-map-il/","inLanguage":["he","en"],"applicationCategory":"TravelApplication","operatingSystem":"Any (web browser)","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"ILS"},"description":"מפה אינטראקטיבית לרחפנים וכטב\"ם בישראל: אזורי טיסה, אזורים אסורים, מנחתים וסגירות זמניות לפי הפמ\"ת והנוטאם."}
+</script>
+<!-- /seo:head -->
+<!-- app (PWA, 1.9) – shared by the Hebrew and English pages -->
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="css/leaflet.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><circle cx="25" cy="7" r="4.5"/><circle cx="7" cy="25" r="4.5"/><circle cx="25" cy="25" r="4.5"/><path d="M10 10l12 12M22 10L10 22"/><rect x="12.5" y="12.5" width="7" height="7" rx="1.5"/></svg>
+    <div>
+      <h1 data-i18n="title"></h1>
+      <div class="sub" id="updatedLine"></div>
+    </div>
+  </div>
+  <div class="search-wrap" id="searchWrap">
+    <input id="search" type="search" autocomplete="off" data-i18n-ph="search">
+    <div id="searchResults" class="search-results" hidden></div>
+  </div>
+  <div class="top-actions">
+    <button id="btnNews" class="chip" type="button"><span data-i18n="whatsNew"></span><b id="newsBadge" hidden></b></button>
+    <button id="btnLang" class="chip" type="button"></button>
+  </div>
+</header>
+
+<div id="demoRibbon" class="ribbon" hidden><b data-i18n="demo"></b> <span data-i18n="demoSub"></span></div>
+<div id="banner" class="banner" hidden></div>
+
+<main id="map" aria-label="map"></main>
+
+<button id="btnLayers" class="fab layers-top" type="button"><svg viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5-10-5zm-7.6 8.3L2 12.5l10 5 10-5-2.4-1.2L12 15l-7.6-3.7zm0 4.5L2 17l10 5 10-5-2.4-1.2L12 19.5l-7.6-3.7z"/></svg><span data-i18n="layers"></span></button>
+
+<button id="tfcPill" class="tfc-pill" type="button" hidden></button>
+
+<div class="fabs">
+  <button id="btnCheck" class="fab primary" type="button" aria-label="check">
+    <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+    <span data-i18n="checkHere"></span>
+  </button>
+  <button id="btnFilters" class="fab" type="button"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span data-i18n="filters"></span><i id="filterDot" hidden></i></button>
+</div>
+
+<!-- side panel / bottom sheet -->
+<section id="sheet" class="sheet" hidden aria-live="polite">
+  <div class="sheet-grip"></div>
+  <button class="sheet-close" id="sheetClose" type="button" aria-label="close">✕</button>
+  <div id="sheetBody"></div>
+</section>
+
+<footer class="foot">
+  <button id="btnInstall" type="button" class="linkish" data-i18n="installApp" hidden></button><span id="sepInstall" hidden> · </span>
+  <button id="btnInfo" type="button" class="linkish">מידע ושאלות נפוצות</button> ·
+  <button id="btnAbout" type="button" class="linkish"></button>
+</footer>
+
+<!-- seo:info – readable text for visitors and search engines; opened by #btnInfo. Keep it true to what the site does. -->
+<div id="seoInfo" hidden>
+<article lang="he" dir="rtl">
+<h2>מפת רחפנים ישראל – איפה מותר להטיס רחפן?</h2>
+<p>מפה חינמית למטיסי רחפנים וכטב"ם בישראל. לוחצים על נקודה במפה, או על "בדיקה כאן", ורואים מה חל במקום: אזורים אסורים, מוגבלים ומסוכנים, אזורי טיסה לכטב"ם, שדות תעופה, מנחתים ומנחתי מסוקים, וסגירות זמניות לפי נוטאם.</p>
+<p><b>זהו כלי עזר בלבד.</b> המקור המחייב הוא הפמ"ת והנוטאם הרשמיים של רשות התעופה האזרחית. יש לבדוק אותם לפני כל טיסה.</p>
+<h3>איפה מותר להטיס רחפן בישראל?</h3>
+<p>זה תלוי במקום, בגובה ובזמן. המפה מרכזת את האזורים מהפמ"ת ואת הסגירות הזמניות מהנוטאם, ומציגה לכל נקודה את המגבלות ואת פרטי הקשר לתיאום.</p>
+<h3>מה זה נוטאם (NOTAM)?</h3>
+<p>הודעה רשמית על שינוי זמני במרחב האווירי, כמו סגירת אזור, פעילות מיוחדת או מכשול חדש. המפה קוראת את הנוטאמים כל 6 שעות ומציירת אותם. כשהמיקום או הגודל לא ברורים, מוצג אזור משוער בצבע בולט יחד עם ציטוט הנוטאם המקורי.</p>
+<h3>מה זה פמ"ת?</h3>
+<p>פרסום המידע התעופתי של ישראל (AIP). ממנו נלקחים אזורי הטיסה, האזורים האסורים, שדות התעופה והמנחתים. המפה בודקת אותו פעם ביום ומציינת מתי עודכנה.</p>
+<h3>מה עוד יש במפה?</h3>
+<p>מזג אוויר לנקודה (רוח, משבים, רוח בגובה 100 מ', גשם, ראות, בסיס ענן, זריחה ושקיעה), גובה קרקע, מכשולים, שטח בנוי וריכוזי קהל, תנועה אווירית נמוכה, ו"למי מתקשרים?" לתיאום.</p>
+<h3>האם זה בחינם?</h3>
+<p>כן. בלי הרשמה ובלי התקנה, ועובד גם בטלפון.</p>
+<p><a href="https://harelrynar.github.io/drone-map-il/en/" hreflang="en">Israel Drone Map – English version</a></p>
+</article>
+</div>
+<!-- /seo:info -->
+
+<script src="js/leaflet.js"></script>
+<script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/terrain.js"></script>
+<script src="js/osm.js"></script>
+<script src="js/traffic.js"></script>
+<script src="js/whocall.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>
