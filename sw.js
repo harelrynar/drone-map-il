@@ -12,7 +12,7 @@
  *
  * בשינוי בקובץ הזה – להעלות את VERSION, כדי שהדפדפן יתקין את החדש.
  * ========================================================= */
-const VERSION = "1.9.0";
+const VERSION = "1.9.1";
 const CACHE = "uasmap-" + VERSION;
 const FONTS = "uasmap-fonts";
 
