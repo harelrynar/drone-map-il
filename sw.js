@@ -13,19 +13,19 @@
  * בשינוי בקובץ הזה – להעלות את VERSION, כדי שהדפדפן יתקין את החדש.
  * ========================================================= */
 const VERSION = "1.9.0";
-const CACHE = "uasmap-try-" + VERSION;
+const CACHE = "uasmap-" + VERSION;
 const FONTS = "uasmap-fonts";
 
 /* נשמרים בהתקנה, כדי שהאפליקציה תיפתח בלי קליטה כבר אחרי הביקור הראשון */
 const PRECACHE = [
-  "./", "manifest.webmanifest",
+  "./", "en/", "manifest.webmanifest", "manifest-en.webmanifest",
   "css/leaflet.css", "css/app.css",
   "js/leaflet.js", "js/config.js", "js/analytics.js", "js/i18n.js", "js/geo.js",
   "js/weather.js", "js/terrain.js", "js/osm.js", "js/traffic.js", "js/whocall.js",
   "js/app.js", "js/pwa.js",
   "img/icon-192.png", "img/apple-touch-icon.png",
-  "../data/basemap.json", "../data/meta.json", "../data/zones.json", "../data/notams.json",
-  "../data/overlays.json", "../data/versions.json", "../data/crosscheck.json"
+  "data/basemap.json", "data/meta.json", "data/zones.json", "data/notams.json",
+  "data/overlays.json", "data/versions.json", "data/crosscheck.json"
 ];
 
 /* זמן המתנה לרשת לפני שמציגים עותק שמור (אם יש) */
@@ -43,7 +43,7 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k.startsWith("uasmap-try-") && k !== CACHE && k !== FONTS).map(k => caches.delete(k)));
+    await Promise.all(keys.filter(k => k.startsWith("uasmap-") && k !== CACHE && k !== FONTS).map(k => caches.delete(k)));
     await self.clients.claim();
   })());
 });
@@ -94,7 +94,7 @@ self.addEventListener("fetch", event => {
   const url = new URL(req.url);
 
   if (url.origin === self.location.origin) {
-    if (!url.pathname.startsWith(new URL("../", self.registration.scope).pathname)) return;  // try-app: also ../data/
+    if (!url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
     event.respondWith(networkFirst(event));
     return;
   }
