@@ -12,7 +12,7 @@
  *
  * בשינוי בקובץ הזה – להעלות את VERSION, כדי שהדפדפן יתקין את החדש.
  * ========================================================= */
-const VERSION = "1.10.0";
+const VERSION = "1.10.1";
 const CACHE = "uasmap-" + VERSION;
 const FONTS = "uasmap-fonts";
 
@@ -55,7 +55,11 @@ async function networkFirst(event) {
   const key = keyOf(req.url);
   const cache = await caches.open(CACHE);
 
-  const net = fetch(req).then(res => {
+  // no-cache: בודקים מול השרת בכל פעם (304 זול), כדי שקובצי JS/CSS ישנים ממטמון הדפדפן
+  // (GitHub Pages: max-age=600) לא יתערבבו עם HTML חדש אחרי פרסום
+  let netReq = req;
+  if (req.mode !== "navigate" && req.cache !== "no-store") { try { netReq = new Request(req, { cache: "no-cache" }); } catch (e) { netReq = req; } }
+  const net = fetch(netReq).then(res => {
     if (res && res.ok && res.type === "basic") {
       const copy = res.clone();
       event.waitUntil(cache.put(key, copy).catch(() => {}));
