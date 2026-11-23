@@ -342,3 +342,10 @@ body.sheet-open .tfc-pill{display:none}
 #btnInstall{font-weight:700}
 html.offline #updatedLine::after{content:" · ⚠ offline";color:var(--caution);font-weight:700}
 html.offline[lang=he] #updatedLine::after{content:" · ⚠ אין קליטה"}
+
+/* ---------- 1.10: משוב ודיווח (Google Form) ---------- */
+.zfoot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.zcard .zfoot .mini{margin-bottom:0}
+a.report{font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+a.report:hover,a.report:focus{color:inherit}
+details.raw a.report{display:inline-block;margin:6px 0 4px}

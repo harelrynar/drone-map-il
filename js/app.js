@@ -494,7 +494,7 @@
   function unlocatedItem(n) {
     return `<details class="raw"><summary><b class="mono">${esc(n.id)}</b> · ${esc(L_(n.summary))}</summary>
       <div class="muted">${esc(T("validity"))}: ${fmtTime(n.valid && n.valid.from) || "—"} – ${n.valid && n.valid.to ? fmtTime(n.valid.to) : esc(T("permanent"))}${n.valid && n.valid.schedule ? " · " + esc(L_(n.valid.schedule)) : ""}</div>
-      <pre dir="ltr">${esc(n.raw)}</pre></details>`;
+      <pre dir="ltr">${esc(n.raw)}</pre>${reportLink(`NOTAM ${n.id} – ${L_(n.summary)}`, "notam-list")}</details>`;
   }
   function generalNoticesHtml() {
     const g = activeUnlocated("general");
@@ -514,6 +514,23 @@
   function contactInline(p) {
     const c = (p.contact || [])[0];
     return c ? ` · <span class="muted">${esc(c.value)}</span>` : "";
+  }
+
+  /* 1.10 – קישור לטופס המשוב, עם מילוי מראש של הגרסה, סוג הפנייה והאזור (בלי מיקום המשתמש) */
+  function feedbackUrl(area) {
+    const fb = CFG.feedback;
+    if (!(CFG.features.feedback && fb && fb.url)) return "";
+    const q = new URLSearchParams({ usp: "pp_url" });
+    if (fb.fields.version) q.set(fb.fields.version, `${CFG.version} (${state.lang})`);
+    if (area) {
+      if (fb.fields.kind && fb.kindError) q.set(fb.fields.kind, fb.kindError);
+      if (fb.fields.area) q.set(fb.fields.area, String(area).slice(0, 300));
+    }
+    return fb.url + "?" + q.toString();
+  }
+  function reportLink(area, from) {
+    const u = feedbackUrl(area);
+    return u ? `<a class="report fb-link" data-fb="${from}" href="${esc(u)}" target="_blank" rel="noopener">✎ ${esc(T("reportHere"))}</a>` : "";
   }
 
   function zoneCard(f, open) {
@@ -548,7 +565,7 @@
         ${approx}
         <dl>${rows.map(r => `<dt>${esc(r[0])}</dt><dd>${r[1]}</dd>`).join("")}</dl>
         ${raw}
-        <button class="mini" data-act="zoomto" data-id="${esc(p.id)}">⌖</button>
+        <div class="zfoot"><button class="mini" data-act="zoomto" data-id="${esc(p.id)}">⌖</button>${reportLink(p.notam ? `NOTAM ${p.notam.id || p.id} – ${L_(p.name)}` : `${p.designator ? p.designator + " – " : ""}${(p.name && (p.name.he || p.name.en)) || L_(p.name)} [${p.id}]`, p.notam ? "notam" : "zone")}</div>
       </details>`;
   }
   function contactHtml(c) {
@@ -1066,6 +1083,20 @@
     openSheet(part.innerHTML, "info");
   }
   if ($("#btnInfo")) $("#btnInfo").onclick = openInfo;
+  // 1.10 – משוב והצעות
+  function initFeedback() {
+    const a = $("#lnkFeedback"), u = feedbackUrl("");
+    if (!a) return;
+    a.hidden = !u; if ($("#sepFeedback")) $("#sepFeedback").hidden = !u;
+    if (u) a.href = u;
+  }
+  initFeedback();
+  document.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest("a.fb-link");
+    if (!a) return;
+    if (a.id === "lnkFeedback") a.href = feedbackUrl("");   // הגרסה והשפה העדכניות
+    Track("feedback-open", { from: a.dataset.fb || "?" });
+  });
   $("#btnLang").onclick = () => {
     state.lang = state.lang === "he" ? "en" : "he"; store.set("lang", state.lang); applyLang();
     Track("language", { to: state.lang });

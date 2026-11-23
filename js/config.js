@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.9.1",
+  version: "1.10",
 
   map: {
     center: [31.45, 34.95],
@@ -40,7 +40,17 @@ window.APP_CONFIG = {
     osm: true,               // 1.8: מכשולים, שטח בנוי וריכוזי קהל (js/osm.js)
     traffic: true,           // 1.8: תנועה אווירית נמוכה (js/traffic.js)
     whoCall: true,           // 1.8: "למי מתקשרים?" (js/whocall.js)
-    pwa: true                // 1.9: התקנה כאפליקציה + עבודה בלי קליטה (js/pwa.js, sw.js)
+    pwa: true,               // 1.9: התקנה כאפליקציה + עבודה בלי קליטה (js/pwa.js, sw.js)
+    feedback: true           // 1.10: "משוב והצעות" + "דווח" בכרטיס אזור/נוטאם (Google Form)
+  },
+
+  /* 1.10 – טופס משוב (Google Forms של הבעלים, "מפת אזורי כטב״ם – משוב"). התשובות נכנסות לגיליון
+     "מפת אזורי כטב״ם – משוב (תגובות)" ב-Drive. השדות ממולאים מראש דרך entry.<id>.
+     ערך kindError חייב להיות זהה לנוסח האפשרות בטופס. */
+  feedback: {
+    url: "https://docs.google.com/forms/d/e/1FAIpQLSfpKFVSpq13yyc4acTFW02qcDxChbIc8liaeu2qPD0CZXHrsw/viewform",
+    fields: { kind: "entry.618581239", version: "entry.428140725", area: "entry.963416057" },
+    kindError: "טעות במפה"
   },
 
   /* 1.8 – גובה קרקע: Open-Meteo Elevation (Copernicus DEM ~90 מ'), נשלף מהדפדפן בכל בדיקת נקודה. */
