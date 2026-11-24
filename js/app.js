@@ -85,8 +85,10 @@
     return lowFt <= altFt;
   }
   function isShown(f) {
-    const k = layerKey(f);
-    if (!state.layersOn[k]) return false;
+    return !!state.layersOn[layerKey(f)] && passesFilters(f);
+  }
+  /* 1.12.1 – the time/altitude filters only. Hiding a layer is a display choice: a point check still lists every zone that applies there */
+  function passesFilters(f) {
     const st = timeStatus(f);
     if (!state.showInactive && st === "inactive") return false;
     // תאריך עתידי שנבחר במכוון – מציגים את מה שפעיל באותו זמן
@@ -227,8 +229,8 @@
   function zonesAt(lat, lon) {
     return state.features.filter(f => {
       const k = layerKey(f);
-      if (k === "airfield" || k === "heliport") return f.properties.radius_m && Geo.contains(f, lat, lon) && isShown(f);
-      return Geo.contains(f, lat, lon) && isShown(f);
+      if (k === "airfield" || k === "heliport") return f.properties.radius_m && Geo.contains(f, lat, lon) && passesFilters(f);
+      return Geo.contains(f, lat, lon) && passesFilters(f);
     });
   }
   function airfieldsNear(lat, lon) {
@@ -581,6 +583,7 @@
     return `
       <details class="zcard" ${open ? "open" : ""} style="--zc:${lc.color}">
         <summary><i class="sw"></i><span>${esc(L_(p.name))}</span>${state.newIds.has(p.id) ? `<em class="newtag">${esc(T("newUpdate"))}</em>` : ""}</summary>
+        ${state.layersOn[key] ? "" : `<div class="hiddenlyr">👁 ${esc(T("layerHidden"))} <button class="mini" type="button" data-act="showLayer" data-k="${esc(key)}">${esc(T("showLayer"))}</button></div>`}
         ${approx}
         <dl>${rows.map(r => `<dt>${esc(r[0])}</dt><dd>${r[1]}</dd>`).join("")}</dl>
         ${raw}
@@ -637,6 +640,11 @@
     if (act === "wxUnit") { state.wxUnit = b.dataset.u === "ms" ? "ms" : "kn"; store.set("wxUnit", state.wxUnit); Track("weather-unit", { unit: state.wxUnit }); drawWeather(); }
     if (act === "wxRefresh" && state.wxOpenAt) showWeather(state.wxOpenAt[0], state.wxOpenAt[1], true);
     if (act === "focus" || act === "zoomto") focusZone(b.dataset.id);
+    if (act === "showLayer") {   // 1.12.1 – turn on the layer of a zone listed at the point, keep the same point open
+      Track("layer-toggle", { layer: b.dataset.k, on: true, from: "point" });
+      state.layersOn[b.dataset.k] = true; store.set("layers", state.layersOn); drawZones();
+      if (state.lastPoint) { rerender = true; try { openPoint(...state.lastPoint); } finally { rerender = false; } }
+    }
     if (act === "layer") { state.layersOn[b.dataset.k] = b.checked; store.set("layers", state.layersOn); drawZones(); openLayers(); }
     if (act === "geo") locateMe();
     if (act === "allOn" || act === "allOff") {

@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.12.1",
+   "date": "2026-11-24",
+   "he": "תיקון: בבדיקת נקודה מוצגים כל האזורים שחלים עליה, גם משכבות שהוסתרו במפה, והם נספרים בתשובה (גם ב\"המקומות שלי\"). אזור משכבה מוסתרת מסומן בכרטיס שלו, עם כפתור \"הצג במפה\". סינון הגובה והמועד ממשיך לחול.",
+   "en": "Fix: a point check now lists every zone that applies there, including zones from layers hidden on the map, and counts them in the answer (also in My places). A zone from a hidden layer is marked on its card, with a \"Show on map\" button. The height and time filters still apply."
+  },
+  {
    "version": "1.12",
    "date": "2026-11-24",
    "he": "המקומות שלי: שומרים נקודה בכפתור \"☆ שמור במקומות שלי\", ופותחים את הרשימה מכפתור ★ \"המקומות שלי\" במפה. לכל מקום מוצג המצב שלו עכשיו, ומסומן אם משהו השתנה בו מאז הפעם הקודמת (מצב חדש או נוטאם חדש בטווח 5 ק\"מ). אפשר לשנות שם ולמחוק.",
