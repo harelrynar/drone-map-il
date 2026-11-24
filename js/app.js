@@ -477,13 +477,31 @@
     if (X.osm) h += row("obs", "x-obs", he ? "מכשולים: קווי מתח, אנטנות, טורבינות" : "Obstacles: power lines, masts, turbines", z("lines"))
       + row("built", "x-built", he ? "שטח בנוי" : "Built-up area", z("built"))
       + row("crowd", "x-crowd", he ? "ריכוזי קהל: בתי ספר, קניונים, אצטדיונים…" : "Crowd places: schools, malls, stadiums…", z("crowd"));
-    if (X.traffic) h += row("traffic", "x-tfc", he ? "תנועה אווירית נמוכה (ADS-B)" : "Low-level traffic (ADS-B)", he ? `מתחת ל-${Traffic.cfg.maxAltFt.toLocaleString()} רגל` : `below ${Traffic.cfg.maxAltFt.toLocaleString()} ft`);
+    if (X.traffic) h += row("traffic", "x-tfc", he ? "תנועה אווירית נמוכה (ADS-B)" : "Low-level traffic (ADS-B)", he ? `מתחת ל-${Traffic.cfg.maxAltFt.toLocaleString()} רגל` : `below ${Traffic.cfg.maxAltFt.toLocaleString()} ft`)
+      + `<div class="tfc-live" id="tfcLive">${tfcLiveHtml()}</div>`;
     return h + `</div><p class="fine">${he ? "מכשולים, שטח בנוי וריכוזי קהל מבוססים על OpenStreetMap ואינם מלאים. תנועה אווירית: רק מי שמשדר ADS-B, בעיכוב של דקה עד שתיים." : "Obstacles, built-up areas and crowd places come from OpenStreetMap and are incomplete. Traffic: ADS-B only, delayed by one to two minutes."}</p>`;
   }
   function setExtraLayer(k, v) {
     state.xl[k] = v; store.set("xl", state.xl);
-    if (k === "traffic") { if (X.traffic) Traffic.set(v); } else if (X.osm) Osm.set(k, v);
+    if (k === "traffic") { if (X.traffic) { Traffic.set(v); if ($("#tfcLive")) $("#tfcLive").innerHTML = tfcLiveHtml(); tfcBadge(); } } else if (X.osm) Osm.set(k, v);
     Track("layer-toggle", { layer: "x-" + k, on: v });
+  }
+  // traffic status inside the layers panel (replaces the floating pill)
+  function tfcLiveHtml() {
+    const he = state.lang === "he", st = Traffic.status();
+    if (st.state === "off") return "";
+    let txt;
+    if (st.state === "ok") txt = he ? `<b>${st.count}</b> כלי טיס נמוכים כרגע` : `<b>${st.count}</b> low aircraft now`;
+    else if (st.state === "loading") txt = "…";
+    else txt = `<span class="stale">${esc(Traffic.t(state.lang, "pillStale"))}</span>`;
+    return `<span>✈ ${txt}</span><button class="btn" type="button" data-act="tfcList">${he ? "רשימה" : "List"} ›</button>`;
+  }
+  // small count on the "Layers" button while low aircraft are shown
+  function tfcBadge() {
+    const b = $("#tfcBadge"); if (!b || !X.traffic) return;
+    const st = Traffic.status(), n = st.state === "ok" ? st.count : 0;
+    b.hidden = !n; b.textContent = n ? "✈" + n : "";
+    b.title = n ? (state.lang === "he" ? `${n} כלי טיס נמוכים` : `${n} low aircraft`) : "";
   }
   function openTraffic() { openSheet(Traffic.listHtml(xo()), "traffic"); }
 
@@ -614,6 +632,7 @@
       else { try { navigator.clipboard.writeText(txt).then(() => toast(WhoCall.t(state.lang, "copied"))).catch(() => {}); } catch (x) {} }
     }
     if (act === "terrRetry" && state.pt) { Terrain.get(state.pt.lat, state.pt.lon, true).catch(() => {}); rerender = true; openPoint(...state.lastPoint); rerender = false; }
+    if (act === "tfcList") { Track("panel", { name: "traffic", from: "layers" }); openTraffic(); }
     if (act === "tfcGo") { map.setView([+b.dataset.lat, +b.dataset.lon], Math.max(map.getZoom(), 11)); }
     if (act === "wxUnit") { state.wxUnit = b.dataset.u === "ms" ? "ms" : "kn"; store.set("wxUnit", state.wxUnit); Track("weather-unit", { unit: state.wxUnit }); drawWeather(); }
     if (act === "wxRefresh" && state.wxOpenAt) showWeather(state.wxOpenAt[0], state.wxOpenAt[1], true);
@@ -1133,11 +1152,13 @@
   }
   if (X.osm) Osm.init(map, { on: { obs: state.xl.obs, built: state.xl.built, crowd: state.xl.crowd } });
   if (X.traffic) {
-    const pill = $("#tfcPill");
-    if (pill) pill.onclick = openTraffic;
     Traffic.init(map, {
-      lang: () => state.lang, on: state.xl.traffic, pill,
-      onUpdate: () => { if (sheetKind === "point") drawPointExtras(); else if (sheetKind === "traffic") openTraffic(); }
+      lang: () => state.lang, on: state.xl.traffic, pill: null,
+      onUpdate: () => {
+        if (sheetKind === "point") drawPointExtras(); else if (sheetKind === "traffic") openTraffic();
+        else if (sheetKind === "layers" && $("#tfcLive")) $("#tfcLive").innerHTML = tfcLiveHtml();
+        tfcBadge();
+      }
     });
   }
   window.__app = { map, openPoint, focusZone, state };
