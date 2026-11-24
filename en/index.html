@@ -70,7 +70,13 @@
     <input id="search" type="search" autocomplete="off" enterkeyhint="search" data-i18n-ph="search">
     <div id="searchResults" class="search-results" hidden></div>
   </div>
-  <button id="btnLayers" class="fab layers-top" type="button"><svg viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5-10-5zm-7.6 8.3L2 12.5l10 5 10-5-2.4-1.2L12 15l-7.6-3.7zm0 4.5L2 17l10 5 10-5-2.4-1.2L12 19.5l-7.6-3.7z"/></svg><span data-i18n="layers"></span></button>
+  <div class="tools-row">
+    <button id="btnLayers" class="fab layers-top" type="button"><svg viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5-10-5zm-7.6 8.3L2 12.5l10 5 10-5-2.4-1.2L12 15l-7.6-3.7zm0 4.5L2 17l10 5 10-5-2.4-1.2L12 19.5l-7.6-3.7z"/></svg><span data-i18n="layers"></span></button>
+    <div class="seg" id="timeSeg" role="group" aria-label="time">
+      <button type="button" data-span="" class="on" aria-pressed="true" data-i18n="spanNow">עכשיו</button><button type="button" data-span="today" aria-pressed="false" data-i18n="spanToday">היום</button><button type="button" data-span="tomorrow" aria-pressed="false" data-i18n="spanTomorrow">מחר</button>
+    </div>
+  </div>
+  <button id="closuresPill" class="cl-pill" type="button" hidden></button>
 </div>
 
 <div class="fabs">
@@ -78,6 +84,7 @@
     <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
     <span data-i18n="checkHere"></span>
   </button>
+  <button id="btnPlaces" class="fab" type="button"><svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg><span data-i18n="myPlaces"></span><i id="placesDot" hidden></i></button>
   <button id="btnFilters" class="fab" type="button"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span data-i18n="filters"></span><i id="filterDot" hidden></i></button>
 </div>
 

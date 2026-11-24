@@ -22,6 +22,8 @@
     altM: store.get("altM", 120),           // null = all altitudes; default: typical small-UAS ceiling
     when: null,                              // null = now
     showInactive: store.get("showInactive", false),
+    span: null,                              // 1.12: null = a moment (now / state.when); "today" | "tomorrow" = the whole day
+    hc: store.get("hc", false),              // 1.12: high contrast for sunlight
     lastSeen: store.get("lastSeen", null),
     watch: store.get("watch", []),
     meta: null, features: [], unlocated: [], basemap: null,
@@ -57,7 +59,20 @@
   function fmtCoord(lat, lon) { return `${lat.toFixed(5)}, ${lon.toFixed(5)}`; }
 
   /* ---------- filtering ---------- */
-  function nowT() { return state.when ? new Date(state.when) : new Date(); }
+  function nowT() { const r = spanRange(); return r ? r[0] : state.when ? new Date(state.when) : new Date(); }
+  /* 1.12 – quick time chips: start of an Israel-time day (0 = today) and the selected range */
+  function ilDayStart(addDays) {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(now);
+    const g = k => +((parts.find(x => x.type === k) || {}).value || 0);
+    const ms = ((g("hour") * 60 + g("minute")) * 60 + g("second")) * 1000 + now.getMilliseconds();
+    return new Date(now.getTime() - ms + addDays * 86400000);
+  }
+  function spanRange() {
+    if (state.span === "today") return [new Date(), ilDayStart(1)];
+    if (state.span === "tomorrow") return [ilDayStart(1), ilDayStart(2)];
+    return null;
+  }
   function layerKey(f) {
     const p = f.properties;
     if (p.layer === "notam" && p.confidence === "approx") return "notamApprox";
@@ -66,6 +81,12 @@
   function timeStatus(f) {
     const p = f.properties, v = p.valid || {};
     if (p.status === "inactive") return "inactive";
+    const r = spanRange();
+    if (r) {   // active at any time during the selected day
+      if (v.to && new Date(v.to) < r[0]) return "inactive";
+      if (v.from && new Date(v.from) >= r[1]) return "scheduled";
+      return "active";
+    }
     const t = nowT();
     if (v.to && new Date(v.to) < t) return "inactive";
     if (v.from && new Date(v.from) > t) return "scheduled";
@@ -90,7 +111,7 @@
     const st = timeStatus(f);
     if (!state.showInactive && st === "inactive") return false;
     // תאריך עתידי שנבחר במכוון – מציגים את מה שפעיל באותו זמן
-    if (state.when && st === "scheduled" && !state.showInactive) return false;
+    if ((state.when || state.span) && st === "scheduled" && !state.showInactive) return false;
     return altitudeRelevant(f);
   }
 
@@ -194,9 +215,9 @@
       const p = f.properties, isNew = state.newIds.has(p.id);
       const st = timeStatus(f);
       const style = {
-        pane: "p_" + key, color: lc.color, weight: key === "notamApprox" ? 2.5 : 2, dashArray: lc.dash,
-        fillColor: lc.color, fillOpacity: st === "active" ? lc.fill : lc.fill * 0.4,
-        opacity: st === "active" ? 0.95 : 0.5,
+        pane: "p_" + key, color: lc.color, weight: (key === "notamApprox" ? 2.5 : 2) * (state.hc ? 1.8 : 1), dashArray: lc.dash,
+        fillColor: lc.color, fillOpacity: (st === "active" ? lc.fill : lc.fill * 0.4) * (state.hc ? 1.5 : 1),
+        opacity: st === "active" ? (state.hc ? 1 : 0.95) : 0.5,
         className: "zone z-" + key + (isNew ? " is-new" : "")
       };
       let layer;
@@ -221,6 +242,7 @@
     });
     state.counts = counts;
     updateFilterDot();
+    updateClosures();
   }
 
   /* ---------- point check ---------- */
@@ -266,6 +288,7 @@
         <div class="v-title">${esc(v[1])}</div>
         <div class="v-sub">${esc(T("verdictInfoSub"))}</div>
       </div>
+      ${CFG.features.brief ? `<button class="btn wide brief-btn" type="button" data-act="brief" data-lat="${lat}" data-lon="${lon}"><span>📋 ${esc(HE() ? "תדריך טיסה לנקודה" : "Flight brief for this point")}</span><small>${esc(HE() ? "אזורים, נוטאם, מזג אוויר, תנועה ולמי מתקשרים – במקום אחד, לשיתוף" : "zones, NOTAMs, weather, traffic and who to call – in one place, to share")}</small></button>` : ""}
       ${whoCallSlot(lat, lon, here, near)}
       <div class="pt-row">
         <span class="mono">${fmtCoord(lat, lon)}</span>
@@ -527,6 +550,7 @@
     const parts = [];
     if (state.altM != null) parts.push(`${state.altM} ${T("metersAgl")}`);
     if (state.when) parts.push(fmtTime(state.when));
+    if (state.span) parts.push(spanLabel());
     return parts.length ? `<div class="fsum">${esc(T("filters"))}: ${esc(parts.join(" · "))}</div>` : "";
   }
   function contactInline(p) {
@@ -619,9 +643,8 @@
     if (act === "watch" || act === "unwatch") {
       const lat = +b.dataset.lat, lon = +b.dataset.lon;
       Track(act === "watch" ? "watch-add" : "watch-remove");
-      if (act === "watch") state.watch.push({ lat, lon, at: new Date().toISOString() });
-      else state.watch = state.watch.filter(w => !(Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4));
-      store.set("watch", state.watch); drawWatch(); rerender = true; openPoint(lat, lon); rerender = false;
+      if (act === "watch") addPlace(lat, lon);
+      else { state.watch = state.watch.filter(w => !(Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4)); store.set("watch", state.watch); drawWatch(); } rerender = true; openPoint(lat, lon); rerender = false;
     }
     if (act === "wx") toggleWeather(b);
     if (act === "wc") toggleWhoCall(b);
@@ -645,7 +668,7 @@
     }
     if (act === "coords") Track("coords-search");
     if (act === "coords") { const v = Geo.parseCoords($("#coordIn").value); if (!v) toast(T("badCoords")); else { map.setView(v, Math.max(map.getZoom(), 12)); openPoint(v[0], v[1]); } }
-    if (act === "resetFilters") { state.altM = null; state.when = null; state.showInactive = false; persistFilters(); drawZones(); openFilters(); }
+    if (act === "resetFilters") { state.altM = null; state.when = null; state.span = null; state.showInactive = false; syncSpanChips(); persistFilters(); drawZones(); openFilters(); }
   });
   $("#sheetBody").addEventListener("click", e => { const a = e.target.closest("[data-wc]"); if (a) Track("whocall-" + a.dataset.wc); });
   $("#sheetBody").addEventListener("change", e => {
@@ -656,7 +679,8 @@
     if (t.matches("[data-layer]")) { Track("layer-toggle", { layer: t.dataset.layer, on: t.checked }); state.layersOn[t.dataset.layer] = t.checked; store.set("layers", state.layersOn); drawZones(); }
     if (t.id === "altSel" || t.id === "whenIn" || t.id === "inactiveChk") Track("filter", { kind: t.id, value: t.type === "checkbox" ? String(t.checked) : (t.id === "altSel" ? t.value || "all" : (t.value ? "set" : "now")) });
     if (t.id === "altSel") { state.altM = t.value === "" ? null : +t.value; persistFilters(); drawZones(); }
-    if (t.id === "whenIn") { state.when = t.value ? new Date(t.value).toISOString() : null; drawZones(); updateFilterDot(); }
+    if (t.id === "whenIn") { state.when = t.value ? new Date(t.value).toISOString() : null; state.span = null; syncSpanChips(); drawZones(); updateFilterDot(); }
+    if (t.matches("[data-hc]")) setHc(t.checked);
     if (t.id === "inactiveChk") { state.showInactive = t.checked; persistFilters(); drawZones(); }
   });
   $("#sheetBody").addEventListener("input", e => { const t = e.target; if (t.matches("[data-ovlop]")) setOverlayOpacity(t.dataset.ovlop, +t.value); });
@@ -715,6 +739,278 @@
     }).join("");
   }
 
+  /* =========================================================
+   * 1.12 – pilot tools: quick time chips, active closures, flight brief, my places, high contrast
+   * ========================================================= */
+  const HE = () => state.lang === "he";
+  const isNotamKey = k => k === "notam" || k === "notamApprox";
+  const distTo = (lat, lon, f) => Geo.contains(f, lat, lon) ? 0 : Geo.distanceM(lat, lon, ...Geo.featureCenter(f));
+  const km = m => m < 1000 ? (HE() ? "בתוך האזור / פחות מ-1 ק\"מ" : "inside / under 1 km") : `${(m / 1000).toFixed(m < 10000 ? 1 : 0)} ${T("km")}`;
+  function fmtDay(d) {
+    return d.toLocaleDateString(HE() ? "he-IL" : "en-GB", { timeZone: "Asia/Jerusalem", weekday: "short", day: "2-digit", month: "2-digit" });
+  }
+  function spanLabel() {
+    if (state.span === "today") return T("spanToday");
+    if (state.span === "tomorrow") return `${T("spanTomorrow")} (${fmtDay(ilDayStart(1))})`;
+    if (state.when) return fmtTime(state.when);
+    return T("spanNow");
+  }
+
+  /* --- time chips --- */
+  function syncSpanChips() {
+    document.querySelectorAll("#timeSeg [data-span]").forEach(b => {
+      const on = !state.when && (b.dataset.span || null) === state.span;
+      b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
+    });
+    const seg = $("#timeSeg"); if (seg) seg.classList.toggle("custom", !!state.when);
+  }
+  function setSpan(v) {
+    state.span = v || null; state.when = null;
+    Track("time-chip", { span: state.span || "now" });
+    syncSpanChips(); drawZones();
+    if (sheetKind === "point" && state.lastPoint) { rerender = true; openPoint(...state.lastPoint); rerender = false; }
+    else if (sheetKind === "closures") openClosures();
+    else if (sheetKind === "places") openPlaces();
+    else if (sheetKind === "brief" && state.briefAt) openBrief(...state.briefAt);
+  }
+  document.querySelectorAll("#timeSeg [data-span]").forEach(b => b.onclick = () => setSpan(b.dataset.span));
+  if (!CFG.features.timeChips) { if ($("#timeSeg")) $("#timeSeg").hidden = true; if ($("#closuresPill")) $("#closuresPill").remove(); }
+  if (!CFG.features.places && $("#btnPlaces")) $("#btnPlaces").remove();
+
+  /* --- active closures (NOTAM areas) for the selected time --- */
+  function activeClosures() {
+    return state.features.filter(f => isNotamKey(layerKey(f)) && timeStatus(f) === "active");
+  }
+  function closuresWord() {
+    if (state.span === "today") return HE() ? "היום" : "today";
+    if (state.span === "tomorrow") return HE() ? "מחר" : "tomorrow";
+    if (state.when) return HE() ? "במועד שנבחר" : "at the selected time";
+    return HE() ? "עכשיו" : "now";
+  }
+  function updateClosures() {
+    const b = $("#closuresPill"); if (!b || !CFG.features.timeChips) return;
+    const n = activeClosures().length;
+    b.hidden = !state.features.length;
+    b.classList.toggle("zero", !n);
+    b.innerHTML = HE()
+      ? `<b>${n}</b> ${n === 1 ? "סגירה פעילה" : "סגירות פעילות"} ${esc(closuresWord())} <i>›</i>`
+      : `<b>${n}</b> active ${n === 1 ? "closure" : "closures"} ${esc(closuresWord())} <i>›</i>`;
+  }
+  if ($("#closuresPill")) $("#closuresPill").onclick = () => { Track("closures-open", { span: state.span || (state.when ? "custom" : "now") }); openClosures(); };
+  function validTxt(p) {
+    const v = p.valid || {};
+    let s = `${fmtTime(v.from) || "—"} – ${v.to ? fmtTime(v.to) : esc(T("permanent"))}`;
+    if (v.schedule) s += ` · ${esc(L_(v.schedule))}`;
+    return s;
+  }
+  function limitsTxt(p) { return p.lower || p.upper ? `${fmtLimit(p.lower)} – ${fmtLimit(p.upper)}` : ""; }
+  function limitsHtml(p) { return p.lower || p.upper ? `<bdi>${esc(fmtLimit(p.lower))}</bdi> – <bdi>${esc(fmtLimit(p.upper))}</bdi>` : ""; }
+  function openClosures() {
+    const mine = !!state.myPos, c = map.getCenter();
+    const o = mine ? state.myPos : [c.lat, c.lng];
+    const list = activeClosures().map(f => ({ f, d: distTo(o[0], o[1], f) })).sort((a, b) => a.d - b.d);
+    const gen = activeUnlocated("general");
+    let html = `<h2>${HE() ? "סגירות פעילות" : "Active closures"} ${esc(closuresWord())} <small>(${list.length})</small></h2>
+      <p class="muted cl-sub">${esc(spanLabel())} · ${HE() ? (mine ? "ממוין לפי המרחק ממך" : "ממוין לפי המרחק ממרכז המפה") : (mine ? "sorted by distance from you" : "sorted by distance from the map centre")}</p>`;
+    html += list.length ? `<ul class="cl-list">${list.map(x => {
+      const p = x.f.properties, lc = CFG.layers[layerKey(x.f)];
+      return `<li><button type="button" data-act="focus" data-id="${esc(p.id)}"><i class="sw" style="--zc:${lc.color}"></i>
+        <span class="cl-main"><b>${esc(L_(p.name))}</b>${p.designator ? ` <small class="mono">${esc(p.designator)}</small>` : ""}
+        <small>${validTxt(p)}${limitsTxt(p) ? " · " + limitsHtml(p) : ""}${layerKey(x.f) === "notamApprox" ? " · " + esc(HE() ? "מיקום משוער" : "approx. area") : ""}</small></span>
+        <em>${esc(km(x.d))}</em></button></li>`;
+    }).join("")}</ul>` : `<p class="muted">${HE() ? "לא נמצאו סגירות עם מיקום על המפה בזמן הזה." : "No closures with a map location at this time."}</p>`;
+    if (gen.length) html += `<h3>⚠ ${esc(T("generalNotices"))} <small>(${gen.length})</small></h3>` + gen.map(unlocatedItem).join("");
+    html += `<p class="disclaimer">${esc(T("disclaimer"))}</p>`;
+    openSheet(html, "closures");
+  }
+
+  /* --- high contrast for sunlight --- */
+  function setHc(on) {
+    state.hc = !!on; store.set("hc", state.hc);
+    document.body.classList.toggle("hc", state.hc);
+    Track("hc-toggle", { on: state.hc });
+    drawZones();
+  }
+  document.body.classList.toggle("hc", !!state.hc);
+  function displayHtml() {
+    if (!CFG.features.highContrast) return "";
+    return `<div class="lrows hc-row"><label class="lrow"><input type="checkbox" data-hc ${state.hc ? "checked" : ""}>
+      <i class="sw hc-sw">☀</i><span>${HE() ? "ניגודיות גבוהה לשמש" : "High contrast for sunlight"}</span><small>${HE() ? "קווים עבים, טקסט גדול" : "thick lines, large text"}</small></label></div>`;
+  }
+
+  /* --- my places (stored in "watch": { lat, lon, at, name?, lastV?, seenN? }) --- */
+  const samePlace = (w, lat, lon) => Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4;
+  const placeName = w => w.name || nearestCity(w.lat, w.lon) || fmtCoord(w.lat, w.lon);
+  function placeStatus(w) {
+    const here = zonesAt(w.lat, w.lon), near = airfieldsNear(w.lat, w.lon), v = verdictOf(here, near);
+    const notams = state.features.filter(f => isNotamKey(layerKey(f)) && timeStatus(f) === "active" && distTo(w.lat, w.lon, f) <= 5000);
+    return { v: v[0], label: v[1], here, notams };
+  }
+  // the baseline for "what changed" is always "now", whatever chip is selected
+  function placeStatusNow(w) {
+    const keep = [state.span, state.when]; state.span = null; state.when = null;
+    try { return placeStatus(w); } finally { [state.span, state.when] = keep; }
+  }
+  function placeChanges(w) {
+    const st = placeStatusNow(w), out = [];
+    const vName = x => T(x === "no" ? "verdictNo" : x === "caution" ? "verdictCaution" : "verdictInfo");
+    if (w.lastV && w.lastV !== st.v) out.push(HE() ? `המצב השתנה מאז הפעם הקודמת (היה: ${vName(w.lastV)})` : `Status changed since last time (was: ${vName(w.lastV)})`);
+    const seen = new Set(w.seenN || []);
+    const fresh = w.seenN ? st.notams.filter(f => !seen.has(f.properties.id)) : [];
+    if (fresh.length) out.push(HE() ? `${fresh.length === 1 ? "נוטאם חדש" : fresh.length + " נוטאמים חדשים"} בטווח 5 ק"מ` : `${fresh.length} new NOTAM${fresh.length > 1 ? "s" : ""} within 5 km`);
+    return { st, out };
+  }
+  function markPlacesSeen() {
+    state.watch.forEach(w => { const st = placeStatusNow(w); w.lastV = st.v; w.seenN = st.notams.map(f => f.properties.id); });
+    store.set("watch", state.watch); updatePlacesDot();
+  }
+  function updatePlacesDot() {
+    const d = $("#placesDot"); if (!d) return;
+    d.hidden = !state.features.length || !state.watch.some(w => placeChanges(w).out.length);
+  }
+  function addPlace(lat, lon) {
+    const w = { lat, lon, at: new Date().toISOString() };
+    w.name = nearestCity(lat, lon) || "";
+    const st = placeStatusNow(w); w.lastV = st.v; w.seenN = st.notams.map(f => f.properties.id);
+    state.watch.push(w); store.set("watch", state.watch); drawWatch();
+    toast(HE() ? `נשמר במקומות שלי${w.name ? ": " + w.name : ""}` : `Saved to My places${w.name ? ": " + w.name : ""}`);
+  }
+  function openPlaces() {
+    let html = `<h2>★ ${HE() ? "המקומות שלי" : "My places"}</h2>`;
+    if (!state.watch.length) {
+      html += `<p class="muted">${HE() ? "עוד לא שמרת מקומות. בודקים נקודה (נגיעה במפה או \"אפשר לטוס כאן?\") ולוחצים \"☆ שמור במקומות שלי\". כאן יופיע המצב של כל מקום, ובפתיחת המפה יסומן אם משהו השתנה בו." : "No saved places yet. Check a point (tap the map or \"Can I fly here?\") and press \"☆ Save to My places\". Each place's status shows here, and the map marks places where something changed."}</p>`;
+      openSheet(html, "places"); return;
+    }
+    html += `<p class="muted cl-sub">${esc(spanLabel())}${state.altM != null ? " · " + state.altM + " " + esc(T("metersAgl")) : ""}</p><ul class="pl-list">`;
+    state.watch.forEach((w, i) => {
+      const ch = placeChanges(w), st = state.span || state.when ? placeStatus(w) : ch.st;
+      html += `<li class="pl pl-${st.v}"><div class="pl-top"><i class="pl-dot"></i>
+          <button type="button" class="pl-name" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${esc(placeName(w))}</button>
+          <button type="button" class="mini" data-act="plRename" data-i="${i}" aria-label="rename">✎</button>
+          <button type="button" class="mini" data-act="plDel" data-i="${i}" aria-label="delete">🗑</button></div>
+        <div class="pl-sub"><b>${esc(st.label)}</b>${st.notams.length ? ` · ${HE() ? `${st.notams.length} סגירות פעילות בטווח 5 ק"מ` : `${st.notams.length} active closures within 5 km`}` : ""}</div>
+        ${ch.out.map(t => `<div class="pl-new">● ${esc(t)}</div>`).join("")}
+        <div class="pl-acts"><button type="button" class="btn small" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${HE() ? "בדיקה" : "Check"}</button>
+          <button type="button" class="btn small" data-act="plBrief" data-lat="${w.lat}" data-lon="${w.lon}">📋 ${HE() ? "תדריך" : "Brief"}</button>
+          <span class="mono muted">${fmtCoord(w.lat, w.lon)}</span></div></li>`;
+    });
+    html += `</ul><p class="fine">${HE() ? "\"השתנה\" ו\"נוטאם חדש\" מושווים למצב בפעם הקודמת שפתחת את הרשימה הזו (לפי הזמן הנוכחי). המקומות נשמרים רק במכשיר הזה." : "\"Changed\" and \"new NOTAM\" compare with the last time you opened this list (for the current time). Places are stored on this device only."}</p>`;
+    openSheet(html, "places");
+    markPlacesSeen();
+  }
+  if ($("#btnPlaces")) $("#btnPlaces").onclick = () => { Track("places-open", { n: state.watch.length }); openPlaces(); };
+
+  /* --- flight brief for a point --- */
+  let briefSeq = 0;
+  function openBrief(lat, lon) {
+    state.briefAt = [lat, lon];
+    const seq = ++briefSeq;
+    const here = zonesAt(lat, lon), near = airfieldsNear(lat, lon), v = verdictOf(here, near);
+    here.sort((a, b) => CFG.layers[layerKey(b)].severity - CFG.layers[layerKey(a)].severity);
+    const city = nearestCity(lat, lon);
+    const nts = activeClosures().filter(f => !here.includes(f)).map(f => ({ f, d: distTo(lat, lon, f) })).filter(x => x.d <= 10000).sort((a, b) => a.d - b.d);
+    const tf = X.traffic ? Traffic.near(lat, lon) : [];
+    const sec = (ico, title, body, id) => `<section class="br-sec"${id ? ` id="${id}"` : ""}>${title ? `<h3>${ico} ${esc(title)}</h3>` : ""}${body}</section>`;
+    let html = `<h2>📋 ${HE() ? "תדריך טיסה" : "Flight brief"}</h2>
+      <div class="br-head"><b>${esc(city || fmtCoord(lat, lon))}</b><span class="mono">${fmtCoord(lat, lon)}</span>
+      <span>${esc(spanLabel())} · ${state.altM != null ? `${HE() ? "גובה" : "height"} ${state.altM} ${esc(T("metersAgl"))}` : esc(HE() ? "לא נבחר גובה (סינון)" : "no height selected (filters)")}</span></div>
+      <div class="verdict v-${v[0]}"><div class="v-title">${esc(v[1])}</div><div class="v-sub">${esc(T("verdictInfoSub"))}</div></div>
+      <div class="br-acts"><button class="btn primary" type="button" data-act="brShare">↗ ${HE() ? "שתף תדריך" : "Share brief"}</button>
+        <button class="btn" type="button" data-act="brCopy">⧉ ${HE() ? "העתק" : "Copy"}</button>
+        <button class="btn" type="button" data-act="goto" data-lat="${lat}" data-lon="${lon}">‹ ${HE() ? "לבדיקת הנקודה" : "Point check"}</button></div>`;
+    html += sec("🗺", HE() ? `אזורים בנקודה (${here.length})` : `Zones at the point (${here.length})`, here.length ? `<ul class="br-list">${here.map(f => {
+      const p = f.properties, lc = CFG.layers[layerKey(f)], st = timeStatus(f);
+      return `<li><i class="sw" style="--zc:${lc.color}"></i><span><button class="linkish" data-act="focus" data-id="${esc(p.id)}">${esc(L_(p.name))}</button>${p.designator ? ` <small class="mono">${esc(p.designator)}</small>` : ""}
+        <small>${esc(lc[state.lang] || lc.he)}${limitsTxt(p) ? " · " + limitsHtml(p) : ""} · <span class="st st-${st}">${esc(T(st))}</span>${p.valid && (p.valid.to || p.valid.schedule) ? " · " + validTxt(p) : ""}</small></span></li>`;
+    }).join("")}</ul>` : `<p class="muted">${HE() ? "לא נמצאו אזורים בנקודה לפי שכבות המפה המוצגות." : "No zones at this point in the shown map layers."}</p>`);
+    html += sec("⚠", HE() ? `סגירות פעילות בטווח 10 ק"מ (${nts.length})` : `Active closures within 10 km (${nts.length})`, nts.length ? `<ul class="br-list">${nts.slice(0, 8).map(x => {
+      const p = x.f.properties;
+      return `<li><i class="sw" style="--zc:${CFG.layers[layerKey(x.f)].color}"></i><span><button class="linkish" data-act="focus" data-id="${esc(p.id)}">${esc(L_(p.name))}</button> · ${esc(km(x.d))}<small>${validTxt(p)}${limitsTxt(p) ? " · " + limitsHtml(p) : ""}</small></span></li>`;
+    }).join("")}</ul>${nts.length > 8 ? `<p class="muted">${HE() ? `ועוד ${nts.length - 8}` : `and ${nts.length - 8} more`}</p>` : ""}` : `<p class="muted">—</p>`);
+    if (near.length) html += sec("✈", HE() ? "מנחתים ושדות קרובים" : "Nearby airfields", `<ul class="br-list">${near.slice(0, 4).map(x => `<li><span><button class="linkish" data-act="focus" data-id="${esc(x.f.properties.id)}">${esc(L_(x.f.properties.name))}</button> · ${(x.d / 1000).toFixed(1)} ${esc(T("km"))}${contactInline(x.f.properties)}</span></li>`).join("")}</ul>`);
+    html += sec("⛰", HE() ? "קרקע" : "Ground", `<p class="muted">…</p>`, "brTerr");
+    html += sec("🌬", HE() ? "מזג אוויר עכשיו" : "Weather now", `<p class="muted">…</p>`, "brWx");
+    if (X.traffic) html += sec("🛩", HE() ? "תנועה אווירית נמוכה בסביבה" : "Low traffic nearby", tf.length
+      ? `<p>${HE() ? `${tf.length} כלי טיס נמוכים בטווח ${Traffic.cfg.nearKm} ק"מ כרגע. הקרוב: ` : `${tf.length} low aircraft within ${Traffic.cfg.nearKm} km now. Nearest: `}<b>${esc(tf[0].call || tf[0].reg || "?")}</b> · ${tf[0].d.toFixed(1)} ${esc(T("km"))}${tf[0].altFt != null ? ` · ${Math.round(tf[0].altFt).toLocaleString()} ft` : ""}</p>`
+      : `<p class="muted">${HE() ? `אין כלי טיס נמוכים בטווח ${Traffic.cfg.nearKm} ק"מ כרגע (רק מי שמשדר ADS-B).` : `No low aircraft within ${Traffic.cfg.nearKm} km now (ADS-B only).`}</p>`);
+    if (X.whoCall) {
+      const res = whoCallResult(here, near);
+      html += sec("📞", "", WhoCall.panelHtml(res, Object.assign(whoCallOpts(lat, lon, res), { open: true })));
+    }
+    html += `<p class="disclaimer">${esc(T("disclaimer"))}</p>`;
+    openSheet(html, "brief");
+    state.brief = { lat, lon, city, v, here, near, nts, tf, elev: null, wx: null };
+    if (X.terrain) Terrain.get(lat, lon).then(e => { if (seq !== briefSeq) return; state.brief.elev = e; drawBriefExtras(); })
+      .catch(() => { if (seq === briefSeq && $("#brTerr")) $("#brTerr").querySelector("p").textContent = HE() ? "גובה הקרקע לא זמין כרגע." : "Ground elevation unavailable."; });
+    else if ($("#brTerr")) $("#brTerr").remove();
+    if (wxOn()) Weather.get(lat, lon).then(d => { if (seq !== briefSeq) return; state.brief.wx = d; drawBriefExtras(); })
+      .catch(() => { if (seq === briefSeq && $("#brWx")) $("#brWx").querySelector("p").textContent = HE() ? "מזג האוויר לא זמין כרגע." : "Weather unavailable."; });
+    else if ($("#brWx")) $("#brWx").remove();
+  }
+  const KN = 1.943844;
+  function wxParts(d) {
+    if (!d) return null;
+    const u = state.wxUnit === "ms" ? "ms" : "kn", sp = x => x == null ? "—" : "\u2068" + (u === "kn" ? Math.round(x * KN) + " kt" : (Math.round(x * 10) / 10) + " m/s") + "\u2069";
+    const hm = iso => iso ? String(iso).slice(11, 16) : "—";
+    const out = [];
+    if (d.wind) out.push([HE() ? "רוח" : "Wind", `${sp(d.wind.s)}${d.wind.d != null ? ` ${HE() ? "מכיוון" : "from"} \u2068${Math.round(d.wind.d)}°\u2069` : ""}${d.wind.g != null ? ` · ${HE() ? "משבים" : "gusts"} ${sp(d.wind.g)}` : ""}`]);
+    if (d.wind100) out.push([HE() ? "רוח ב-100 מ'" : "Wind at 100 m", sp(d.wind100.s)]);
+    if (d.visM != null) out.push([HE() ? "ראות" : "Visibility", d.visM >= 10000 ? (HE() ? "10 ק\"מ ומעלה" : "10 km+") : (d.visM / 1000).toFixed(1) + " " + T("km")]);
+    if (d.cloudBase) out.push([HE() ? "בסיס ענן" : "Cloud base", d.cloudBase.kind === "clear" ? (HE() ? "שמיים בהירים" : "clear") : d.cloudBase.kind === "fog" ? (HE() ? "ערפל / בגובה הקרקע" : "fog / at ground") : `~${d.cloudBase.m} ${HE() ? "מ' (הערכה)" : "m (estimate)"}`]);
+    if (d.rainMmH != null) out.push([HE() ? "גשם" : "Rain", d.rainMmH < 0.1 ? (HE() ? "אין" : "none") : d.rainMmH.toFixed(1) + " mm/h"]);
+    if (d.temp != null) out.push([HE() ? "טמפרטורה" : "Temperature", Math.round(d.temp) + "°C"]);
+    out.push([HE() ? "זריחה / שקיעה" : "Sunrise / sunset", `${hm(d.sunrise)} / ${hm(d.sunset)}`]);
+    return out;
+  }
+  function drawBriefExtras() {
+    const b = state.brief; if (!b || sheetKind !== "brief") return;
+    if (b.elev != null && $("#brTerr")) $("#brTerr").innerHTML = `<h3>⛰ ${esc(HE() ? "קרקע" : "Ground")}</h3><p>${HE() ? `גובה הקרקע כ-<b>${Math.round(b.elev)}</b> מ' מעל פני הים` : `Ground about <b>${Math.round(b.elev)}</b> m above sea level`}${state.altM != null ? (HE() ? ` · תקרת הטיסה כ-${Math.round(b.elev + state.altM)} מ' מעל פני הים (<bdi>${Math.round((b.elev + state.altM) * 3.28084).toLocaleString()} ft AMSL</bdi>)` : ` · flight ceiling about ${Math.round(b.elev + state.altM)} m AMSL (${Math.round((b.elev + state.altM) * 3.28084).toLocaleString()} ft)`) : ""}</p>`;
+    const w = wxParts(b.wx);
+    if (w && $("#brWx")) $("#brWx").innerHTML = `<h3>🌬 ${esc(HE() ? "מזג אוויר עכשיו" : "Weather now")}</h3><dl class="br-wx">${w.map(r => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl><p class="fine">${esc(HE() ? "ערכי מודל לנקודה (Open-Meteo), לא מדידה מתחנה." : "Model values for the point (Open-Meteo), not a station reading.")}</p>`;
+  }
+  function briefText() {
+    const b = state.brief; if (!b) return "";
+    const L = [];
+    L.push(`${HE() ? "תדריך טיסה" : "Flight brief"} – ${b.city || ""} ${fmtCoord(b.lat, b.lon)}`.trim());
+    L.push(`${spanLabel()}${state.altM != null ? ` · ${state.altM} ${T("metersAgl")}` : ""}`);
+    L.push(`${b.v[1]}`);
+    L.push(""); L.push(HE() ? "אזורים בנקודה:" : "Zones at the point:");
+    if (!b.here.length) L.push("—");
+    b.here.forEach(f => { const p = f.properties; L.push(`• ${L_(p.name)}${p.designator ? " (" + p.designator + ")" : ""}${limitsTxt(p) ? " · " + limitsTxt(p) : ""}${(p.contact || [])[0] ? " · " + p.contact[0].value : ""}`); });
+    if (b.nts.length) { L.push(""); L.push(HE() ? "סגירות פעילות בטווח 10 ק\"מ:" : "Active closures within 10 km:"); b.nts.slice(0, 8).forEach(x => L.push(`• ${L_(x.f.properties.name)} · ${km(x.d)}`)); }
+    if (b.elev != null) { L.push(""); L.push(HE() ? `גובה הקרקע: כ-${Math.round(b.elev)} מ' מעל פני הים` : `Ground: about ${Math.round(b.elev)} m AMSL`); }
+    const w = wxParts(b.wx);
+    if (w) { L.push(""); w.forEach(r => L.push(`${r[0]}: ${r[1]}`)); }
+    if (X.traffic) { L.push(""); L.push(b.tf.length ? (HE() ? `תנועה נמוכה: ${b.tf.length} כלי טיס בטווח ${Traffic.cfg.nearKm} ק"מ` : `Low traffic: ${b.tf.length} aircraft within ${Traffic.cfg.nearKm} km`) : (HE() ? "תנועה נמוכה: אין כרגע" : "Low traffic: none now")); }
+    L.push(""); L.push(`https://maps.google.com/?q=${b.lat.toFixed(5)},${b.lon.toFixed(5)}`);
+    L.push(HE() ? "מפת אזורי כטב״ם – harelrynar.github.io/drone-map-il · המידע אינו תחליף לפרסומים הרשמיים" : "Israel Drone Map – harelrynar.github.io/drone-map-il · not a substitute for official publications");
+    return L.join("\n");
+  }
+  $("#sheetBody").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const act = b.dataset.act;
+    if (act === "brief" || act === "plBrief") { Track("brief-open", { from: act === "brief" ? "point" : "places" }); openBrief(+b.dataset.lat, +b.dataset.lon); }
+    if (act === "brShare" || act === "brCopy") {
+      const txt = briefText();
+      Track("brief-share", { how: act === "brShare" && navigator.share ? "share" : "copy" });
+      if (act === "brShare" && navigator.share) navigator.share({ title: HE() ? "תדריך טיסה" : "Flight brief", text: txt }).catch(() => {});
+      else { try { navigator.clipboard.writeText(txt).then(() => toast(HE() ? "התדריך הועתק" : "Brief copied")).catch(() => {}); } catch (x) {} }
+    }
+    if (act === "plDel") {
+      const i = +b.dataset.i, w = state.watch[i]; if (!w) return;
+      state.watch.splice(i, 1); store.set("watch", state.watch); drawWatch(); Track("watch-remove", { from: "places" }); openPlaces();
+    }
+    if (act === "plRename") {
+      const i = +b.dataset.i, w = state.watch[i]; if (!w) return;
+      const btn = b.parentNode.querySelector(".pl-name");
+      const inp = document.createElement("input"); inp.className = "pl-in"; inp.value = placeName(w); inp.maxLength = 40;
+      btn.replaceWith(inp); inp.focus(); inp.select();
+      const save = () => { w.name = inp.value.trim().slice(0, 40); store.set("watch", state.watch); openPlaces(); };
+      inp.addEventListener("keydown", ev => { if (ev.key === "Enter") inp.blur(); });
+      inp.addEventListener("blur", save, { once: true });
+    }
+  });
+
   /* ---------- panels ---------- */
   function openLayers() {
     const rows = CFG.drawOrder.slice().reverse().map(k => {
@@ -723,7 +1019,7 @@
         <i class="sw ${k === "airfield" || k === "heliport" ? "dot" : ""}" style="--zc:${lc.color};--dash:${lc.dash ? "dashed" : "solid"}"></i>
         <span>${esc(lc[state.lang] || lc.he)}</span><small>${n}</small></label>`;
     }).join("");
-    let html = `<h2>${esc(T("layers"))}</h2>${trafficLayerHtml()}
+    let html = `<h2>${esc(T("layers"))}</h2>${trafficLayerHtml()}${displayHtml()}
       <div class="lbtns"><button class="btn" data-act="allOn">✓ ${esc(T("selectAll"))}</button><button class="btn" data-act="allOff">✕ ${esc(T("clearAll"))}</button></div>
       <div class="lrows">${rows}</div>` + extraLayersHtml() + overlaysHtml();
     const gen = activeUnlocated("general"), ad = activeUnlocated("ad"), oth = state.unlocated.filter(u => u.kind !== "general" && u.kind !== "ad");
@@ -762,8 +1058,8 @@
   }
   function watchListHtml() {
     if (!state.watch.length) return "";
-    return `<h3>★ ${esc(T("watched"))}</h3><ul class="near">` + state.watch.map(w =>
-      `<li><button class="linkish" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${fmtCoord(w.lat, w.lon)}</button></li>`).join("") + "</ul>";
+    return `<h3>★ ${esc(HE() ? "המקומות שלי" : "My places")}</h3><ul class="near">` + state.watch.map(w =>
+      `<li><button class="linkish" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${esc(placeName(w))}</button></li>`).join("") + "</ul>";
   }
   $("#sheetBody").addEventListener("click", e => {
     const b = e.target.closest("[data-act=goto]"); if (!b) return;
@@ -1036,7 +1332,8 @@
   let watchLayer = L.layerGroup().addTo(map);
   function drawWatch() {
     watchLayer.clearLayers();
-    state.watch.forEach(w => L.marker([w.lat, w.lon], { icon: L.divIcon({ className: "watch", html: "★", iconSize: [20, 20] }), interactive: false }).addTo(watchLayer));
+    state.watch.forEach(w => L.marker([w.lat, w.lon], { icon: L.divIcon({ className: "watch", html: "★", iconSize: [20, 20] }), title: placeName(w) })
+      .on("click", ev => { L.DomEvent.stopPropagation(ev); openPoint(w.lat, w.lon); }).addTo(watchLayer));
   }
 
   /* ---------- toast ---------- */
@@ -1057,6 +1354,7 @@
     if ($("#btnInfo")) $("#btnInfo").textContent = state.lang === "he" ? "מידע ושאלות נפוצות" : "About & FAQ";
     updatedLine();
     if (state.basemap) drawCities();
+    updateClosures();
   }
   // header: when each source was last CHECKED (checkedAt or updatedAt, the newer), green dot = checked in the last 36 h
   function lastCheck(src) {
@@ -1144,7 +1442,7 @@
       try { state.versions = await getJSON("data/versions.json"); } catch (e) { state.versions = null; }
       state.overlays.forEach(o => { if ((state.ovlState[o.id] || {}).on) setOverlay(o.id, true); });
       $("#demoRibbon").hidden = !meta.demo;
-      drawBasemap(); renderBanner(); drawZones(); applyLang();
+      drawBasemap(); renderBanner(); drawZones(); applyLang(); syncSpanChips(); updatePlacesDot();
     } catch (err) {
       console.error(err);
       toast("Data load error: " + err.message);
