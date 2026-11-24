@@ -112,6 +112,45 @@
   tiles.on("tileload", () => { if (!tilesOk) { tilesOk = true; document.body.classList.add("has-tiles"); } });
   tiles.addTo(map);
 
+  /* ---------- 1.13: מפה / תצ"א ---------- */
+  // תצ"א = אריחי Esri World Imagery. נטענים רק כשבוחרים בה; הבחירה נשמרת במכשיר.
+  // במצב תצ"א שמות היישובים שלנו (בעברית) מוצגים מעל התמונה, וקווי האזורים מודגשים.
+  let satTiles = null, base = "map";
+  function makeSat() {
+    const sc = CFG.satellite;
+    const t = L.tileLayer(sc.url, { maxZoom: 18, maxNativeZoom: sc.maxNativeZoom, attribution: sc.attribution });
+    let ok = 0, bad = 0;
+    t.on("tileload", () => { ok++; });
+    t.on("tileerror", () => {
+      bad++;
+      // אם התצ"א לא נטענת בכלל (חסימה/אין קליטה) – חוזרים למפה ומודיעים
+      if (bad >= 6 && ok === 0 && base === "sat") { setBase("map", true); toast(T("satFail")); }
+    });
+    return t;
+  }
+  function setBase(kind, quiet) {
+    if (!CFG.features.satellite) kind = "map";
+    base = kind;
+    if (kind === "sat") {
+      if (!satTiles) satTiles = makeSat();
+      if (map.hasLayer(tiles)) tiles.remove();
+      if (!map.hasLayer(satTiles)) satTiles.addTo(map);
+    } else {
+      if (satTiles && map.hasLayer(satTiles)) satTiles.remove();
+      if (!map.hasLayer(tiles)) tiles.addTo(map);
+    }
+    document.body.classList.toggle("sat", kind === "sat");
+    store.set("base", kind);
+    const b = $("#btnBase");
+    if (b) { b.dataset.to = kind === "sat" ? "map" : "sat"; b.setAttribute("aria-pressed", kind === "sat"); updateBaseBtn(); }
+    if (!quiet) Track("basemap", { kind });
+  }
+  function updateBaseBtn() {
+    const b = $("#btnBase"); if (!b) return;
+    const lbl = b.querySelector("span"); if (lbl) lbl.textContent = T(b.dataset.to === "sat" ? "baseSat" : "baseMap");
+    b.title = T(b.dataset.to === "sat" ? "baseSatTitle" : "baseMapTitle");
+  }
+
   const panes = {};
   ["basemap", "annex", "labels"].concat(CFG.drawOrder).forEach((name, i) => {
     panes[name] = map.createPane("p_" + name);
@@ -1148,6 +1187,7 @@
     document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = T(el.dataset.i18n));
     document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = T(el.dataset.i18nPh));
     $("#btnLang").textContent = T("lang");
+    updateBaseBtn();
     zoomCtl.setPosition(d.dir === "rtl" ? "topleft" : "topright");
     $("#btnAbout").textContent = `${T("version")} ${CFG.version} · ${T("sourcesTitle")} · ${T("legend")}`;
     if ($("#btnInfo")) $("#btnInfo").textContent = state.lang === "he" ? "מידע ושאלות נפוצות" : "About & FAQ";
@@ -1187,6 +1227,11 @@
   map.on("click", e => { if (CFG.features.pointCheck) openPoint(e.latlng.lat, e.latlng.lng); });
   $("#btnLayers").onclick = openLayers;
   $("#btnFilters").onclick = openFilters;
+  if (CFG.features.satellite && $("#btnBase")) {
+    $("#btnBase").hidden = false;
+    $("#btnBase").onclick = () => setBase(base === "sat" ? "map" : "sat");
+    setBase(store.get("base", "map") === "sat" ? "sat" : "map", true);
+  }
   $("#btnCheck").onclick = openCheck;
   $("#btnNews").onclick = openNews;
   $("#updatedLine").onclick = openNews;

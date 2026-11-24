@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.12.1",
+  version: "1.13",
 
   map: {
     center: [31.45, 34.95],
@@ -42,7 +42,15 @@ window.APP_CONFIG = {
     traffic: true,           // 1.8: תנועה אווירית נמוכה (js/traffic.js)
     whoCall: true,           // 1.8: "למי מתקשרים?" (js/whocall.js)
     pwa: true,               // 1.9: התקנה כאפליקציה + עבודה בלי קליטה (js/pwa.js, sw.js)
-    feedback: true           // 1.10: "משוב והצעות" + "דווח" בכרטיס אזור/נוטאם (Google Form)
+    feedback: true,          // 1.10: "משוב והצעות" + "דווח" בכרטיס אזור/נוטאם (Google Form)
+    satellite: true          // 1.13: מתג מפה / תצ"א (Esri World Imagery)
+  },
+
+  /* 1.13 – תצ"א. Esri World Imagery: חינם עם ייחוס, בלי מפתח. אם מחליפים ספק – רק כאן. */
+  satellite: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    maxNativeZoom: 18,
+    attribution: "תצ\"א/Imagery © Esri, Maxar, Earthstar Geographics"
   },
 
   /* 1.10 – טופס משוב (Google Forms של הבעלים, "מפת אזורי כטב״ם – משוב"). התשובות נכנסות לגיליון
