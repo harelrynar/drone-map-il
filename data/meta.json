@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.11",
+   "date": "2026-11-24",
+   "he": "עיצוב חדש: שדה \"בחר אזור לבדיקה\" בולט על המפה, ומתחתיו \"שכבות\". תנועה אווירית נמוכה עברה לראש רשימת השכבות (עם מספר כלי הטיס ורשימה), וכפתור \"משוב והצעות\" בולט יותר.",
+   "en": "New layout: a prominent \"Pick an area to check\" field on the map, with \"Layers\" right under it. Low-level air traffic is now first in the Layers list (with the aircraft count and a list), and the Feedback button stands out more."
+  },
+  {
    "version": "1.10",
    "date": "2026-11-23",
    "he": "משוב והצעות: קישור בתחתית המסך, ובכל אזור ונוטאם \"משהו לא נכון כאן? דווחו לנו\". הטופס נפתח עם שם האזור והגרסה כבר ממולאים, בלי לשלוח את המיקום שלכם.",
