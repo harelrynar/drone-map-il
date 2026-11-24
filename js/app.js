@@ -467,8 +467,17 @@
     const tf = $("#tfcBox"); if (tf && X.traffic) tf.innerHTML = Traffic.nearHtml(pt.lat, pt.lon, o);
     drawWhoCall();   // the brief includes the ground elevation once it is known
   }
+  // low-level traffic – first row of the Layers panel
+  function trafficLayerHtml() {
+    if (!X.traffic) return "";
+    const he = state.lang === "he";
+    return `<div class="lrows tfc-first"><label class="lrow"><input type="checkbox" data-xl="traffic" ${state.xl.traffic ? "checked" : ""}>
+        <i class="sw xsw x-tfc"></i><span>${esc(he ? "תנועה אווירית נמוכה (ADS-B)" : "Low-level traffic (ADS-B)")}</span><small>${esc(he ? `מתחת ל-${Traffic.cfg.maxAltFt.toLocaleString()} רגל` : `below ${Traffic.cfg.maxAltFt.toLocaleString()} ft`)}</small></label>
+      <div class="tfc-live" id="tfcLive">${tfcLiveHtml()}</div>
+      <p class="fine">${esc(he ? "רק מי שמשדר ADS-B, בעיכוב של דקה עד שתיים." : "ADS-B only, delayed by one to two minutes.")}</p></div>`;
+  }
   function extraLayersHtml() {
-    if (!X.osm && !X.traffic) return "";
+    if (!X.osm) return "";
     const he = state.lang === "he";
     const z = k => Osm.t(state.lang, "zoomHint").replace("{z}", Osm.cfg.minZoom[k]);
     const row = (k, sw, label, hint) => `<label class="lrow"><input type="checkbox" data-xl="${k}" ${state.xl[k] ? "checked" : ""}>
@@ -477,13 +486,11 @@
     if (X.osm) h += row("obs", "x-obs", he ? "מכשולים: קווי מתח, אנטנות, טורבינות" : "Obstacles: power lines, masts, turbines", z("lines"))
       + row("built", "x-built", he ? "שטח בנוי" : "Built-up area", z("built"))
       + row("crowd", "x-crowd", he ? "ריכוזי קהל: בתי ספר, קניונים, אצטדיונים…" : "Crowd places: schools, malls, stadiums…", z("crowd"));
-    if (X.traffic) h += row("traffic", "x-tfc", he ? "תנועה אווירית נמוכה (ADS-B)" : "Low-level traffic (ADS-B)", he ? `מתחת ל-${Traffic.cfg.maxAltFt.toLocaleString()} רגל` : `below ${Traffic.cfg.maxAltFt.toLocaleString()} ft`)
-      + `<div class="tfc-live" id="tfcLive">${tfcLiveHtml()}</div>`;
-    return h + `</div><p class="fine">${he ? "מכשולים, שטח בנוי וריכוזי קהל מבוססים על OpenStreetMap ואינם מלאים. תנועה אווירית: רק מי שמשדר ADS-B, בעיכוב של דקה עד שתיים." : "Obstacles, built-up areas and crowd places come from OpenStreetMap and are incomplete. Traffic: ADS-B only, delayed by one to two minutes."}</p>`;
+    return h + `</div><p class="fine">${he ? "מכשולים, שטח בנוי וריכוזי קהל מבוססים על OpenStreetMap ואינם מלאים." : "Obstacles, built-up areas and crowd places come from OpenStreetMap and are incomplete."}</p>`;
   }
   function setExtraLayer(k, v) {
     state.xl[k] = v; store.set("xl", state.xl);
-    if (k === "traffic") { if (X.traffic) { Traffic.set(v); if ($("#tfcLive")) $("#tfcLive").innerHTML = tfcLiveHtml(); tfcBadge(); } } else if (X.osm) Osm.set(k, v);
+    if (k === "traffic") { if (X.traffic) { Traffic.set(v); if ($("#tfcLive")) $("#tfcLive").innerHTML = tfcLiveHtml(); } } else if (X.osm) Osm.set(k, v);
     Track("layer-toggle", { layer: "x-" + k, on: v });
   }
   // traffic status inside the layers panel (replaces the floating pill)
@@ -495,13 +502,6 @@
     else if (st.state === "loading") txt = "…";
     else txt = `<span class="stale">${esc(Traffic.t(state.lang, "pillStale"))}</span>`;
     return `<span>✈ ${txt}</span><button class="btn" type="button" data-act="tfcList">${he ? "רשימה" : "List"} ›</button>`;
-  }
-  // small count on the "Layers" button while low aircraft are shown
-  function tfcBadge() {
-    const b = $("#tfcBadge"); if (!b || !X.traffic) return;
-    const st = Traffic.status(), n = st.state === "ok" ? st.count : 0;
-    b.hidden = !n; b.textContent = n ? "✈" + n : "";
-    b.title = n ? (state.lang === "he" ? `${n} כלי טיס נמוכים` : `${n} low aircraft`) : "";
   }
   function openTraffic() { openSheet(Traffic.listHtml(xo()), "traffic"); }
 
@@ -723,7 +723,7 @@
         <i class="sw ${k === "airfield" || k === "heliport" ? "dot" : ""}" style="--zc:${lc.color};--dash:${lc.dash ? "dashed" : "solid"}"></i>
         <span>${esc(lc[state.lang] || lc.he)}</span><small>${n}</small></label>`;
     }).join("");
-    let html = `<h2>${esc(T("layers"))}</h2>
+    let html = `<h2>${esc(T("layers"))}</h2>${trafficLayerHtml()}
       <div class="lbtns"><button class="btn" data-act="allOn">✓ ${esc(T("selectAll"))}</button><button class="btn" data-act="allOff">✕ ${esc(T("clearAll"))}</button></div>
       <div class="lrows">${rows}</div>` + extraLayersHtml() + overlaysHtml();
     const gen = activeUnlocated("general"), ad = activeUnlocated("ad"), oth = state.unlocated.filter(u => u.kind !== "general" && u.kind !== "ad");
@@ -1157,7 +1157,6 @@
       onUpdate: () => {
         if (sheetKind === "point") drawPointExtras(); else if (sheetKind === "traffic") openTraffic();
         else if (sheetKind === "layers" && $("#tfcLive")) $("#tfcLive").innerHTML = tfcLiveHtml();
-        tfcBadge();
       }
     });
   }
