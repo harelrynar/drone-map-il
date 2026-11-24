@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.12",
+   "date": "2026-11-24",
+   "he": "המקומות שלי: שומרים נקודה בכפתור \"☆ שמור במקומות שלי\", ופותחים את הרשימה מכפתור ★ \"המקומות שלי\" במפה. לכל מקום מוצג המצב שלו עכשיו, ומסומן אם משהו השתנה בו מאז הפעם הקודמת (מצב חדש או נוטאם חדש בטווח 5 ק\"מ). אפשר לשנות שם ולמחוק.",
+   "en": "My places: save a point with \"☆ Save to My places\" and open the list from the ★ \"My places\" button on the map. Each place shows its current status and is marked when something changed since last time (new status or a new NOTAM within 5 km). Rename and delete are available."
+  },
+  {
    "version": "1.11",
    "date": "2026-11-24",
    "he": "עיצוב חדש: שדה \"בחר אזור לבדיקה\" בולט על המפה, ומתחתיו \"שכבות\". תנועה אווירית נמוכה עברה לראש רשימת השכבות (עם מספר כלי הטיס ורשימה), וכפתור \"משוב והצעות\" בולט יותר.",
