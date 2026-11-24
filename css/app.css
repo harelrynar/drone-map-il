@@ -404,7 +404,7 @@ body.sheet-open .map-tools{display:none}
 .base-btn:focus-visible{outline:3px solid #0b6bcb;outline-offset:2px}
 .bright-btn{width:40px;height:40px;flex:none;border-radius:50%;border:0;background:#fff;box-shadow:var(--shadow);font-size:20px;line-height:1;cursor:pointer;color:#5f6b76;order:2}
 .bright-btn.on{color:#f4a100;box-shadow:var(--shadow),inset 0 0 0 2px #f4a100}
-.bright-pop{direction:ltr;position:absolute;bottom:calc(100% + 8px);inset-inline-start:0;display:flex;align-items:center;gap:8px;background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:8px 12px;white-space:nowrap}
+.bright-pop{direction:ltr;position:absolute;bottom:calc(100% + 8px);right:0;max-width:calc(100vw - 32px);box-sizing:border-box;display:flex;align-items:center;gap:8px;background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:8px 12px;white-space:nowrap}
 .bright-pop[hidden]{display:none}
 .bright-pop input{width:min(180px,46vw);accent-color:#0b6bcb;direction:ltr}
 .bp-ico{font-size:17px;color:#5f6b76}
@@ -418,3 +418,5 @@ body.sat .city i{background:#fff;box-shadow:0 0 0 1.5px #000}
 /* קווי האזורים מודגשים, עם הילה בהירה כדי שייראו גם על שטח כהה */
 body.sat path.zone{stroke-width:3px}
 body.sat .leaflet-pane svg{filter:drop-shadow(0 0 1px rgba(255,255,255,.95))}
+[dir="ltr"] .bright-pop{right:auto;left:0}
+.bp-ico.dim{font-size:13px;opacity:.4}
