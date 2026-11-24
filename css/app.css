@@ -394,14 +394,22 @@ body.sheet-open .map-tools{display:none}
 .hiddenlyr .mini{margin-inline-start:auto}
 
 /* ---------- 1.13: מפה / תצ"א ---------- */
-.base-btn{position:fixed;z-index:900;inset-inline-start:12px;bottom:calc(48px + var(--safe-b));width:64px;height:64px;padding:0;border-radius:12px;border:3px solid #fff;box-shadow:var(--shadow);overflow:hidden;background:#cfd8c4;cursor:pointer}
-.base-btn[hidden]{display:none}
+.base-tools{position:fixed;z-index:950;inset-inline-start:12px;bottom:calc(48px + var(--safe-b));display:flex;align-items:flex-end;gap:8px}
+.base-tools[hidden]{display:none}
+.base-btn{position:relative;width:64px;height:64px;flex:none;padding:0;border-radius:12px;border:3px solid #fff;box-shadow:var(--shadow);overflow:hidden;background:#cfd8c4;cursor:pointer}
 .base-btn i{position:absolute;inset:0;background-size:cover;background-position:center}
 .base-btn[data-to="sat"] i{background-color:#5b6b4a;background-image:url("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/12/1662/2443"),linear-gradient(135deg,#6f7d55,#3d4a33 55%,#8a7a5c)}
 .base-btn[data-to="map"] i{background-color:#f2efe6;background-image:url("https://tile.openstreetmap.org/12/2443/1662.png"),linear-gradient(135deg,#f6f3ea,#e3dfd2)}
 .base-btn span{position:absolute;left:0;right:0;bottom:0;padding:2px 0 3px;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.72));text-align:center}
 .base-btn:focus-visible{outline:3px solid #0b6bcb;outline-offset:2px}
-@media (max-width:820px){body.sheet-open .base-btn{display:none}.base-btn{width:56px;height:56px;bottom:calc(76px + var(--safe-b))}}
+.bright-btn{width:40px;height:40px;flex:none;border-radius:50%;border:0;background:#fff;box-shadow:var(--shadow);font-size:20px;line-height:1;cursor:pointer;color:#5f6b76;order:2}
+.bright-btn.on{color:#f4a100;box-shadow:var(--shadow),inset 0 0 0 2px #f4a100}
+.bright-pop{direction:ltr;position:absolute;bottom:calc(100% + 8px);inset-inline-start:0;display:flex;align-items:center;gap:8px;background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:8px 12px;white-space:nowrap}
+.bright-pop[hidden]{display:none}
+.bright-pop input{width:min(180px,46vw);accent-color:#0b6bcb;direction:ltr}
+.bp-ico{font-size:17px;color:#5f6b76}
+.bp-reset{border:0;background:#eef1f4;border-radius:12px;padding:4px 10px;font-size:12.5px;font-weight:600}
+@media (max-width:820px){body.sheet-open .base-tools{display:none}.base-btn{width:56px;height:56px}.base-tools{bottom:calc(76px + var(--safe-b))}}
 /* במצב תצ"א: שמות היישובים שלנו מעל התמונה, בטקסט לבן עם הילה כהה */
 body.sat.has-tiles .leaflet-p_labels-pane{display:block}
 body.sat .city span{color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 0 2px #000}

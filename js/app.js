@@ -140,15 +140,31 @@
       if (!map.hasLayer(tiles)) tiles.addTo(map);
     }
     document.body.classList.toggle("sat", kind === "sat");
+    applyBright();
     store.set("base", kind);
     const b = $("#btnBase");
     if (b) { b.dataset.to = kind === "sat" ? "map" : "sat"; b.setAttribute("aria-pressed", kind === "sat"); updateBaseBtn(); }
     if (!quiet) Track("basemap", { kind });
   }
+  // בהירות הרקע (מפה / תצ"א בנפרד): -60..+60. משפיע רק על אריחי הרקע, לא על האזורים
+  const bright = Object.assign({ map: 0, sat: 0 }, store.get("bright", {}));
+  function applyBright() {
+    const v = bright[base] || 0;
+    const tp = map.getPane("tilePane");
+    tp.style.filter = v ? `brightness(${(1 + v / 100).toFixed(2)})` : "";
+    const r = $("#brightRange"); if (r) r.value = v;
+    const bb = $("#btnBright"); if (bb) bb.classList.toggle("on", !!v);
+  }
+  function setBright(v, track) {
+    bright[base] = Math.max(-60, Math.min(60, +v || 0));
+    store.set("bright", bright); applyBright();
+    if (track) Track("brightness", { kind: base, v: bright[base] });
+  }
   function updateBaseBtn() {
     const b = $("#btnBase"); if (!b) return;
     const lbl = b.querySelector("span"); if (lbl) lbl.textContent = T(b.dataset.to === "sat" ? "baseSat" : "baseMap");
     b.title = T(b.dataset.to === "sat" ? "baseSatTitle" : "baseMapTitle");
+    const bb = $("#btnBright"); if (bb) bb.title = bb.ariaLabel = T("brightTitle");
   }
 
   const panes = {};
@@ -1228,7 +1244,13 @@
   $("#btnLayers").onclick = openLayers;
   $("#btnFilters").onclick = openFilters;
   if (CFG.features.satellite && $("#btnBase")) {
-    $("#btnBase").hidden = false;
+    $("#baseTools").hidden = false;
+    const pop = $("#brightPop"), bb = $("#btnBright");
+    bb.onclick = () => { pop.hidden = !pop.hidden; bb.setAttribute("aria-expanded", !pop.hidden); };
+    $("#brightRange").oninput = e => setBright(e.target.value);
+    $("#brightRange").onchange = e => setBright(e.target.value, true);
+    $("#brightReset").onclick = () => setBright(0, true);
+    map.on("click movestart", () => { pop.hidden = true; bb.setAttribute("aria-expanded", "false"); });
     $("#btnBase").onclick = () => setBase(base === "sat" ? "map" : "sat");
     setBase(store.get("base", "map") === "sat" ? "sat" : "map", true);
   }

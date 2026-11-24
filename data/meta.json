@@ -3,8 +3,8 @@
   {
    "version": "1.13",
    "date": "2026-11-24",
-   "he": "מפה / תצ\"א: כפתור בפינת המפה שמחליף בין המפה הרגילה לתצלום אוויר (Esri). במצב תצ\"א שמות היישובים מוצגים בעברית מעל התמונה וקווי האזורים מודגשים. הבחירה נשמרת במכשיר.",
-   "en": "Map / satellite: a button in the corner of the map switches between the regular map and aerial imagery (Esri). In satellite mode place names stay on top of the image and zone outlines are bolder. The choice is saved on the device."
+   "he": "מפה / תצ\"א: כפתור בפינת המפה שמחליף בין המפה הרגילה לתצלום אוויר (Esri), ולידו כפתור ☀ עם סליידר להבהרה או הכהיה של הרקע (נשמר בנפרד למפה ולתצ\"א). במצב תצ\"א שמות היישובים מוצגים מעל התמונה וקווי האזורים מודגשים. הבחירות נשמרות במכשיר.",
+   "en": "Map / satellite: a button in the corner of the map switches between the regular map and aerial imagery (Esri), with a ☀ button next to it for a slider that lightens or darkens the background (saved separately for map and satellite). In satellite mode place names stay on top of the image and zone outlines are bolder. Choices are saved on the device."
   },
   {
    "version": "1.12.1",

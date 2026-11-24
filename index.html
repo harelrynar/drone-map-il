@@ -72,7 +72,16 @@
 </div>
 
 <!-- 1.13: מפה / תצ"א -->
-<button id="btnBase" class="base-btn" type="button" data-to="sat" aria-pressed="false" hidden><i aria-hidden="true"></i><span>תצ״א</span></button>
+<div class="base-tools" id="baseTools" hidden>
+  <div class="bright-pop" id="brightPop" hidden>
+    <span class="bp-ico" aria-hidden="true">◐</span>
+    <input id="brightRange" type="range" min="-60" max="60" step="5" value="0" aria-label="brightness">
+    <span class="bp-ico" aria-hidden="true">☀</span>
+    <button id="brightReset" type="button" class="bp-reset" data-i18n="brightReset">איפוס</button>
+  </div>
+  <button id="btnBright" class="bright-btn" type="button" aria-expanded="false"><span aria-hidden="true">☀</span></button>
+  <button id="btnBase" class="base-btn" type="button" data-to="sat" aria-pressed="false"><i aria-hidden="true"></i><span>תצ״א</span></button>
+</div>
 
 <div class="fabs">
   <button id="btnCheck" class="fab primary" type="button" aria-label="check">
