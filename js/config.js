@@ -33,7 +33,8 @@ window.APP_CONFIG = {
     dateFilter: true,
     languages: ["he", "en"],
     updateBanner: true,
-    watchPoints: true,       // נקודות מעקב והתראות על שינויים לידן
+    watchPoints: true,
+    places: true,            // 1.12: "המקומות שלי" – כפתור ★ במפה, שמות, מצב נוכחי ומה השתנה מאז הפעם הקודמת       // נקודות מעקב והתראות על שינויים לידן
     search: true,
     weather: true,           // לחצן "נתונים מטאורולוגיים" בחלון הנקודה (js/weather.js)
     terrain: true,           // 1.8: גובה קרקע ותקרה אמיתית (js/terrain.js)

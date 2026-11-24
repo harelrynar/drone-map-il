@@ -266,11 +266,12 @@
         <div class="v-title">${esc(v[1])}</div>
         <div class="v-sub">${esc(T("verdictInfoSub"))}</div>
       </div>
+      ${CFG.features.watchPoints ? `<button class="btn wide place-btn${watched ? " saved" : ""}" type="button" data-act="${watched ? "unwatch" : "watch"}" data-lat="${lat}" data-lon="${lon}">
+        <b class="pl-star">${watched ? "★" : "☆"}</b><span>${esc(watched ? T("watched") : T("watch"))}</span>${watched ? `<small>${esc(T("unwatch"))}</small>` : ""}</button>` : ""}
       ${whoCallSlot(lat, lon, here, near)}
       <div class="pt-row">
         <span class="mono">${fmtCoord(lat, lon)}</span>
         <button class="mini" data-act="copy" data-v="${fmtCoord(lat, lon)}">⧉</button>
-        ${CFG.features.watchPoints ? `<button class="mini" data-act="${watched ? "unwatch" : "watch"}" data-lat="${lat}" data-lon="${lon}">${watched ? "★ " + esc(T("watched")) : "☆ " + esc(T("watch"))}</button>` : ""}
       </div>
       ${X.terrain ? `<div id="terrBox" class="terr">${Terrain.loadingHtml(xo())}</div>` : ""}
       ${weatherSlot(lat, lon)}
@@ -619,9 +620,8 @@
     if (act === "watch" || act === "unwatch") {
       const lat = +b.dataset.lat, lon = +b.dataset.lon;
       Track(act === "watch" ? "watch-add" : "watch-remove");
-      if (act === "watch") state.watch.push({ lat, lon, at: new Date().toISOString() });
-      else state.watch = state.watch.filter(w => !(Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4));
-      store.set("watch", state.watch); drawWatch(); rerender = true; openPoint(lat, lon); rerender = false;
+      if (act === "watch") addPlace(lat, lon);
+      else { state.watch = state.watch.filter(w => !(Math.abs(w.lat - lat) < 1e-4 && Math.abs(w.lon - lon) < 1e-4)); store.set("watch", state.watch); drawWatch(); updatePlacesDot(); } rerender = true; openPoint(lat, lon); rerender = false;
     }
     if (act === "wx") toggleWeather(b);
     if (act === "wc") toggleWhoCall(b);
@@ -715,6 +715,93 @@
     }).join("");
   }
 
+  /* =========================================================
+   * 1.12 – My places: named saved places (stored in "watch": { lat, lon, at, name?, lastV?, seenN? }),
+   * their current status, and what changed since the list was last opened
+   * ========================================================= */
+  const HE = () => state.lang === "he";
+  const isNotamKey = k => k === "notam" || k === "notamApprox";
+  const distTo = (lat, lon, f) => Geo.contains(f, lat, lon) ? 0 : Geo.distanceM(lat, lon, ...Geo.featureCenter(f));
+  const placeName = w => w.name || nearestCity(w.lat, w.lon) || fmtCoord(w.lat, w.lon);
+  function placeStatus(w) {
+    const here = zonesAt(w.lat, w.lon), near = airfieldsNear(w.lat, w.lon), v = verdictOf(here, near);
+    const notams = state.features.filter(f => isNotamKey(layerKey(f)) && timeStatus(f) === "active" && distTo(w.lat, w.lon, f) <= 5000);
+    return { v: v[0], label: v[1], here, notams };
+  }
+  // the baseline for "what changed" is always "now", whatever time is set in the filters
+  function placeStatusNow(w) {
+    const keep = state.when; state.when = null;
+    try { return placeStatus(w); } finally { state.when = keep; }
+  }
+  const vName = x => T(x === "no" ? "verdictNo" : x === "caution" ? "verdictCaution" : "verdictInfo");
+  function placeChanges(w) {
+    const st = placeStatusNow(w), out = [];
+    if (w.lastV && w.lastV !== st.v) out.push(HE() ? `המצב השתנה מאז הפעם הקודמת (היה: ${vName(w.lastV)})` : `Status changed since last time (was: ${vName(w.lastV)})`);
+    const seen = new Set(w.seenN || []);
+    const fresh = w.seenN ? st.notams.filter(f => !seen.has(f.properties.id)) : [];
+    if (fresh.length) out.push(HE() ? `${fresh.length === 1 ? "נוטאם חדש" : fresh.length + " נוטאמים חדשים"} בטווח 5 ק"מ` : `${fresh.length} new NOTAM${fresh.length > 1 ? "s" : ""} within 5 km`);
+    return { st, out };
+  }
+  function markPlacesSeen() {
+    state.watch.forEach(w => { const st = placeStatusNow(w); w.lastV = st.v; w.seenN = st.notams.map(f => f.properties.id); });
+    store.set("watch", state.watch); updatePlacesDot();
+  }
+  function updatePlacesDot() {
+    const d = $("#placesDot"), n = $("#placesCount");
+    if (n) { n.textContent = state.watch.length; n.hidden = !state.watch.length; }
+    if (d) d.hidden = !state.features.length || !state.watch.some(w => placeChanges(w).out.length);
+  }
+  function addPlace(lat, lon) {
+    const w = { lat, lon, at: new Date().toISOString() };
+    w.name = nearestCity(lat, lon) || "";
+    const st = placeStatusNow(w); w.lastV = st.v; w.seenN = st.notams.map(f => f.properties.id);
+    state.watch.push(w); store.set("watch", state.watch); drawWatch(); updatePlacesDot();
+    toast(HE() ? `נשמר במקומות שלי${w.name ? ": " + w.name : ""}` : `Saved to My places${w.name ? ": " + w.name : ""}`);
+  }
+  function openPlaces() {
+    let html = `<h2>★ ${esc(T("myPlaces"))}</h2>`;
+    if (!state.watch.length) {
+      html += `<p class="muted">${HE() ? "עוד לא שמרת מקומות. בודקים נקודה (נגיעה במפה או \"אפשר לטוס כאן?\") ולוחצים \"☆ שמור במקומות שלי\". כאן יופיע המצב של כל מקום, ויסומן אם משהו השתנה בו מאז הפעם הקודמת." : "No saved places yet. Check a point (tap the map or \"Can I fly here?\") and press \"☆ Save to My places\". Each place's status shows here, with a mark when something changed since last time."}</p>`;
+      openSheet(html, "places"); return;
+    }
+    html += `<p class="muted pl-subhead">${HE() ? "המצב עכשיו" : "Status now"}${state.altM != null ? " · " + state.altM + " " + esc(T("metersAgl")) : ""}</p><ul class="pl-list">`;
+    state.watch.forEach((w, i) => {
+      const ch = placeChanges(w), st = ch.st;
+      html += `<li class="pl pl-${st.v}"><div class="pl-top">
+          <button type="button" class="pl-name" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${esc(placeName(w))}</button>
+          <button type="button" class="mini" data-act="plRename" data-i="${i}" aria-label="rename">✎</button>
+          <button type="button" class="mini" data-act="plDel" data-i="${i}" aria-label="delete">🗑</button></div>
+        <div class="pl-sub"><b>${esc(st.label)}</b>${st.notams.length ? ` · ${HE() ? `${st.notams.length} סגירות פעילות בטווח 5 ק"מ` : `${st.notams.length} active closures within 5 km`}` : ""}</div>
+        ${ch.out.map(t => `<div class="pl-new">● ${esc(t)}</div>`).join("")}
+        <div class="pl-acts"><button type="button" class="btn small" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${HE() ? "בדיקת המקום ›" : "Check ›"}</button>
+          <span class="mono muted">${fmtCoord(w.lat, w.lon)}</span></div></li>`;
+    });
+    html += `</ul><p class="fine">${HE() ? "\"השתנה\" ו\"נוטאם חדש\" מושווים למצב בפעם הקודמת שפתחת את הרשימה. המקומות נשמרים רק במכשיר הזה." : "\"Changed\" and \"new NOTAM\" compare with the last time you opened this list. Places are stored on this device only."}</p>`;
+    openSheet(html, "places");
+    markPlacesSeen();
+  }
+  if ($("#btnPlaces")) {
+    if (!CFG.features.places) $("#btnPlaces").remove();
+    else $("#btnPlaces").onclick = () => { Track("places-open", { n: state.watch.length }); openPlaces(); };
+  }
+  $("#sheetBody").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const act = b.dataset.act;
+    if (act === "plDel") {
+      const i = +b.dataset.i; if (!state.watch[i]) return;
+      state.watch.splice(i, 1); store.set("watch", state.watch); drawWatch(); Track("watch-remove", { from: "places" }); openPlaces();
+    }
+    if (act === "plRename") {
+      const i = +b.dataset.i, w = state.watch[i]; if (!w) return;
+      const btn = b.parentNode.querySelector(".pl-name");
+      const inp = document.createElement("input"); inp.className = "pl-in"; inp.value = placeName(w); inp.maxLength = 40;
+      btn.replaceWith(inp); inp.focus(); inp.select();
+      const save = () => { w.name = inp.value.trim().slice(0, 40); store.set("watch", state.watch); drawWatch(); openPlaces(); };
+      inp.addEventListener("keydown", ev => { if (ev.key === "Enter") inp.blur(); });
+      inp.addEventListener("blur", save, { once: true });
+    }
+  });
+
   /* ---------- panels ---------- */
   function openLayers() {
     const rows = CFG.drawOrder.slice().reverse().map(k => {
@@ -762,8 +849,8 @@
   }
   function watchListHtml() {
     if (!state.watch.length) return "";
-    return `<h3>★ ${esc(T("watched"))}</h3><ul class="near">` + state.watch.map(w =>
-      `<li><button class="linkish" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${fmtCoord(w.lat, w.lon)}</button></li>`).join("") + "</ul>";
+    return `<h3>★ ${esc(T("myPlaces"))}</h3><ul class="near">` + state.watch.map(w =>
+      `<li><button class="linkish" data-act="goto" data-lat="${w.lat}" data-lon="${w.lon}">${esc(placeName(w))}</button></li>`).join("") + "</ul>";
   }
   $("#sheetBody").addEventListener("click", e => {
     const b = e.target.closest("[data-act=goto]"); if (!b) return;
@@ -1036,7 +1123,8 @@
   let watchLayer = L.layerGroup().addTo(map);
   function drawWatch() {
     watchLayer.clearLayers();
-    state.watch.forEach(w => L.marker([w.lat, w.lon], { icon: L.divIcon({ className: "watch", html: "★", iconSize: [20, 20] }), interactive: false }).addTo(watchLayer));
+    state.watch.forEach(w => L.marker([w.lat, w.lon], { icon: L.divIcon({ className: "watch", html: "★", iconSize: [20, 20] }), title: placeName(w) })
+      .on("click", ev => { L.DomEvent.stopPropagation(ev); openPoint(w.lat, w.lon); }).addTo(watchLayer));
   }
 
   /* ---------- toast ---------- */
@@ -1144,7 +1232,7 @@
       try { state.versions = await getJSON("data/versions.json"); } catch (e) { state.versions = null; }
       state.overlays.forEach(o => { if ((state.ovlState[o.id] || {}).on) setOverlay(o.id, true); });
       $("#demoRibbon").hidden = !meta.demo;
-      drawBasemap(); renderBanner(); drawZones(); applyLang();
+      drawBasemap(); renderBanner(); drawZones(); applyLang(); updatePlacesDot();
     } catch (err) {
       console.error(err);
       toast("Data load error: " + err.message);
