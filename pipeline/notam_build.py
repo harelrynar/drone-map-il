@@ -76,7 +76,7 @@ def limits(f, e, q):
     lo = conv(f["F"]) if f.get("F") else None
     up = conv(f["G"]) if f.get("G") else None
     if not up:
-        m = re.search(r"UP\s*(?:TO)?\s*([\d,]+)\s*(FT)?\s*(AMSL|AGL)?", e) or re.search(r"UP TO\s+[\d.]+M\s+AGL\s+([\d,]+)\s*FT\s*(AMSL)", e)
+        m = re.search(r"UP\s*(?:TO)?\s*(\d[\d,]*)\s*(FT)?\s*(AMSL|AGL)?", e) or re.search(r"UP TO\s+[\d.]+M\s+AGL\s+([\d,]+)\s*FT\s*(AMSL)", e)
         m2 = re.search(r"UP TO\s+[\d.,]+\s*M(?:\s+AGL)?,?\s+([\d,]+)\s*FT\s+AMSL", e) or re.search(r"UP TO\s+([\d,]+)\s*FT\s+AMSL", e)
         if m2: up = {"v": int(m2.group(1).replace(",", "")), "u": "ft", "ref": "AMSL"}
         elif m:
