@@ -625,8 +625,14 @@
     if (v.schedule) rows.push([T("schedule"), esc(L_(v.schedule))]);
     if (p.elevation_ft != null) rows.push([state.lang === "he" ? "גובה השדה" : "Elevation", `${p.elevation_ft} ft`]);
     if (p.contact && p.contact.length) rows.push([T("contact"), p.contact.map(contactHtml).join("<br>")]);
-    if (p.remarks && L_(p.remarks)) rows.push([T("remarks"), esc(L_(p.remarks))]);
-    if (p.source) rows.push([T("source"), p.source.url ? `<a href="${esc(p.source.url)}" target="_blank" rel="noopener">${esc(L_(p.source.name))}</a>${p.source.ref ? " · " + esc(p.source.ref) : ""}` : esc(L_(p.source.name))]);
+    // 1.13.1 – הערות ארוכות מקופלות לשורה אחת עם "עוד"; המקור עבר לשורה התחתונה של הכרטיס
+    if (p.remarks && L_(p.remarks)) {
+      const rm = L_(p.remarks);
+      rows.push([T("remarks"), rm.length > 70
+        ? `<details class="rmk"><summary><span class="rmk-t">${esc(rm)}</span><span class="rmk-more">${esc(T("more"))}</span><span class="rmk-less">${esc(T("less"))}</span></summary></details>`
+        : esc(rm)]);
+    }
+    const srcLink = p.source ? `<span class="zsrc">${esc(T("source"))}: ${p.source.url ? `<a href="${esc(p.source.url)}" target="_blank" rel="noopener">${esc(L_(p.source.name))}</a>` : esc(L_(p.source.name))}${p.source.ref ? " · " + esc(p.source.ref) : ""}</span>` : "";
 
     let approx = "";
     if (p.confidence === "approx") approx = `<div class="approx"><b>⚠ ${esc(T("approxTitle"))}</b><p>${esc(T("approxText"))}</p>${p.approxReason ? `<p class="muted">${esc(L_(p.approxReason))}</p>` : ""}</div>`;
@@ -637,13 +643,20 @@
 
     return `
       <details class="zcard" ${open ? "open" : ""} style="--zc:${lc.color}">
-        <summary><i class="sw"></i><span>${esc(L_(p.name))}</span>${state.newIds.has(p.id) ? `<em class="newtag">${esc(T("newUpdate"))}</em>` : ""}</summary>
+        <summary><i class="sw"></i><span class="zname">${esc(L_(p.name))}${zoneGlance(p, st)}</span>${state.newIds.has(p.id) ? `<em class="newtag">${esc(T("newUpdate"))}</em>` : ""}</summary>
         ${state.layersOn[key] ? "" : `<div class="hiddenlyr">👁 ${esc(T("layerHidden"))} <button class="mini" type="button" data-act="showLayer" data-k="${esc(key)}">${esc(T("showLayer"))}</button></div>`}
         ${approx}
         <dl>${rows.map(r => `<dt>${esc(r[0])}</dt><dd>${r[1]}</dd>`).join("")}</dl>
         ${raw}
-        <div class="zfoot"><button class="mini" data-act="zoomto" data-id="${esc(p.id)}">⌖</button>${reportLink(p.notam ? `NOTAM ${p.notam.id || p.id} – ${L_(p.name)}` : `${p.designator ? p.designator + " – " : ""}${(p.name && (p.name.he || p.name.en)) || L_(p.name)} [${p.id}]`, p.notam ? "notam" : "zone")}</div>
+        <div class="zfoot"><button class="mini" data-act="zoomto" data-id="${esc(p.id)}">⌖</button>${srcLink}${reportLink(p.notam ? `NOTAM ${p.notam.id || p.id} – ${L_(p.name)}` : `${p.designator ? p.designator + " – " : ""}${(p.name && (p.name.he || p.name.en)) || L_(p.name)} [${p.id}]`, p.notam ? "notam" : "zone")}</div>
       </details>`;
+  }
+  /* 1.13.1 – שורת תקציר מתחת לשם האזור (נראית כשהכרטיס סגור): סטטוס · גבולות גובה */
+  function zoneGlance(p, st) {
+    const bits = [`<b class="st st-${st}">${esc(T(st))}</b>`];
+    if (p.lower || p.upper) bits.push(`<bdi>${esc(fmtLimit(p.lower))}</bdi>–<bdi>${esc(fmtLimit(p.upper))}</bdi>`);
+    else if (p.valid && p.valid.to) bits.push(`${esc(T("to"))} ${fmtTime(p.valid.to)}`);
+    return `<small class="zglance">${bits.join(" · ")}</small>`;
   }
   function contactHtml(c) {
     const label = c.label ? esc(L_(c.label)) + ": " : "";
