@@ -271,7 +271,7 @@
       } else {
         layer = L.geoJSON(f, Object.assign({ pane: "p_" + key, style: () => style }, key === "nature" ? { renderer: natureRenderer } : {}));
       }
-      layer.on("click", e => { L.DomEvent.stop(e); openPoint(e.latlng.lat, e.latlng.lng, p.id); });
+      layer.on("click", e => { L.DomEvent.stop(e); if (tapCloses()) return; openPoint(e.latlng.lat, e.latlng.lng, p.id); });
       if (layer.bindTooltip && !L.Browser.mobile) layer.bindTooltip(esc(L_(p.name)), { sticky: true, direction: "top", className: "ztip" });
       layer.addTo(zoneGroup);
       zoneLayers[p.id] = layer;
@@ -695,7 +695,14 @@
     document.body.classList.remove("sheet-open");
     if (state.checkMarker) { state.checkMarker.remove(); state.checkMarker = null; }
   }
-  $("#sheetClose").onclick = closeSheet;
+  $("#sheetClose").onclick = () => { closeSheet(); Track("sheet-close", { how: "x" }); };
+  /* 1.13.2 – נגיעה במפה כשחלון פתוח רק סוגרת אותו; הנגיעה הבאה בוחרת נקודה.
+     גרירה/זום לא נחשבים נגיעה (Leaflet לא שולח click אחרי גרירה). כיבוי: features.tapClose = false */
+  function tapCloses() {
+    if (CFG.features.tapClose === false || $("#sheet").hidden) return false;
+    const kind = sheetKind; closeSheet(); Track("sheet-close", { how: "map", kind: kind || "?" });
+    return true;
+  }
 
   $("#sheetBody").addEventListener("click", e => {
     const b = e.target.closest("[data-act]"); if (!b) return;
@@ -1011,7 +1018,7 @@
       zIndexOffset: 1100, title: T("myLocation")
     }).addTo(map)
       .bindTooltip(T("myLocation"), { direction: "top", offset: [0, -10], className: "ztip" })
-      .on("click", ev => { L.DomEvent.stopPropagation(ev); openPoint(state.myPos[0], state.myPos[1]); });
+      .on("click", ev => { L.DomEvent.stopPropagation(ev); if (tapCloses()) return; openPoint(state.myPos[0], state.myPos[1]); });
   }
 
   /* ---------- what's new / banner ---------- */
@@ -1213,7 +1220,7 @@
   function drawWatch() {
     watchLayer.clearLayers();
     state.watch.forEach(w => L.marker([w.lat, w.lon], { icon: L.divIcon({ className: "watch", html: "★", iconSize: [20, 20] }), title: placeName(w) })
-      .on("click", ev => { L.DomEvent.stopPropagation(ev); openPoint(w.lat, w.lon); }).addTo(watchLayer));
+      .on("click", ev => { L.DomEvent.stopPropagation(ev); if (tapCloses()) return; openPoint(w.lat, w.lon); }).addTo(watchLayer));
   }
 
   /* ---------- toast ---------- */
@@ -1266,7 +1273,7 @@
   }
 
   /* ---------- events ---------- */
-  map.on("click", e => { if (CFG.features.pointCheck) openPoint(e.latlng.lat, e.latlng.lng); });
+  map.on("click", e => { if (tapCloses()) return; if (CFG.features.pointCheck) openPoint(e.latlng.lat, e.latlng.lng); });
   $("#btnLayers").onclick = openLayers;
   $("#btnFilters").onclick = openFilters;
   if (CFG.features.satellite && $("#btnBase")) {
@@ -1311,7 +1318,7 @@
     if (X.traffic) Traffic.redraw();
     const k = sheetKind; if (k === "layers") openLayers(); else if (k === "filters") openFilters(); else if (k === "check") openCheck(); else if (k === "news") openNews(); else if (k === "about") openAbout(); else if (k === "info") openInfo(); else if (k === "traffic") openTraffic(); else if (k === "point" && state.lastPoint) { rerender = true; openPoint(...state.lastPoint); rerender = false; }
   };
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#sheet").hidden) { closeSheet(); Track("sheet-close", { how: "esc" }); } });
 
   /* ---------- load ---------- */
   async function getJSON(path) {

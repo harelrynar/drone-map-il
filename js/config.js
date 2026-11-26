@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.13.1",
+  version: "1.13.2",
 
   map: {
     center: [31.45, 34.95],
@@ -43,7 +43,8 @@ window.APP_CONFIG = {
     whoCall: true,           // 1.8: "למי מתקשרים?" (js/whocall.js)
     pwa: true,               // 1.9: התקנה כאפליקציה + עבודה בלי קליטה (js/pwa.js, sw.js)
     feedback: true,          // 1.10: "משוב והצעות" + "דווח" בכרטיס אזור/נוטאם (Google Form)
-    satellite: true          // 1.13: מתג מפה / תצ"א (Esri World Imagery)
+    satellite: true,         // 1.13: מתג מפה / תצ"א (Esri World Imagery)
+    tapClose: true           // 1.13.2: נגיעה במפה כשחלון פתוח – רק סוגרת אותו
   },
 
   /* 1.13 – תצ"א. Esri World Imagery: חינם עם ייחוס, בלי מפתח. אם מחליפים ספק – רק כאן. */
