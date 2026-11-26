@@ -326,14 +326,13 @@
       ${CFG.features.watchPoints ? `<button class="btn wide place-btn${watched ? " saved" : ""}" type="button" data-act="${watched ? "unwatch" : "watch"}" data-lat="${lat}" data-lon="${lon}">
         <b class="pl-star">${watched ? "★" : "☆"}</b><span>${esc(watched ? T("watched") : T("watch"))}</span>${watched ? `<small>${esc(T("unwatch"))}</small>` : ""}</button>` : ""}
       ${whoCallSlot(lat, lon, here, near)}
-      <div class="pt-row">
-        <span class="mono">${fmtCoord(lat, lon)}</span>
-        <button class="mini" data-act="copy" data-v="${fmtCoord(lat, lon)}">⧉</button>
+      <div class="ptinfo">
+        <div class="pt-row"><span class="mono">${fmtCoord(lat, lon)}</span><button class="mini" data-act="copy" data-v="${fmtCoord(lat, lon)}">⧉</button></div>
+        ${X.terrain ? `<div id="terrBox" class="terr">${Terrain.loadingHtml(xo())}</div>` : ""}
+        ${filterSummary()}
       </div>
-      ${X.terrain ? `<div id="terrBox" class="terr">${Terrain.loadingHtml(xo())}</div>` : ""}
       ${weatherSlot(lat, lon)}
-      ${filterSummary()}
-      <h3>${esc(T("zonesHere"))} <small>(${here.length})</small></h3>
+      <h3 class="zh">${esc(T("zonesHere"))} ${zoneTally(here)}</h3>
       ${here.length ? here.map((f, i) => zoneCard(f, i === 0 || f.properties.id === focusId)).join("") : `<p class="muted">—</p>`}
     `;
     if (near.length) {
@@ -346,7 +345,7 @@
     html += generalNoticesHtml();
     html += vlosHtml();
     html += `<p class="disclaimer">${esc(T("disclaimer"))}</p>`;
-    openSheet(html, "point");
+    openSheet(`<div class="ptv">${html}</div>`, "point");
     if (wxIsOpenFor(lat, lon)) showWeather(lat, lon); else state.wxOpenAt = null;
     loadPointExtras(lat, lon, here, near, v[0]);
     if (!rerender) Track("point-check", { verdict: v[0], zones: here.length, top: here[0] ? layerKey(here[0]) : "none", mine: !!isMine });
@@ -650,6 +649,20 @@
         ${raw}
         <div class="zfoot"><button class="mini" data-act="zoomto" data-id="${esc(p.id)}">⌖</button>${srcLink}${reportLink(p.notam ? `NOTAM ${p.notam.id || p.id} – ${L_(p.name)}` : `${p.designator ? p.designator + " – " : ""}${(p.name && (p.name.he || p.name.en)) || L_(p.name)} [${p.id}]`, p.notam ? "notam" : "zone")}</div>
       </details>`;
+  }
+  /* 1.13.1 – מונה צבעוני ליד "אזורים בנקודה": מגבילים עכשיו / דורשים תיאום / לא פעילים כרגע */
+  function zoneTally(here) {
+    if (!here.length) return `<small>(0)</small>`;
+    const c = { no: 0, caution: 0, off: 0 };
+    here.forEach(f => {
+      if (timeStatus(f) !== "active") c.off++;
+      else if (CFG.layers[layerKey(f)].severity >= 3) c.no++;
+      else c.caution++;
+    });
+    const he = state.lang === "he";
+    const lbl = he ? { no: ["מגביל", "מגבילים"], caution: ["דורש תיאום", "דורשים תיאום"], off: ["לא פעיל כרגע", "לא פעילים כרגע"] }
+                   : { no: ["restricting", "restricting"], caution: ["needs coordination", "need coordination"], off: ["not active now", "not active now"] };
+    return `<span class="ztally">${["no", "caution", "off"].filter(k => c[k]).map(k => `<span class="zt zt-${k}"><i></i>${c[k]} ${esc(lbl[k][c[k] > 1 ? 1 : 0])}</span>`).join("")}</span>`;
   }
   /* 1.13.1 – שורת תקציר מתחת לשם האזור (נראית כשהכרטיס סגור): סטטוס · גבולות גובה */
   function zoneGlance(p, st) {

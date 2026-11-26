@@ -41,7 +41,7 @@
       school: "בית ספר", univ: "מכללה / אוניברסיטה", hosp: "בית חולים", mall: "קניון", market: "שוק",
       stadium: "אצטדיון", park: "פארק שעשועים / גן חיות", beach: "חוף", station: "תחנת רכבת / אוטובוס",
       pplCaveat: "שטח בנוי = שימושי קרקע של מגורים, מסחר ותעשייה ב-OpenStreetMap. זו אינה ההגדרה המשפטית של \"אזור מאוכלס\".",
-      updated: "נתוני OSM מ-", zoomHint: "מקירוב {z}"
+      updated: "נתוני OSM מ-", moreN: "עוד {n} ▾", lessN: "פחות ▴", about: "על הנתונים", zoomHint: "מקירוב {z}"
     },
     en: {
       obsTitle: "Obstacles within {r} m", pplTitle: "Built-up area and crowd places",
@@ -59,7 +59,7 @@
       school: "School", univ: "College / university", hosp: "Hospital", mall: "Mall", market: "Market",
       stadium: "Stadium", park: "Theme park / zoo", beach: "Beach", station: "Train / bus station",
       pplCaveat: "Built-up = residential, commercial and industrial land use in OpenStreetMap. It is not the legal definition of a \"populated area\".",
-      updated: "OSM data from ", zoomHint: "zoom {z}+"
+      updated: "OSM data from ", moreN: "{n} more ▾", lessN: "less ▴", about: "About this data", zoomHint: "zoom {z}+"
     }
   };
   const t = (lang, k) => (TXT[lang] || TXT.he)[k] ?? TXT.he[k] ?? k;
@@ -237,6 +237,16 @@
     return isNaN(d) ? "" : ` ${o.esc(t(o.lang, "updated"))}${d.toLocaleDateString(o.lang === "he" ? "he-IL" : "en-GB")}.`;
   }
 
+  /* 1.13.1 – 3 הראשונים גלויים, השאר מקופלים; הסתייגות המקור מקופלת מאחורי ⓘ */
+  const SHOW = 3;
+  function ulMore(items, o, L) {
+    const head = `<ul class="obs">${items.slice(0, SHOW).join("")}</ul>`;
+    if (items.length <= SHOW) return head;
+    return head + `<details class="lmore"><summary><span class="lm-o">${o.esc(t(L, "moreN").replace("{n}", items.length - SHOW))}</span><span class="lm-c">${o.esc(t(L, "lessN"))}</span></summary><ul class="obs">${items.slice(SHOW).join("")}</ul></details>`;
+  }
+  function fineInfo(html, o, L) {
+    return `<details class="finfo"><summary>ⓘ ${o.esc(t(L, "about"))}</summary><p class="fine">${html}</p></details>`;
+  }
   function obstaclesHtml(res, o) {
     const L = o.lang, R = CFG.nearObstacleM;
     const title = `<h3>${o.esc(t(L, "obsTitle").replace("{r}", R))}</h3>`;
@@ -260,9 +270,9 @@
     });
     rows.sort((a, b) => a.d - b.d);
     const list = rows.length
-      ? `<ul class="obs">${rows.map(r => `<li class="${r.cls}${r.d < 60 ? " close" : ""}"><i></i><span>${r.html}</span><em>${o.esc(away(r.d, L))}</em></li>`).join("")}</ul>`
+      ? ulMore(rows.map(r => `<li class="${r.cls}${r.d < 60 ? " close" : ""}"><i></i><span>${r.html}</span><em>${o.esc(away(r.d, L))}</em></li>`), o, L)
       : `<p class="obs-none">✓ ${o.esc(t(L, "none").replace("{r}", R))}</p>`;
-    return title + list + `<p class="fine">${o.esc(t(L, "caveat"))}${stamp(res, o)}</p>`;
+    return title + list + fineInfo(`${o.esc(t(L, "caveat"))}${stamp(res, o)}`, o, L);
   }
 
   function peopleHtml(res, o) {
@@ -281,14 +291,14 @@
       html += `<p class="obs-none">✓ ${o.esc(t(L, "notBuilt"))}</p>`;
     }
     if (res.crowd.length) {
-      html += `<div class="crowd-h">${o.esc(t(L, "crowdNear").replace("{r}", R))}</div><ul class="obs">` + res.crowd.slice(0, 8).map(p => {
+      html += `<div class="crowd-h">${o.esc(t(L, "crowdNear").replace("{r}", R))}</div>` + ulMore(res.crowd.slice(0, 8).map(p => {
         const n = nameOf(p, L);
         return `<li class="cr"><i></i><span><b>${o.esc(t(L, p.k))}</b>${n ? " " + o.esc(n) : ""}</span><em>${o.esc(t(L, "mAway").replace("{d}", r10(p.d)))}</em></li>`;
-      }).join("") + "</ul>";
+      }), o, L);
     } else {
       html += `<p class="muted crowd-none">${o.esc(t(L, "crowdNone").replace("{r}", R))}</p>`;
     }
-    return html + `<p class="fine">${o.esc(t(L, "pplCaveat"))}${stamp(res, o)}</p>`;
+    return html + fineInfo(`${o.esc(t(L, "pplCaveat"))}${stamp(res, o)}`, o, L);
   }
 
   window.Osm = { init, set, at, refresh, obstaclesHtml, peopleHtml, t, cfg: CFG };

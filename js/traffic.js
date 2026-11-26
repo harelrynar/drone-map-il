@@ -216,7 +216,8 @@
       return `<p class="tfc-stale">⚠ ${esc(t(lang, "stale").replace("{m}", st.ageSec ? Math.round(st.ageSec / 60) : "?"))}</p>`;
     return null;
   }
-  const foot = (lang, esc) => `<p class="fine">${esc(t(lang, "caveat"))} ${esc(t(lang, "src").replace("{p}", (feed && feed.provider) || "adsb.fi"))}.</p>`;
+  // 1.13.1 – ההסתייגות מקופלת מאחורי ⓘ
+  const foot = (lang, esc) => `<details class="finfo"><summary>ⓘ ${lang === "he" ? "על הנתונים" : "About this data"}</summary><p class="fine">${esc(t(lang, "caveat"))} ${esc(t(lang, "src").replace("{p}", (feed && feed.provider) || "adsb.fi"))}.</p></details>`;
 
   function nearHtml(lat, lon, o) {
     const L_ = o.lang, title = `<h3>${o.esc(t(L_, "nearTitle").replace("{r}", CFG.nearKm))}</h3>`;
