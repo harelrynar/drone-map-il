@@ -1,6 +1,12 @@
 {
  "appChangelog": [
   {
+   "version": "1.13.1",
+   "date": "2026-11-26",
+   "he": "חלון הנקודה מסודר יותר: ליד \"אזורים בנקודה\" מונה צבעוני (מגבילים / דורשים תיאום / לא פעילים); בכרטיס סגור מוצגים הסטטוס והגבהים; הערות ארוכות מקופלות עם \"עוד\"; קואורדינטות, גובה קרקע וסינון בפס אחד; בריכוזי קהל ומכשולים מוצגים 3 הקרובים; הסתייגויות המקור מקופלות ל\"ⓘ על הנתונים\".",
+   "en": "Tidier point panel: a coloured count next to \"Zones at this point\" (restricting / need coordination / not active); closed zone cards show status and height limits; long remarks fold behind \"more\"; coordinates, ground elevation and filter in one strip; crowd places and obstacles show the 3 nearest; data caveats fold behind \"ⓘ About this data\"."
+  },
+  {
    "version": "1.13",
    "date": "2026-11-24",
    "he": "מפה / תצ\"א: כפתור בפינת המפה שמחליף בין המפה הרגילה לתצלום אוויר (Esri), ולידו כפתור ☀ עם סליידר להבהרה או הכהיה של הרקע (נשמר בנפרד למפה ולתצ\"א). במצב תצ\"א שמות היישובים מוצגים מעל התמונה וקווי האזורים מודגשים. הבחירות נשמרות במכשיר.",
