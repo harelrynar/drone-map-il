@@ -52,7 +52,8 @@ The claude.ai artifact (444ddce3-…) is a legacy preview and is no longer updat
 ## B. AIP run (daily)
 1. `python3 aip_check.py /home/claude/site/data/aip_state.json /home/claude/build/aip_state.json` → JSON report.
 2. If nothing changed: `python3 mark_checked.py /home/claude/site/data aip` (sets `meta.aip.checkedAt` = now), publish `data/meta.json`, `data/aip_state.json`. Done.
-3. If `א'-17*.pdf` changed: `python3 build_prd.py` (automatic parse). Check the log for `NO GEOMETRY` and review curated.py remarks/contacts against the new text.
+3. If `א'-17*.pdf` changed: `python3 build_prd.py` (automatic parse).
+   **1.14:** if `א'-07`, `א'-11` or `א'-17` changed, compare the phones/emails in `data/contacts.json` with the new text, then run `node pipeline/contacts_report.js` (coverage of derived contacts; `--list` for details). Check the log for `NO GEOMETRY` and review curated.py remarks/contacts against the new text.
 4. If `ב'-09.pdf`, airport/airstrip pages, or `א'-07.pdf` changed: extract text (`pdftotext -layout`), compare with the transcriptions in
    `build_uas.py` / `build_ad.py` / `curated.py`, edit them, run them.
 5. `python3 build_uas.py && python3 build_ad.py` (always – they are cheap), then

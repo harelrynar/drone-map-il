@@ -42,7 +42,7 @@
         "מועד: ________ עד ________", "שם המפעיל: ________ · טלפון: ________", "סוג הכלי ומשקל: ________"],
       nearCity: " (ליד {c})", altSel: "עד {a} מ' מעל הקרקע", altNone: "________ מ' מעל הקרקע",
       ground: " · גובה הקרקע כ-{g} מ' מעל פני הים",
-      fine: "הפרטים נלקחו מהפמ\"ת ומהנוטאם כפי שהם מופיעים במפה. ייתכן שמספר השתנה – אם אין מענה, בדקו בפרסום המקורי."
+      fine: "הפרטים נלקחו מהפמ\"ת ומהנוטאם כפי שהם מופיעים במפה. 🔶 = הושלם לפי כלל (לא מופיע בפרסום של האזור עצמו). ייתכן שמספר השתנה – אם אין מענה, בדקו בפרסום המקורי."
     },
     en: {
       button: "Who do I call?", title: "Who to call – in order",
@@ -72,7 +72,7 @@
         "Time: ________ to ________", "Operator: ________ · phone: ________", "Aircraft type and weight: ________"],
       nearCity: " (near {c})", altSel: "up to {a} m above ground", altNone: "________ m above ground",
       ground: " · ground elevation about {g} m AMSL",
-      fine: "Details are taken from the AIP and NOTAM as shown on the map. Numbers may change – if there is no answer, check the original publication."
+      fine: "Details are taken from the AIP and NOTAM as shown on the map. 🔶 = derived by a rule (not in the zone's own publication). Numbers may change – if there is no answer, check the original publication."
     }
   };
   const t = (lang, k) => (TXT[lang] || TXT.he)[k] ?? TXT.he[k] ?? k;
@@ -86,6 +86,8 @@
       const st = ctx.timeStatus(f);
       if (st === "inactive") return;
       let contacts = (p.contact || []).slice(), fromNotam = false;
+      let alt = null;   // 1.14 – derived contacts (js/contacts.js, incl. NOTAM phones), shown with their basis
+      if (!contacts.length && p.contactAlt && p.contactAlt.length) { alt = p.contactAlt; contacts = alt.flatMap(g => g.items); }
       if (!contacts.length && p.notam && p.notam.raw) {
         const found = [...new Set((p.notam.raw.match(PHONE_RE) || []).map(s => s.replace(/\s+/g, "-")))];
         contacts = found.map(v => ({ type: "phone", value: v }));
@@ -96,7 +98,7 @@
       const key = contacts.length ? k + "|" + contacts.map(c => c.type + ":" + c.value).join("|") : "none|" + p.id;
       let s = byKey.get(key);
       if (!s) {
-        s = { layer: k, sev, contacts, fromNotam, zones: [], remarks: p.remarks, source: p.source, isNotam: k === "notam" || k === "notamApprox", scheduled: st === "scheduled", near: extra && extra.d };
+        s = { layer: k, sev, contacts, fromNotam, alt, zones: [], remarks: p.remarks, source: p.source, isNotam: k === "notam" || k === "notamApprox", scheduled: st === "scheduled", near: extra && extra.d };
         byKey.set(key, s); steps.push(s);
       }
       s.zones.push(p);
@@ -142,7 +144,10 @@
       const lc = o.layers[s.layer] || {};
       const ask = (TXT[L] || TXT.he).ask[s.layer] || TXT.he.ask[s.layer] || "";
       let body;
-      if (s.contacts.length) {
+      if (s.alt) {
+        // derived: one block per rule, in the order the rules ranked them
+        body = s.alt.map(g => `<div class="wc-alt"><div class="wc-alt-basis">🔶 ${o.esc(o.L_(g.basis))}</div><div class="wc-acts">${g.items.map(c => contactBtn(c, o, false)).join("")}</div></div>`).join("");
+      } else if (s.contacts.length) {
         const order = { phone: 0, url: 1, email: 2, freq: 3 };
         body = `<div class="wc-acts">${s.contacts.slice().sort((a, b) => (order[a.type] ?? 9) - (order[b.type] ?? 9)).map(c => contactBtn(c, o, s.fromNotam)).join("")}</div>`;
       } else {

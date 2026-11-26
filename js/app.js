@@ -587,7 +587,7 @@
     return parts.length ? `<div class="fsum">${esc(T("filters"))}: ${esc(parts.join(" · "))}</div>` : "";
   }
   function contactInline(p) {
-    const c = (p.contact || [])[0];
+    const c = (p.contact || [])[0] || (p.contactAlt && p.contactAlt[0] && p.contactAlt[0].items[0]);
     return c ? ` · <span class="muted">${esc(c.value)}</span>` : "";
   }
 
@@ -624,6 +624,7 @@
     if (v.schedule) rows.push([T("schedule"), esc(L_(v.schedule))]);
     if (p.elevation_ft != null) rows.push([state.lang === "he" ? "גובה השדה" : "Elevation", `${p.elevation_ft} ft`]);
     if (p.contact && p.contact.length) rows.push([T("contact"), p.contact.map(contactHtml).join("<br>")]);
+    else if (p.contactAlt && p.contactAlt.length && window.Contacts) rows.push([T("contact"), Contacts.cardHtml(p, { lang: state.lang, esc, L_, itemHtml: contactHtml })]);
     // 1.13.1 – הערות ארוכות מקופלות לשורה אחת עם "עוד"; המקור עבר לשורה התחתונה של הכרטיס
     if (p.remarks && L_(p.remarks)) {
       const rm = L_(p.remarks);
@@ -676,7 +677,7 @@
     const v = esc(c.value);
     if (c.type === "phone") return `${label}<a class="mono" dir="ltr" href="tel:${v.replace(/[^\d+]/g, "")}">${v}</a>`;
     if (c.type === "url") return `${label}<a href="${v}" target="_blank" rel="noopener">${v}</a>`;
-    if (c.type === "email") return `${label}<span class="mono">${v}</span>`;
+    if (c.type === "email") return `${label}<a class="mono" dir="ltr" href="mailto:${v}">${v}</a>`;
     return `${label}<span class="mono">${v}</span>`;
   }
 
@@ -1327,6 +1328,10 @@
       ]);
       state.basemap = basemap; state.meta = meta;
       state.features = (zones.features || []).concat((notams.located && notams.located.features) || []);
+      // 1.14 – השלמת פרטי קשר לאזורים ולנוטאמים שאין להם (js/contacts.js)
+      if (CFG.features.contactAlt && window.Contacts) {
+        try { state.contactStats = Contacts.enrich(state.features, await getJSON("data/contacts.json"), Geo); } catch (e) { console.warn("contacts", e); }
+      }
       state.unlocated = notams.unlocated || [];
       try { state.overlays = await getJSON("data/overlays.json"); } catch (e) { state.overlays = []; }
       try { state.crosscheck = await getJSON("data/crosscheck.json"); } catch (e) { state.crosscheck = null; }

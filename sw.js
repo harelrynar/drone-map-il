@@ -12,7 +12,7 @@
  *
  * בשינוי בקובץ הזה – להעלות את VERSION, כדי שהדפדפן יתקין את החדש.
  * ========================================================= */
-const VERSION = "1.13.1";
+const VERSION = "1.14-beta";
 const CACHE = "uasmap-" + VERSION;
 const FONTS = "uasmap-fonts";
 
@@ -21,7 +21,7 @@ const PRECACHE = [
   "./", "en/", "manifest.webmanifest", "manifest-en.webmanifest",
   "css/leaflet.css", "css/app.css",
   "js/leaflet.js", "js/config.js", "js/analytics.js", "js/i18n.js", "js/geo.js",
-  "js/weather.js", "js/terrain.js", "js/osm.js", "js/traffic.js", "js/whocall.js",
+  "js/weather.js", "js/terrain.js", "js/osm.js", "js/traffic.js", "js/whocall.js", "js/contacts.js",
   "js/app.js", "js/pwa.js",
   "img/icon-192.png", "img/apple-touch-icon.png",
   "data/basemap.json", "data/meta.json", "data/zones.json", "data/notams.json",

@@ -3,7 +3,7 @@
  * App configuration – add layers, colors and feature flags here.
  * ========================================================= */
 window.APP_CONFIG = {
-  version: "1.13.1",
+  version: "1.14 beta",
 
   map: {
     center: [31.45, 34.95],
@@ -41,6 +41,7 @@ window.APP_CONFIG = {
     osm: true,               // 1.8: מכשולים, שטח בנוי וריכוזי קהל (js/osm.js)
     traffic: true,           // 1.8: תנועה אווירית נמוכה (js/traffic.js)
     whoCall: true,           // 1.8: "למי מתקשרים?" (js/whocall.js)
+    contactAlt: true,        // 1.14: השלמת פרטי קשר חסרים (js/contacts.js + data/contacts.json)
     pwa: true,               // 1.9: התקנה כאפליקציה + עבודה בלי קליטה (js/pwa.js, sw.js)
     feedback: true,          // 1.10: "משוב והצעות" + "דווח" בכרטיס אזור/נוטאם (Google Form)
     satellite: true          // 1.13: מתג מפה / תצ"א (Esri World Imagery)

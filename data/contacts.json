@@ -1,0 +1,340 @@
+{
+ "_doc": "1.14 – ספריית גורמי קשר להשלמת פרטי קשר חסרים (js/contacts.js). כל רשומה מתומללת מפרסום רשמי, עם מקור. לא להוסיף מספר בלי מקור. בעדכון פמ\"ת א'-07 / א'-11 / א'-17 – להשוות לכאן.",
+ "verifiedAt": "2026-11-26",
+ "sources": {
+  "A07": {
+   "name": {
+    "he": "פמ\"ת א'-07 §10 – טלפונים של יחידות הנת\"א",
+    "en": "AIP A-07 §10 – ATS unit phones"
+   },
+   "url": "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-07.pdf"
+  },
+  "A11": {
+   "name": {
+    "he": "פמ\"ת א'-11 – הגשת תוכניות טיסה וסגירות",
+    "en": "AIP A-11 – flight plans and closures"
+   },
+   "url": "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-11.pdf"
+  },
+  "A17": {
+   "name": {
+    "he": "פמ\"ת א'-17 – אזורים אסורים, מוגבלים ומסוכנים",
+    "en": "AIP A-17 – P/R/D areas"
+   },
+   "url": "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-17.pdf"
+  },
+  "B09": {
+   "name": {
+    "he": "פמ\"ת ב'-09 – טיסות כטב\"ם",
+    "en": "AIP B-09 – UAS flights"
+   },
+   "url": "https://www.gov.il/BlobFolder/guide/aip/he/%D7%91'-09.pdf"
+  }
+ },
+ "units": {
+  "notamOffice": {
+   "name": {
+    "he": "משרד נוטאם (רש\"ת)",
+    "en": "NOTAM office (IAA)"
+   },
+   "src": "A11",
+   "ref": "א'-11 סעיף 3ב(4)",
+   "items": [
+    {
+     "type": "email",
+     "value": "notamoffice@iaa.gov.il"
+    },
+    {
+     "type": "email",
+     "value": "nofm@iaa.gov.il"
+    }
+   ]
+  },
+  "fpl": {
+   "name": {
+    "he": "מודיעין טיס – תוכניות טיסה",
+    "en": "Flight plans office"
+   },
+   "src": "A11",
+   "ref": "א'-11 סעיף 3ב(2)",
+   "items": [
+    {
+     "type": "email",
+     "value": "fpl@iaa.gov.il"
+    }
+   ]
+  },
+  "caaiExceptions": {
+   "name": {
+    "he": "רת\"א – אגף פיקוח אווירי (בקשת חריגה)",
+    "en": "CAAI – exception requests"
+   },
+   "src": "A17",
+   "ref": "א'-17 סעיף 5",
+   "items": [
+    {
+     "type": "email",
+     "value": "caai-charigot@mot.gov.il"
+    }
+   ]
+  },
+  "iafSync": {
+   "name": {
+    "he": "סנכרון חיל האוויר (כטב\"ם/טיסן ליד הגבול)",
+    "en": "IAF sync (UAS near the border)"
+   },
+   "src": "A17",
+   "ref": "א'-17 סעיף 4",
+   "items": [
+    {
+     "type": "email",
+     "value": "sinhrun5@gmail.com"
+    }
+   ]
+  },
+  "matamSouth": {
+   "name": {
+    "he": "מתא\"מ פיקוד דרום (באר שבע ודרומה)",
+    "en": "Southern Cmd training coordination"
+   },
+   "src": "A17",
+   "ref": "א'-17 סעיף 1א, א'-11",
+   "items": [
+    {
+     "type": "phone",
+     "value": "08-9902926"
+    }
+   ]
+  },
+  "matamCentral": {
+   "name": {
+    "he": "מתא\"מ פיקוד מרכז (באר שבע עד חדרה)",
+    "en": "Central Cmd training coordination"
+   },
+   "src": "A17",
+   "ref": "א'-17 סעיף 1א, א'-11",
+   "items": [
+    {
+     "type": "phone",
+     "value": "02-5305042"
+    }
+   ]
+  },
+  "matamNorth": {
+   "name": {
+    "he": "מתא\"מ פיקוד צפון (חדרה וצפונה)",
+    "en": "Northern Cmd training coordination"
+   },
+   "src": "A17",
+   "ref": "א'-17 סעיף 1א, א'-11",
+   "items": [
+    {
+     "type": "phone",
+     "value": "073-3483007"
+    },
+    {
+     "type": "email",
+     "value": "pakmaz64@gmail.com"
+    }
+   ]
+  },
+  "matamGolan": {
+   "name": {
+    "he": "מתא\"מ 210 – רמת הגולן",
+    "en": "Golan training coordination (210)"
+   },
+   "src": "A17",
+   "ref": "א'-17 סעיף 1א, א'-11",
+   "items": [
+    {
+     "type": "phone",
+     "value": "04-6977808"
+    }
+   ]
+  },
+  "atcBgTwr": {
+   "name": {
+    "he": "מגדל בן גוריון",
+    "en": "Ben Gurion TWR"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "03-9758666"
+    }
+   ]
+  },
+  "atcBgRadar": {
+   "name": {
+    "he": "בן גוריון מכ\"ם",
+    "en": "Ben Gurion radar"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "03-9758110"
+    }
+   ]
+  },
+  "atcNorth": {
+   "name": {
+    "he": "בקרה צפון",
+    "en": "North control"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "04-6166222"
+    }
+   ]
+  },
+  "atcSouth": {
+   "name": {
+    "he": "בקרה דרום",
+    "en": "South control"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "08-6833212"
+    }
+   ]
+  },
+  "atcRoshPina": {
+   "name": {
+    "he": "ראש פינה",
+    "en": "Rosh Pina"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "04-6136210"
+    }
+   ]
+  },
+  "atcHaifa": {
+   "name": {
+    "he": "מגדל חיפה",
+    "en": "Haifa TWR"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "04-8476120"
+    }
+   ]
+  },
+  "atcHerzliya": {
+   "name": {
+    "he": "מגדל הרצליה",
+    "en": "Herzliya TWR"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "09-9719554"
+    },
+    {
+     "type": "phone",
+     "value": "09-9719559"
+    }
+   ]
+  },
+  "atcEilat": {
+   "name": {
+    "he": "אילת רמון",
+    "en": "Eilat Ramon"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "08-9553666"
+    }
+   ]
+  },
+  "atcPlutoW": {
+   "name": {
+    "he": "פלוטו מערב",
+    "en": "Pluto West"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "04-6926211"
+    }
+   ]
+  },
+  "atcPlutoE": {
+   "name": {
+    "he": "פלוטו מזרח",
+    "en": "Pluto East"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "04-6926239"
+    }
+   ]
+  },
+  "atcKedem": {
+   "name": {
+    "he": "קדם",
+    "en": "Kedem"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "08-9907913"
+    }
+   ]
+  },
+  "atcPalmachim": {
+   "name": {
+    "he": "מגדל פלמחים",
+    "en": "Palmachim TWR"
+   },
+   "src": "A07",
+   "ref": "א'-07 סעיף 10",
+   "items": [
+    {
+     "type": "phone",
+     "value": "076-8638322"
+    }
+   ]
+  }
+ },
+ "ctrAlias": {
+  "GVULT": "ad-agri-1",
+  "KEDMA": "ad-agri-7"
+ },
+ "a07Link": {
+  "type": "url",
+  "value": "https://www.gov.il/BlobFolder/guide/aip/he/%D7%90'-07.pdf",
+  "label": {
+   "he": "טלפוני יחידות הנת\"א (א'-07 סעיף 10)",
+   "en": "ATS unit phones (A-07 §10)"
+  }
+ }
+}
